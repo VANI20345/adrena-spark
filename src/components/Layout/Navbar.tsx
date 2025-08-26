@@ -35,12 +35,12 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
+          <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
-                className="text-sm font-medium transition-colors hover:text-primary smooth-transition"
+                className="text-sm font-medium transition-colors hover:text-primary smooth-transition px-2"
               >
                 {language === "ar" ? item.title : item.titleEn}
               </Link>

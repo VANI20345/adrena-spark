@@ -96,19 +96,22 @@ const HeroSection = () => {
             </Button>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 pt-8 border-t border-white/20">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold">500+</div>
-              <div className="text-sm text-white/80">فعالية نشطة</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold">10K+</div>
-              <div className="text-sm text-white/80">مغامر سعيد</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold">50+</div>
-              <div className="text-sm text-white/80">موقع مذهل</div>
+          {/* Terms and Conditions */}
+          <div className="pt-8 border-t border-white/20">
+            <div className="text-center space-y-4">
+              <p className="text-sm text-white/90">
+                بالمتابعة، أنت توافق على 
+                <a href="/terms" className="text-yellow-200 hover:text-yellow-100 underline mx-1">
+                  الشروط والأحكام
+                </a>
+                و
+                <a href="/privacy" className="text-yellow-200 hover:text-yellow-100 underline mx-1">
+                  سياسة الخصوصية
+                </a>
+              </p>
+              <p className="text-xs text-white/70">
+                جميع الأسعار شاملة ضريبة القيمة المضافة 15%
+              </p>
             </div>
           </div>
         </div>
