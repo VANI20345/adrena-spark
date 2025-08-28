@@ -52,20 +52,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (profileError) throw profileError;
-      setProfile(profileData);
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+      
+      if (profileData) {
+        setProfile(profileData);
+      }
 
       // Fetch user role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (roleError) throw roleError;
-      setUserRoleState(roleData.role);
+      if (roleError && roleError.code !== 'PGRST116') {
+        throw roleError;
+      }
+      
+      if (roleData?.role) {
+        setUserRoleState(roleData.role);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     }

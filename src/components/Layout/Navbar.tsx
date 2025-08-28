@@ -1,17 +1,42 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Bell, Wallet, Globe, Menu, X, Mountain } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Bell, Wallet, Globe, Menu, Mountain, User, LogOut } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [language, setLanguage] = useState("ar");
+  const { user, userRole, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === "ar" ? "en" : "ar");
     // Update document direction
     document.documentElement.dir = language === "ar" ? "ltr" : "rtl";
+  };
+
+  const getRoleText = (role: string) => {
+    switch (role) {
+      case 'attendee': return language === "ar" ? 'باحث/مشارك' : 'Attendee';
+      case 'organizer': return language === "ar" ? 'منظم' : 'Organizer';
+      case 'provider': return language === "ar" ? 'مقدم خدمة' : 'Provider';
+      case 'admin': return language === "ar" ? 'مدير' : 'Admin';
+      default: return '';
+    }
   };
 
   const navItems = [
@@ -52,15 +77,75 @@ const Navbar = () => {
             <Button variant="ghost" size="icon" onClick={toggleLanguage}>
               <Globe className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon">
-              <Bell className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Wallet className="w-4 h-4" />
-            </Button>
-            <Button variant="default">
-              {language === "ar" ? "تسجيل الدخول" : "Sign In"}
-            </Button>
+
+            {user ? (
+              <>
+                {/* Notifications */}
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="w-4 h-4" />
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
+                </Button>
+
+                {/* Wallet */}
+                <Button variant="ghost" size="icon">
+                  <Wallet className="w-4 h-4" />
+                </Button>
+
+                {/* Profile Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <User className="w-4 h-4" />
+                      <span className="text-sm">
+                        {language === "ar" ? "الملف الشخصي" : "Profile"}
+                      </span>
+                      {userRole && (
+                        <span className="text-xs text-muted-foreground">
+                          ({getRoleText(userRole)})
+                        </span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      {language === "ar" ? "الملف الشخصي" : "Profile"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      {language === "ar" ? "الحجوزات" : "Bookings"}
+                    </DropdownMenuItem>
+                    {userRole === 'organizer' && (
+                      <DropdownMenuItem>
+                        {language === "ar" ? "لوحة المنظم" : "Organizer Dashboard"}
+                      </DropdownMenuItem>
+                    )}
+                    {userRole === 'provider' && (
+                      <DropdownMenuItem>
+                        {language === "ar" ? "لوحة مقدم الخدمة" : "Provider Dashboard"}
+                      </DropdownMenuItem>
+                    )}
+                    {userRole === 'admin' && (
+                      <DropdownMenuItem>
+                        {language === "ar" ? "لوحة الإدارة" : "Admin Panel"}
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem>
+                      {language === "ar" ? "الإعدادات" : "Settings"}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4 ml-2" />
+                      {language === "ar" ? "تسجيل الخروج" : "Sign Out"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <Button asChild>
+                <Link to="/auth">
+                  {language === "ar" ? "تسجيل الدخول" : "Sign In"}
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Trigger */}
@@ -83,21 +168,40 @@ const Navbar = () => {
                       {language === "ar" ? item.title : item.titleEn}
                     </Link>
                   ))}
+                  
                   <div className="flex items-center space-x-4 rtl:space-x-reverse px-3 py-2">
                     <Button variant="ghost" size="icon" onClick={toggleLanguage}>
                       <Globe className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon">
-                      <Bell className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <Wallet className="w-4 h-4" />
-                    </Button>
+                    {user && (
+                      <>
+                        <Button variant="ghost" size="icon">
+                          <Bell className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <Wallet className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
+                  
                   <div className="px-3 py-2">
-                    <Button className="w-full">
-                      {language === "ar" ? "تسجيل الدخول" : "Sign In"}
-                    </Button>
+                    {user ? (
+                      <div className="space-y-2">
+                        <div className="text-sm text-muted-foreground">
+                          {userRole && `${getRoleText(userRole)}`}
+                        </div>
+                        <Button variant="outline" className="w-full" onClick={handleSignOut}>
+                          {language === "ar" ? "تسجيل الخروج" : "Sign Out"}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button className="w-full" asChild>
+                        <Link to="/auth">
+                          {language === "ar" ? "تسجيل الدخول" : "Sign In"}
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
