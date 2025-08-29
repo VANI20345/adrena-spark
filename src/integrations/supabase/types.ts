@@ -14,6 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          icon: string | null
+          id: string
+          name: string
+          name_ar: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          name_ar: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          name_ar?: string
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          current_attendees: number | null
+          description: string | null
+          description_ar: string | null
+          end_date: string
+          featured: boolean | null
+          id: string
+          image_url: string | null
+          location: string
+          location_ar: string
+          max_attendees: number | null
+          organizer_id: string
+          points_required: number | null
+          price: number | null
+          start_date: string
+          status: string | null
+          title: string
+          title_ar: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          current_attendees?: number | null
+          description?: string | null
+          description_ar?: string | null
+          end_date: string
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          location: string
+          location_ar: string
+          max_attendees?: number | null
+          organizer_id: string
+          points_required?: number | null
+          price?: number | null
+          start_date: string
+          status?: string | null
+          title: string
+          title_ar: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          current_attendees?: number | null
+          description?: string | null
+          description_ar?: string | null
+          end_date?: string
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          location?: string
+          location_ar?: string
+          max_attendees?: number | null
+          organizer_id?: string
+          points_required?: number | null
+          price?: number | null
+          start_date?: string
+          status?: string | null
+          title?: string
+          title_ar?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -49,6 +156,71 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      services: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          duration_minutes: number | null
+          featured: boolean | null
+          id: string
+          image_url: string | null
+          location: string | null
+          location_ar: string | null
+          name: string
+          name_ar: string
+          price: number
+          provider_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          duration_minutes?: number | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          location_ar?: string | null
+          name: string
+          name_ar: string
+          price: number
+          provider_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          duration_minutes?: number | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          location_ar?: string | null
+          name?: string
+          name_ar?: string
+          price?: number
+          provider_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
