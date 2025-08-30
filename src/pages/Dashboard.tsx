@@ -108,7 +108,7 @@ const Dashboard = () => {
     try {
       const { error } = await supabase
         .from('user_roles')
-        .update({ role: newRole })
+        .update({ role: newRole as any })
         .eq('user_id', userId);
       
       if (error) throw error;
@@ -205,7 +205,7 @@ const Dashboard = () => {
             </>
           )}
           
-          {userRole === 'service_provider' && (
+          {userRole === 'provider' && (
             <>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -289,7 +289,7 @@ const Dashboard = () => {
             {userRole === 'organizer' && (
               <TabsTrigger value="events">فعالياتي</TabsTrigger>
             )}
-            {userRole === 'service_provider' && (
+          {userRole === 'provider' && (
               <TabsTrigger value="services">خدماتي</TabsTrigger>
             )}
             {userRole === 'admin' && (
@@ -402,7 +402,7 @@ const Dashboard = () => {
             </TabsContent>
           )}
 
-          {userRole === 'service_provider' && (
+          {userRole === 'provider' && (
             <TabsContent value="services" className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">خدماتي</h2>
@@ -496,7 +496,7 @@ const Dashboard = () => {
                               <Button 
                                 size="sm" 
                                 variant="outline"
-                                onClick={() => changeUserRole(user.user_id, 'service_provider')}
+                                onClick={() => changeUserRole(user.user_id, 'provider')}
                               >
                                 <Settings className="w-4 h-4" />
                               </Button>
