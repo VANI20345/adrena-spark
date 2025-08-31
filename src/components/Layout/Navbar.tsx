@@ -107,20 +107,28 @@ const Navbar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      {language === "ar" ? "الملف الشخصي" : "Profile"}
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile">
+                        {language === "ar" ? "الملف الشخصي" : "Profile"}
+                      </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      {language === "ar" ? "الحجوزات" : "Bookings"}
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard">
+                        {language === "ar" ? "لوحة التحكم" : "Dashboard"}
+                      </Link>
                     </DropdownMenuItem>
                     {userRole === 'organizer' && (
-                      <DropdownMenuItem>
-                        {language === "ar" ? "لوحة المنظم" : "Organizer Dashboard"}
+                      <DropdownMenuItem asChild>
+                        <Link to="/create-event">
+                          {language === "ar" ? "إنشاء فعالية" : "Create Event"}
+                        </Link>
                       </DropdownMenuItem>
                     )}
                     {userRole === 'provider' && (
-                      <DropdownMenuItem>
-                        {language === "ar" ? "لوحة مقدم الخدمة" : "Provider Dashboard"}
+                      <DropdownMenuItem asChild>
+                        <Link to="/create-service">
+                          {language === "ar" ? "إضافة خدمة" : "Add Service"}
+                        </Link>
                       </DropdownMenuItem>
                     )}
                     {userRole === 'admin' && (
@@ -128,8 +136,10 @@ const Navbar = () => {
                         {language === "ar" ? "لوحة الإدارة" : "Admin Panel"}
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem>
-                      {language === "ar" ? "الإعدادات" : "Settings"}
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings">
+                        {language === "ar" ? "الإعدادات" : "Settings"}
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
@@ -191,6 +201,16 @@ const Navbar = () => {
                         <div className="text-sm text-muted-foreground">
                           {userRole && `${getRoleText(userRole)}`}
                         </div>
+                        <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
+                          <Button variant="outline" className="w-full mb-2">
+                            {language === "ar" ? "الملف الشخصي" : "Profile"}
+                          </Button>
+                        </Link>
+                        <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                          <Button variant="outline" className="w-full mb-2">
+                            {language === "ar" ? "لوحة التحكم" : "Dashboard"}
+                          </Button>
+                        </Link>
                         <Button variant="outline" className="w-full" onClick={handleSignOut}>
                           {language === "ar" ? "تسجيل الخروج" : "Sign Out"}
                         </Button>

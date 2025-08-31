@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Eye, EyeOff, ArrowRight, Mail } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -81,6 +83,24 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setError('');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/account-type`
+        }
+      });
+      
+      if (error) {
+        setError('حدث خطأ في تسجيل الدخول بـ Google');
+      }
+    } catch (err) {
+      setError('حدث خطأ غير متوقع');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -112,138 +132,180 @@ const Auth = () => {
             </TabsList>
             
             <TabsContent value="login" className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">البريد الإلكتروني</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="أدخل بريدك الإلكتروني"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
-                </div>
+              <div className="space-y-4">
+                <Button
+                  onClick={handleGoogleSignIn}
+                  variant="outline"
+                  className="w-full"
+                  type="button"
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  تسجيل الدخول بـ Google
+                </Button>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="password">كلمة المرور</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="أدخل كلمة المرور"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      dir="ltr"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute left-2 top-0 h-full px-3"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">أو</span>
                   </div>
                 </div>
 
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">البريد الإلكتروني</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="أدخل بريدك الإلكتروني"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      dir="ltr"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="password">كلمة المرور</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="أدخل كلمة المرور"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        dir="ltr"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute left-2 top-0 h-full px-3"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
 
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? 'جاري التحميل...' : 'تسجيل الدخول'}
-                  <ArrowRight className="mr-2 h-4 w-4" />
-                </Button>
-              </form>
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? 'جاري التحميل...' : 'تسجيل الدخول'}
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">الاسم الكامل</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="أدخل اسمك الكامل"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="space-y-4">
+                <Button
+                  onClick={handleGoogleSignIn}
+                  variant="outline"
+                  className="w-full"
+                  type="button"
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  إنشاء حساب بـ Google
+                </Button>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="signupEmail">البريد الإلكتروني</Label>
-                  <Input
-                    id="signupEmail"
-                    type="email"
-                    placeholder="أدخل بريدك الإلكتروني"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">أو</span>
+                  </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signupPassword">كلمة المرور</Label>
-                  <div className="relative">
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">الاسم الكامل</Label>
                     <Input
-                      id="signupPassword"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      id="fullName"
+                      type="text"
+                      placeholder="أدخل اسمك الكامل"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signupEmail">البريد الإلكتروني</Label>
+                    <Input
+                      id="signupEmail"
+                      type="email"
+                      placeholder="أدخل بريدك الإلكتروني"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                       dir="ltr"
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute left-2 top-0 h-full px-3"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
                   </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="أعد إدخال كلمة المرور"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
-                </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signupPassword">كلمة المرور</Label>
+                    <div className="relative">
+                      <Input
+                        id="signupPassword"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        dir="ltr"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute left-2 top-0 h-full px-3"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="أعد إدخال كلمة المرور"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      dir="ltr"
+                    />
+                  </div>
 
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
 
-                {success && (
-                  <Alert>
-                    <AlertDescription>{success}</AlertDescription>
-                  </Alert>
-                )}
+                  {success && (
+                    <Alert>
+                      <AlertDescription>{success}</AlertDescription>
+                    </Alert>
+                  )}
 
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? 'جاري التحميل...' : 'إنشاء الحساب'}
-                  <ArrowRight className="mr-2 h-4 w-4" />
-                </Button>
-              </form>
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? 'جاري التحميل...' : 'إنشاء الحساب'}
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>

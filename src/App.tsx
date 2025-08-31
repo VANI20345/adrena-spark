@@ -13,6 +13,8 @@ import ServiceDetails from "./pages/ServiceDetails";
 import Auth from "./pages/Auth";
 import AccountType from "./pages/AccountType";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import CreateEvent from "./pages/CreateEvent";
 import CreateService from "./pages/CreateService";
 import Help from "./pages/Help";
@@ -52,6 +54,22 @@ const App = () => (
               element={
                 <ProtectedRoute requireAuth={true}>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Settings />
                 </ProtectedRoute>
               } 
             />
