@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          booking_reference: string
+          created_at: string
+          discount_amount: number | null
+          event_id: string
+          id: string
+          payment_id: string | null
+          points_used: number | null
+          quantity: number
+          status: string
+          total_amount: number
+          updated_at: string
+          user_id: string
+          vat_amount: number
+        }
+        Insert: {
+          booking_reference: string
+          created_at?: string
+          discount_amount?: number | null
+          event_id: string
+          id?: string
+          payment_id?: string | null
+          points_used?: number | null
+          quantity?: number
+          status?: string
+          total_amount: number
+          updated_at?: string
+          user_id: string
+          vat_amount: number
+        }
+        Update: {
+          booking_reference?: string
+          created_at?: string
+          discount_amount?: number | null
+          event_id?: string
+          id?: string
+          payment_id?: string | null
+          points_used?: number | null
+          quantity?: number
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+          vat_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -44,23 +100,76 @@ export type Database = {
         }
         Relationships: []
       }
+      event_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          current_members: number | null
+          event_id: string
+          group_id_external: string | null
+          group_link: string | null
+          group_name: string
+          group_type: string
+          id: string
+          max_members: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          current_members?: number | null
+          event_id: string
+          group_id_external?: string | null
+          group_link?: string | null
+          group_name: string
+          group_type: string
+          id?: string
+          max_members?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          current_members?: number | null
+          event_id?: string
+          group_id_external?: string | null
+          group_link?: string | null
+          group_name?: string
+          group_type?: string
+          id?: string
+          max_members?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_groups_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
+          cancellation_policy: string | null
           category_id: string | null
           created_at: string
           current_attendees: number | null
           description: string | null
           description_ar: string | null
+          difficulty_level: string | null
           end_date: string
           featured: boolean | null
           id: string
           image_url: string | null
+          latitude: number | null
+          license_document_url: string | null
           location: string
           location_ar: string
+          longitude: number | null
           max_attendees: number | null
           organizer_id: string
           points_required: number | null
           price: number | null
+          requires_license: boolean | null
           start_date: string
           status: string | null
           title: string
@@ -68,21 +177,27 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancellation_policy?: string | null
           category_id?: string | null
           created_at?: string
           current_attendees?: number | null
           description?: string | null
           description_ar?: string | null
+          difficulty_level?: string | null
           end_date: string
           featured?: boolean | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
+          license_document_url?: string | null
           location: string
           location_ar: string
+          longitude?: number | null
           max_attendees?: number | null
           organizer_id: string
           points_required?: number | null
           price?: number | null
+          requires_license?: boolean | null
           start_date: string
           status?: string | null
           title: string
@@ -90,21 +205,27 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancellation_policy?: string | null
           category_id?: string | null
           created_at?: string
           current_attendees?: number | null
           description?: string | null
           description_ar?: string | null
+          difficulty_level?: string | null
           end_date?: string
           featured?: boolean | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
+          license_document_url?: string | null
           location?: string
           location_ar?: string
+          longitude?: number | null
           max_attendees?: number | null
           organizer_id?: string
           points_required?: number | null
           price?: number | null
+          requires_license?: boolean | null
           start_date?: string
           status?: string | null
           title?: string
@@ -121,8 +242,173 @@ export type Database = {
           },
         ]
       }
+      loyalty_ledger: {
+        Row: {
+          created_at: string
+          description: string
+          expires_at: string | null
+          id: string
+          points: number
+          reference_id: string | null
+          reference_type: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          expires_at?: string | null
+          id?: string
+          points: number
+          reference_id?: string | null
+          reference_type?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          expires_at?: string | null
+          id?: string
+          points?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          booking_confirmations: boolean
+          created_at: string
+          email_notifications: boolean
+          event_reminders: boolean
+          event_updates: boolean
+          follower_activity: boolean
+          id: string
+          marketing_emails: boolean
+          sms_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_confirmations?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          event_reminders?: boolean
+          event_updates?: boolean
+          follower_activity?: boolean
+          id?: string
+          marketing_emails?: boolean
+          sms_notifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_confirmations?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          event_reminders?: boolean
+          event_updates?: boolean
+          follower_activity?: boolean
+          id?: string
+          marketing_emails?: boolean
+          sms_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          email_sent: boolean
+          id: string
+          message: string
+          read: boolean
+          sms_sent: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          email_sent?: boolean
+          id?: string
+          message: string
+          read?: boolean
+          sms_sent?: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          email_sent?: boolean
+          id?: string
+          message?: string
+          read?: boolean
+          sms_sent?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          booking_id: string
+          completed_at: string | null
+          created_at: string
+          currency: string
+          id: string
+          payment_method: string
+          payment_provider: string
+          provider_payment_id: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_method: string
+          payment_provider: string
+          provider_payment_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_method?: string
+          payment_provider?: string
+          provider_payment_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          auto_redeem_points: boolean | null
           avatar_url: string | null
           bio: string | null
           city: string | null
@@ -130,10 +416,13 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          points_balance: number | null
+          total_points_earned: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          auto_redeem_points?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -141,10 +430,13 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          points_balance?: number | null
+          total_points_earned?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          auto_redeem_points?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -152,10 +444,177 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          points_balance?: number | null
+          total_points_earned?: number | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      refunds: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          id: string
+          processed_at: string | null
+          processed_by: string | null
+          reason: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          booking_id: string | null
+          comment: string | null
+          created_at: string
+          event_id: string | null
+          helpful_count: number | null
+          id: string
+          rating: number
+          service_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          comment?: string | null
+          created_at?: string
+          event_id?: string | null
+          helpful_count?: number | null
+          id?: string
+          rating: number
+          service_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          comment?: string | null
+          created_at?: string
+          event_id?: string | null
+          helpful_count?: number | null
+          id?: string
+          rating?: number
+          service_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_requests: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          message: string | null
+          negotiated_price: number | null
+          organizer_id: string
+          provider_id: string
+          requested_price: number | null
+          response_message: string | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          message?: string | null
+          negotiated_price?: number | null
+          organizer_id: string
+          provider_id: string
+          requested_price?: number | null
+          response_message?: string | null
+          service_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          message?: string | null
+          negotiated_price?: number | null
+          organizer_id?: string
+          provider_id?: string
+          requested_price?: number | null
+          response_message?: string | null
+          service_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       services: {
         Row: {
@@ -222,6 +681,50 @@ export type Database = {
           },
         ]
       }
+      tickets: {
+        Row: {
+          booking_id: string
+          checked_in_at: string | null
+          checked_in_by: string | null
+          created_at: string
+          holder_name: string
+          id: string
+          qr_code: string
+          status: string
+          ticket_number: string
+        }
+        Insert: {
+          booking_id: string
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          created_at?: string
+          holder_name: string
+          id?: string
+          qr_code: string
+          status?: string
+          ticket_number: string
+        }
+        Update: {
+          booking_id?: string
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          created_at?: string
+          holder_name?: string
+          id?: string
+          qr_code?: string
+          status?: string
+          ticket_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -242,6 +745,69 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_wallets: {
+        Row: {
+          balance: number
+          id: string
+          total_earned: number
+          total_withdrawn: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          id?: string
+          total_earned?: number
+          total_withdrawn?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          id?: string
+          total_earned?: number
+          total_withdrawn?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          status: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
