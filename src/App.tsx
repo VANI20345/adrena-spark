@@ -22,6 +22,12 @@ import PointsPage from "./pages/Points";
 import MyEventsPage from "./pages/MyEvents";
 import ManageEventsPage from "./pages/ManageEvents";
 import ManageServicesPage from "./pages/ManageServices";
+import AdminPanel from "./pages/AdminPanel";
+import OrganizerDashboard from "./pages/OrganizerDashboard";
+import ProviderDashboard from "./pages/ProviderDashboard";
+import AttendeeDashboard from "./pages/AttendeeDashboard";
+import Groups from "./pages/Groups";
+import QRScanner from "./pages/QRScanner";
 import Help from "./pages/Help";
 import Contact from "./pages/Contact";
 import Safety from "./pages/Safety";
@@ -140,6 +146,54 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/refund" element={<Refund />} />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="admin">
+                  <AdminPanel />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/organizer-dashboard" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="organizer">
+                  <OrganizerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/provider-dashboard" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="provider">
+                  <ProviderDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/attendee-dashboard" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="attendee">
+                  <AttendeeDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Groups />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/qr-scanner" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['organizer', 'admin']}>
+                  <QRScanner />
+                </ProtectedRoute>
+              } 
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
