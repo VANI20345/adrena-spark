@@ -59,6 +59,7 @@ const Navbar = () => {
           ...baseItems,
           { title: "استكشاف", href: "/explore", titleEn: "Explore" },
           { title: "فعالياتي", href: "/my-events", titleEn: "My Events" },
+          { title: "القروبات", href: "/groups", titleEn: "Groups" },
           { title: "المحفظة", href: "/wallet", titleEn: "Wallet" },
           { title: "النقاط", href: "/points", titleEn: "Points" },
           { title: "تواصل معنا", href: "/contact", titleEn: "Contact" },
@@ -68,6 +69,7 @@ const Navbar = () => {
           ...baseItems,
           { title: "إنشاء فعالية", href: "/create-event", titleEn: "Create Event" },
           { title: "إدارة الفعاليات", href: "/manage-events", titleEn: "Manage Events" },
+          { title: "القروبات", href: "/groups", titleEn: "Groups" },
           { title: "المحفظة", href: "/wallet", titleEn: "Wallet" },
           { title: "النقاط", href: "/points", titleEn: "Points" },
           { title: "تواصل معنا", href: "/contact", titleEn: "Contact" },
@@ -77,6 +79,7 @@ const Navbar = () => {
           ...baseItems,
           { title: "إضافة خدمة", href: "/create-service", titleEn: "Add Service" },
           { title: "إدارة الخدمات", href: "/manage-services", titleEn: "Manage Services" },
+          { title: "القروبات", href: "/groups", titleEn: "Groups" },
           { title: "المحفظة", href: "/wallet", titleEn: "Wallet" },
           { title: "النقاط", href: "/points", titleEn: "Points" },
           { title: "تواصل معنا", href: "/contact", titleEn: "Contact" },
@@ -86,6 +89,7 @@ const Navbar = () => {
           ...baseItems,
           { title: "استكشاف", href: "/explore", titleEn: "Explore" },
           { title: "الخدمات", href: "/services", titleEn: "Services" },
+          { title: "القروبات", href: "/groups", titleEn: "Groups" },
           { title: "لوحة الإدارة", href: "/admin", titleEn: "Admin Panel" },
           { title: "تواصل معنا", href: "/contact", titleEn: "Contact" },
         ];
@@ -132,9 +136,11 @@ const Navbar = () => {
             {user ? (
               <>
                 {/* Notifications */}
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="w-4 h-4" />
-                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
+                <Button variant="ghost" size="icon" className="relative" asChild>
+                  <Link to="/notifications">
+                    <Bell className="w-4 h-4" />
+                    <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
+                  </Link>
                 </Button>
 
                 {/* Wallet */}

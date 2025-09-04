@@ -27,6 +27,7 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import AttendeeDashboard from "./pages/AttendeeDashboard";
 import Groups from "./pages/Groups";
+import Notifications from "./pages/Notifications";
 import QRScanner from "./pages/QRScanner";
 import Help from "./pages/Help";
 import Contact from "./pages/Contact";
@@ -190,6 +191,14 @@ const App = () => (
               } 
             />
             <Route 
+              path="/notifications" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Notifications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route
               path="/qr-scanner" 
               element={
                 <ProtectedRoute requireAuth={true} requiredRole={['organizer', 'admin']}>
