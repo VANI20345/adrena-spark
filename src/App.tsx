@@ -48,7 +48,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/explore" element={<Explore />} />
@@ -220,9 +221,10 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+      </LanguageProvider>
+    </BrowserRouter>
+  </TooltipProvider>
+</QueryClientProvider>
 );
 
 export default App;
