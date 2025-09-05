@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 
 interface LanguageContextType {
   language: 'ar' | 'en';
@@ -184,4 +184,14 @@ export const useLanguageState = () => {
     t,
     isRTL: language === 'ar'
   };
+};
+
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const languageState = useLanguageState();
+  
+  return (
+    <LanguageContext.Provider value={languageState}>
+      {children}
+    </LanguageContext.Provider>
+  );
 };
