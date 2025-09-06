@@ -546,7 +546,7 @@ const AdvancedReviewSystem: React.FC<AdvancedReviewSystemProps> = ({
                   {renderStars(summary.averageRating)}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {t('basedOnReviews', { count: summary.totalReviews })}
+                  {t('basedOnReviews')} ({summary.totalReviews})
                 </p>
                 <div className="mt-4">
                   <Badge variant="secondary" className="text-primary">

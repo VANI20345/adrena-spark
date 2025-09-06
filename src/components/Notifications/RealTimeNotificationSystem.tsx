@@ -22,7 +22,7 @@ import {
   CheckCircle,
   Clock,
   Trash2,
-  MarkAsRead,
+  CheckCheck,
   Filter
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -321,7 +321,7 @@ const RealTimeNotificationSystem: React.FC<RealTimeNotificationSystemProps> = ({
               
               {unreadCount > 0 && (
                 <Button variant="outline" size="sm" onClick={markAllAsRead}>
-                  <MarkAsRead className="w-4 h-4 mr-2" />
+                  <CheckCheck className="w-4 h-4 mr-2" />
                   {t('markAllRead')}
                 </Button>
               )}

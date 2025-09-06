@@ -100,7 +100,7 @@ const AdvancedSearchSystem: React.FC<AdvancedSearchSystemProps> = ({
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestionsDropdown, setShowSuggestionsDropdown] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -403,10 +403,10 @@ const AdvancedSearchSystem: React.FC<AdvancedSearchSystemProps> = ({
                   value={filters.query}
                   onChange={(e) => {
                     updateFilter('query', e.target.value);
-                    setShowSuggestions(true);
+                    setShowSuggestionsDropdown(true);
                   }}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  onFocus={() => setShowSuggestionsDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestionsDropdown(false), 200)}
                   className="pl-10 pr-12"
                 />
                 {filters.query && (
@@ -422,7 +422,7 @@ const AdvancedSearchSystem: React.FC<AdvancedSearchSystemProps> = ({
               </div>
 
               {/* Search Suggestions */}
-              {showSuggestions && (suggestions.length > 0 || searchHistory.length > 0) && (
+              {showSuggestionsDropdown && (suggestions.length > 0 || searchHistory.length > 0) && (
                 <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-card border rounded-md shadow-lg max-h-80 overflow-y-auto">
                   {suggestions.length > 0 && (
                     <div className="p-2">
@@ -435,7 +435,7 @@ const AdvancedSearchSystem: React.FC<AdvancedSearchSystemProps> = ({
                           className="px-2 py-1.5 text-sm hover:bg-muted rounded cursor-pointer flex items-center gap-2"
                           onClick={() => {
                             updateFilter('query', suggestion);
-                            setShowSuggestions(false);
+                            setShowSuggestionsDropdown(false);
                           }}
                         >
                           <Search className="w-3 h-3 text-muted-foreground" />
@@ -456,7 +456,7 @@ const AdvancedSearchSystem: React.FC<AdvancedSearchSystemProps> = ({
                           className="px-2 py-1.5 text-sm hover:bg-muted rounded cursor-pointer flex items-center gap-2"
                           onClick={() => {
                             updateFilter('query', item);
-                            setShowSuggestions(false);
+                            setShowSuggestionsDropdown(false);
                           }}
                         >
                           <Clock className="w-3 h-3 text-muted-foreground" />

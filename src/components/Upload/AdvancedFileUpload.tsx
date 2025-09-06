@@ -98,7 +98,7 @@ const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
     // Check file size
     const maxSizeBytes = maxFileSize * 1024 * 1024;
     if (file.size > maxSizeBytes) {
-      return t('fileTooLarge', { maxSize: formatFileSize(maxSizeBytes) });
+      return t('fileTooLarge') + `: ${formatFileSize(maxSizeBytes)}`;
     }
 
     return null;
@@ -123,7 +123,7 @@ const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
     if (files.length + fileArray.length > maxFiles) {
       toast({
         title: t('tooManyFiles'),
-        description: t('maxFilesAllowed', { max: maxFiles }),
+        description: t('maxFilesAllowed') + `: ${maxFiles}`,
         variant: 'destructive'
       });
       return;
