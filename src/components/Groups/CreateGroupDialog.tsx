@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useLanguage } from '@/hooks/useLanguage';
+import { useLanguageContext } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Image as ImageIcon } from 'lucide-react';
 
@@ -17,7 +17,7 @@ interface CreateGroupDialogProps {
 }
 
 export const CreateGroupDialog = ({ open, onOpenChange, onGroupCreated }: CreateGroupDialogProps) => {
-  const { language } = useLanguage();
+  const { language } = useLanguageContext();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({

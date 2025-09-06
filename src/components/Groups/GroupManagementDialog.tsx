@@ -21,7 +21,7 @@ import {
   MoreVertical
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useLanguage } from '@/hooks/useLanguage';
+import { useLanguageContext } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface GroupMember {
@@ -52,7 +52,7 @@ interface GroupManagementDialogProps {
 }
 
 export const GroupManagementDialog = ({ open, onOpenChange, group }: GroupManagementDialogProps) => {
-  const { language } = useLanguage();
+  const { language } = useLanguageContext();
   const { toast } = useToast();
   
   const [members, setMembers] = useState<GroupMember[]>([]);

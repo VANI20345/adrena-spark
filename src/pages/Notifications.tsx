@@ -24,7 +24,7 @@ import {
   VolumeX
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/hooks/useLanguage';
+import { useLanguageContext } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
@@ -53,7 +53,7 @@ interface NotificationSettings {
 
 const Notifications = () => {
   const { user } = useAuth();
-  const { language } = useLanguage();
+  const { language } = useLanguageContext();
   const { toast } = useToast();
   
   const [notifications, setNotifications] = useState<Notification[]>([]);
