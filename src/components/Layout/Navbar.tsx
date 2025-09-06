@@ -11,10 +11,11 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguageContext } from '@/contexts/LanguageContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [language, setLanguage] = useState("ar");
+  const { language, setLanguage, t, isRTL } = useLanguageContext();
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -24,17 +25,15 @@ const Navbar = () => {
   };
 
   const toggleLanguage = () => {
-    setLanguage(prev => prev === "ar" ? "en" : "ar");
-    // Update document direction
-    document.documentElement.dir = language === "ar" ? "ltr" : "rtl";
+    setLanguage(language === "ar" ? "en" : "ar");
   };
 
   const getRoleText = (role: string) => {
     switch (role) {
-      case 'attendee': return language === "ar" ? 'باحث/مشارك' : 'Attendee';
-      case 'organizer': return language === "ar" ? 'منظم' : 'Organizer';
-      case 'provider': return language === "ar" ? 'مقدم خدمة' : 'Provider';
-      case 'admin': return language === "ar" ? 'مدير' : 'Admin';
+      case 'attendee': return t('attendee');
+      case 'organizer': return t('organizer');
+      case 'provider': return t('provider');
+      case 'admin': return t('admin');
       default: return '';
     }
   };
