@@ -1,0 +1,7 @@
+project_id = "nzuppbjtxmfrgutyagev"
+
+[functions.calculate-statistics]
+verify_jwt = false
+
+[functions.calculate-ratings]
+verify_jwt = false
