@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Mountain, Instagram, Twitter, Youtube } from "lucide-react";
+import { Mountain, Instagram, Twitter, Video } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-secondary border-t">
+    <footer className="bg-secondary border-t mt-auto">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Description */}
@@ -20,7 +20,7 @@ const Footer = () => {
             <div className="flex space-x-4 rtl:space-x-reverse">
               <Instagram className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer smooth-transition" />
               <Twitter className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer smooth-transition" />
-              <Youtube className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer smooth-transition" />
+              <Video className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer smooth-transition" />
             </div>
           </div>
 

@@ -338,29 +338,6 @@ const CreateService = () => {
                       )}
                     />
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="featured"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            خدمة مميزة
-                          </FormLabel>
-                          <div className="text-sm text-muted-foreground">
-                            ستظهر الخدمة في القسم المميز (رسوم إضافية)
-                          </div>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
                 </CardContent>
               </Card>
 

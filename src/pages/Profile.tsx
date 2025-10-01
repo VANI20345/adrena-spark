@@ -527,53 +527,12 @@ const Profile = () => {
                   <CardDescription>التقييمات التي تلقيتها من المستخدمين</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>أ</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">أحمد محمد</p>
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star key={star} className="h-3 w-3 text-yellow-500 fill-current" />
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <span className="text-xs text-muted-foreground">منذ يومين</span>
-                      </div>
-                      <p className="text-sm">
-                        تجربة رائعة! التنظيم كان ممتاز والخدمة المقدمة تفوق التوقعات. 
-                        أنصح بشدة بالتعامل معهم.
-                      </p>
-                    </div>
-                    
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>س</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">سارة العتيبي</p>
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4].map((star) => (
-                                <Star key={star} className="h-3 w-3 text-yellow-500 fill-current" />
-                              ))}
-                              <Star className="h-3 w-3 text-gray-300" />
-                            </div>
-                          </div>
-                        </div>
-                        <span className="text-xs text-muted-foreground">منذ أسبوع</span>
-                      </div>
-                      <p className="text-sm">
-                        فعالية جميلة وتنظيم جيد، لكن كان هناك تأخير بسيط في البداية. 
-                        بشكل عام تجربة ممتعة.
-                      </p>
-                    </div>
+                  <div className="text-center p-8">
+                    <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">لا توجد تقييمات بعد</h3>
+                    <p className="text-muted-foreground">
+                      لم تتلق أي تقييمات من المستخدمين حتى الآن
+                    </p>
                   </div>
                 </CardContent>
               </Card>

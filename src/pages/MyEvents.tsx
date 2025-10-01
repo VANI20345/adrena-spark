@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,56 +6,91 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Users, Clock, Download, Star, MessageCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const MyEventsPage = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const [completedEvents, setCompletedEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: 'رحلة جبلية إلى أبها',
-      date: '2024-02-15',
-      time: '06:00 صباحاً',
-      location: 'أبها، المملكة العربية السعودية',
-      image: '/placeholder.svg',
-      attendees: 25,
-      maxAttendees: 30,
-      price: 150,
-      status: 'confirmed',
-      organizer: 'أحمد السعيد'
-    },
-    {
-      id: 2,
-      title: 'ورشة طبخ تقليدي',
-      date: '2024-02-20',
-      time: '16:00 عصراً',
-      location: 'الرياض، المملكة العربية السعودية',
-      image: '/placeholder.svg',
-      attendees: 12,
-      maxAttendees: 15,
-      price: 75,
-      status: 'confirmed',
-      organizer: 'فاطمة محمد'
-    }
-  ];
+  useEffect(() => {
+    const fetchMyEvents = async () => {
+      if (!user) return;
+      
+      try {
+        setLoading(true);
+        const { data: bookings, error } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            events (
+              id,
+              title_ar,
+              title,
+              location_ar,
+              location,
+              start_date,
+              price,
+              max_attendees,
+              current_attendees,
+              image_url,
+              organizer_id
+            )
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
-  const completedEvents = [
-    {
-      id: 3,
-      title: 'مباراة كرة قدم ودية',
-      date: '2024-01-10',
-      time: '17:00 مساءً',
-      location: 'جدة، المملكة العربية السعودية',
-      image: '/placeholder.svg',
-      attendees: 22,
-      maxAttendees: 22,
-      price: 50,
-      status: 'completed',
-      organizer: 'سالم الأحمدي',
-      rating: 4.5,
-      reviewed: true
-    }
-  ];
+        if (error) throw error;
+
+        const now = new Date();
+        const upcoming = bookings?.filter(b => 
+          new Date(b.events.start_date) > now && b.status === 'confirmed'
+        ).map(b => ({
+          id: b.id,
+          title: b.events.title_ar || b.events.title,
+          date: new Date(b.events.start_date).toLocaleDateString('ar-SA'),
+          time: new Date(b.events.start_date).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }),
+          location: b.events.location_ar || b.events.location,
+          image: b.events.image_url || '/placeholder.svg',
+          attendees: b.events.current_attendees || 0,
+          maxAttendees: b.events.max_attendees,
+          price: b.events.price,
+          status: 'confirmed',
+          organizer: 'منظم الفعالية'
+        })) || [];
+
+        const completed = bookings?.filter(b => 
+          new Date(b.events.start_date) <= now
+        ).map(b => ({
+          id: b.id,
+          title: b.events.title_ar || b.events.title,
+          date: new Date(b.events.start_date).toLocaleDateString('ar-SA'),
+          time: new Date(b.events.start_date).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }),
+          location: b.events.location_ar || b.events.location,
+          image: b.events.image_url || '/placeholder.svg',
+          attendees: b.events.current_attendees || 0,
+          maxAttendees: b.events.max_attendees,
+          price: b.events.price,
+          status: 'completed',
+          organizer: 'منظم الفعالية',
+          rating: 0,
+          reviewed: false
+        })) || [];
+
+        setUpcomingEvents(upcoming);
+        setCompletedEvents(completed);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyEvents();
+  }, [user]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -147,10 +182,18 @@ const MyEventsPage = () => {
     </Card>
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         <div className="space-y-6">
           {/* Header */}
           <div>

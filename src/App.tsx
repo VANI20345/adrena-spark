@@ -57,10 +57,11 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <LanguageProvider>
-              <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
+            <div className="min-h-screen flex flex-col">
+              <LanguageProvider>
+                <AuthProvider>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/services" element={<Services />} />
             <Route path="/event/:id" element={<EventDetails />} />
@@ -255,9 +256,10 @@ const App = () => (
           </Routes>
           </AuthProvider>
         </LanguageProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
-  </GlobalErrorBoundary>
+      </div>
+    </BrowserRouter>
+  </ErrorBoundary>
+</GlobalErrorBoundary>
 </TooltipProvider>
 </QueryClientProvider>
 );
