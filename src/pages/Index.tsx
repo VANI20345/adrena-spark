@@ -1,7 +1,6 @@
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
 import HeroSection from "@/components/Home/HeroSection";
-import FeaturedEvents from "@/components/Home/FeaturedEvents";
 import CategorySection from "@/components/Home/CategorySection";
 import UserDashboard from "@/components/Home/UserDashboard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,7 +26,6 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <FeaturedEvents />
         <CategorySection />
       </main>
       <Footer />

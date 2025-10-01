@@ -178,6 +178,62 @@ const AdminPanel = () => {
     }
   };
 
+  const handleEventView = (event: any) => {
+    // Navigate to event details
+    window.location.href = `/event/${event.id}`;
+  };
+
+  const handleServiceView = (service: any) => {
+    // Navigate to service details
+    window.location.href = `/service/${service.id}`;
+  };
+
+  const handleEventDelete = async (eventId: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الفعالية؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', eventId);
+      
+      if (!error) {
+        toast.success('تم حذف الفعالية بنجاح');
+        loadAdminData();
+      } else {
+        toast.error('خطأ في حذف الفعالية');
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast.error('خطأ في حذف الفعالية');
+    }
+  };
+
+  const handleServiceDelete = async (serviceId: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الخدمة؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', serviceId);
+      
+      if (!error) {
+        toast.success('تم حذف الخدمة بنجاح');
+        loadAdminData();
+      } else {
+        toast.error('خطأ في حذف الخدمة');
+      }
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error('خطأ في حذف الخدمة');
+    }
+  };
+
   const handleEventAction = async (eventId: string, action: 'approve' | 'reject') => {
     const status = action === 'approve' ? 'active' : 'rejected';
     
@@ -459,9 +515,13 @@ const AdminPanel = () => {
                             <XCircle className="w-4 h-4 ml-1" />
                             رفض
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleEventView(event)}>
                             <Eye className="w-4 h-4 ml-1" />
                             عرض
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleEventDelete(event.id)}>
+                            <Trash2 className="w-4 h-4 ml-1" />
+                            حذف
                           </Button>
                         </div>
                       </div>
@@ -493,9 +553,13 @@ const AdminPanel = () => {
                             <XCircle className="w-4 h-4 ml-1" />
                             رفض
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleServiceView(service)}>
                             <Eye className="w-4 h-4 ml-1" />
                             عرض
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleServiceDelete(service.id)}>
+                            <Trash2 className="w-4 h-4 ml-1" />
+                            حذف
                           </Button>
                         </div>
                       </div>

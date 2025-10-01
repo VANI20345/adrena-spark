@@ -187,12 +187,13 @@ const Auth = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         dir="ltr"
+                        className="pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
-                        size="sm"
-                        className="absolute left-2 top-0 h-full px-3"
+                        size="icon"
+                        className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -273,12 +274,13 @@ const Auth = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         dir="ltr"
+                        className="pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
-                        size="sm"
-                        className="absolute left-2 top-0 h-full px-3"
+                        size="icon"
+                        className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

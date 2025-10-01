@@ -92,8 +92,13 @@ const CategorySection = () => {
   };
 
   const getGradientClass = (colorStart?: string, colorEnd?: string) => {
-    if (!colorStart || !colorEnd) return 'from-gray-500 to-slate-600';
-    return `from-${colorStart} to-${colorEnd}`;
+    // Ensure colors are valid or return default
+    if (!colorStart || !colorEnd) {
+      return 'bg-gradient-to-r from-primary/80 to-primary';
+    }
+    
+    // Return the gradient using the color values directly
+    return `bg-gradient-to-r from-${colorStart}-500 to-${colorEnd}-600`;
   };
 
   if (loading) {

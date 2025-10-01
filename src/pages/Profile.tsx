@@ -102,13 +102,23 @@ const Profile = () => {
         .eq('user_id', user?.id)
         .single();
 
+      // Calculate average rating from reviews
+      const { data: reviewsData } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('user_id', user?.id);
+
+      const averageRating = reviewsData && reviewsData.length > 0
+        ? reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviewsData.length
+        : 0;
+
       setStats({
         events_attended: userRole === 'attendee' ? 0 : 0, // Will be calculated from bookings
         events_organized: userRole === 'organizer' ? (eventsData?.length || 0) : 0,
         services_provided: userRole === 'provider' ? (servicesData?.length || 0) : 0,
         points: profileData?.points_balance || 0,
         wallet_balance: walletData?.balance || 0,
-        rating: 4.8, // Will be calculated from reviews
+        rating: Math.round(averageRating * 10) / 10,
         total_earnings: walletData?.total_earned || 0
       });
     } catch (error) {
