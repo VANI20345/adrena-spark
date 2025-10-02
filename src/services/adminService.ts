@@ -145,7 +145,7 @@ export const adminService = {
         suspended_until: null,
         suspended_by: null
       })
-      .eq('user_id', userId);
+      .eq('user_id', userId)
       .select();
     
     if (error) throw error;
