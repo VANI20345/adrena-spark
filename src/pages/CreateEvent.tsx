@@ -48,6 +48,19 @@ const formSchema = z.object({
   pointsRequired: z.number().min(0, "النقاط المطلوبة يجب أن تكون 0 أو أكثر"),
   featured: z.boolean().default(false),
   imageUrl: z.string().optional(),
+}).refine(data => {
+  const startDateTime = new Date(data.startDate);
+  const [startHour, startMinute] = data.startTime.split(':');
+  startDateTime.setHours(parseInt(startHour), parseInt(startMinute));
+  
+  const endDateTime = new Date(data.endDate);
+  const [endHour, endMinute] = data.endTime.split(':');
+  endDateTime.setHours(parseInt(endHour), parseInt(endMinute));
+  
+  return endDateTime > startDateTime;
+}, {
+  message: "تاريخ ووقت النهاية يجب أن يكون بعد تاريخ ووقت البداية",
+  path: ["endDate"]
 });
 
 type FormData = z.infer<typeof formSchema>;

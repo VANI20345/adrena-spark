@@ -214,39 +214,19 @@ const ManageServicesPage = () => {
                 </Button>
                 {service.status !== 'rejected' && (
                   <>
-                    <Button size="sm" variant="outline" asChild className="gap-2">
+                    <Button size="sm" variant="outline" asChild className="gap-2" disabled={service.status === 'approved'}>
                       <Link to={`/create-service?edit=${service.id}`}>
                         <Edit className="h-4 w-4" />
                         تعديل
                       </Link>
                     </Button>
                     {service.status === 'approved' && (
-                      <>
-                        <Button size="sm" variant="outline" asChild className="gap-2">
-                          <Link to={`/service-requests?service=${service.id}`}>
-                            <MessageCircle className="h-4 w-4" />
-                            الطلبات ({requestCount})
-                          </Link>
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
-                          className="gap-2"
-                          onClick={() => {
-                            if (window.confirm('هل أنت متأكد من حذف هذه الخدمة؟')) {
-                              // Handle deletion
-                              toast({
-                                title: "تنبيه",
-                                description: "وظيفة حذف الخدمة قيد التطوير",
-                                variant: "default",
-                              });
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          حذف
-                        </Button>
-                      </>
+                      <Button size="sm" variant="outline" asChild className="gap-2">
+                        <Link to={`/service-requests?service=${service.id}`}>
+                          <MessageCircle className="h-4 w-4" />
+                          الطلبات ({requestCount})
+                        </Link>
+                      </Button>
                     )}
                   </>
                 )}

@@ -43,6 +43,9 @@ const formSchema = z.object({
   pointsRequired: z.number().min(0, "النقاط المطلوبة يجب أن تكون 0 أو أكثر"),
   featured: z.boolean().default(false),
   imageUrl: z.string().optional(),
+}).refine(data => data.endDate > data.startDate, {
+  message: "تاريخ النهاية يجب أن يكون بعد تاريخ البداية",
+  path: ["endDate"]
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -148,6 +151,16 @@ const EditEvent = () => {
 
   const onSubmit = async (data: FormData) => {
     if (!user || !id) return;
+
+    // Check if event has already started
+    if (event && new Date(event.start_date) < new Date()) {
+      toast({
+        title: t('error', 'خطأ'),
+        description: 'لا يمكن تعديل فعالية قد بدأت بالفعل',
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     try {

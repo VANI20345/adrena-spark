@@ -226,7 +226,7 @@ const ManageEventsPage = () => {
                   عرض
                 </Link>
               </Button>
-              {event.status !== 'completed' && (
+              {event.status !== 'completed' && new Date(event.start_date) > new Date() && (
                 <>
                   <Button size="sm" variant="outline" asChild className="gap-2">
                     <Link to={`/edit-event/${event.id}`}>
@@ -254,7 +254,7 @@ const ManageEventsPage = () => {
                   </Button>
                 </>
               )}
-              {event.status === 'active' && (
+              {event.status === 'active' && new Date(event.start_date) > new Date() && (
                 <Button 
                   size="sm" 
                   variant="destructive" 

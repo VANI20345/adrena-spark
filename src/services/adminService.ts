@@ -136,7 +136,7 @@ export const adminService = {
   },
 
   async unsuspendUser(userId: string) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .update({ 
         suspended: false,
