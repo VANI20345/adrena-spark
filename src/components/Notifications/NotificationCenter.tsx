@@ -114,10 +114,28 @@ export const NotificationCenter = () => {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'booking': return <Check className="h-4 w-4 text-green-500" />;
+      case 'success': return <Check className="h-4 w-4 text-green-500" />;
       case 'reminder': return <Bell className="h-4 w-4 text-blue-500" />;
+      case 'info': return <Bell className="h-4 w-4 text-blue-500" />;
       case 'event': return <Volume2 className="h-4 w-4 text-purple-500" />;
       case 'system': return <Settings className="h-4 w-4 text-gray-500" />;
+      case 'warning': return <Bell className="h-4 w-4 text-yellow-500" />;
+      case 'error': return <X className="h-4 w-4 text-red-500" />;
       default: return <Bell className="h-4 w-4" />;
+    }
+  };
+
+  const getNotificationStyle = (type: string) => {
+    switch (type) {
+      case 'success': return 'border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20';
+      case 'info': return 'border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20';
+      case 'warning': return 'border-l-4 border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20';
+      case 'error': return 'border-l-4 border-l-red-500 bg-red-50/50 dark:bg-red-950/20';
+      case 'booking': return 'border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20';
+      case 'reminder': return 'border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20';
+      case 'event': return 'border-l-4 border-l-purple-500 bg-purple-50/50 dark:bg-purple-950/20';
+      case 'system': return 'border-l-4 border-l-gray-500 bg-gray-50/50 dark:bg-gray-950/20';
+      default: return 'border-l-4 border-l-gray-300';
     }
   };
 
@@ -351,8 +369,11 @@ export const NotificationCenter = () => {
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-4 border rounded-lg transition-colors ${
-                  !notification.read ? 'bg-accent/50 border-primary/20' : 'bg-background'
+                onClick={() => !notification.read && markAsRead(notification.id)}
+                className={`p-4 rounded-lg transition-all cursor-pointer ${
+                  getNotificationStyle(notification.type)
+                } ${
+                  !notification.read ? 'shadow-sm' : 'opacity-75'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -372,13 +393,7 @@ export const NotificationCenter = () => {
                   </div>
                   <div className="flex gap-1 ml-2">
                     {!notification.read && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => markAsRead(notification.id)}
-                      >
-                        <Check className="h-3 w-3" />
-                      </Button>
+                      <div className="w-2 h-2 bg-primary rounded-full" />
                     )}
                   </div>
                 </div>

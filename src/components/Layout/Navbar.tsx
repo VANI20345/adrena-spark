@@ -173,7 +173,7 @@ const Navbar = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to={`/${userRole}-dashboard`}>
+                      <Link to={userRole === 'admin' ? '/admin' : `/${userRole}-dashboard`}>
                         {language === "ar" ? "لوحة التحكم" : "Dashboard"}
                       </Link>
                     </DropdownMenuItem>
@@ -199,8 +199,10 @@ const Navbar = () => {
                       </DropdownMenuItem>
                     )}
                     {userRole === 'admin' && (
-                      <DropdownMenuItem>
-                        {language === "ar" ? "لوحة الإدارة" : "Admin Panel"}
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin">
+                          {language === "ar" ? "لوحة الإدارة" : "Admin Panel"}
+                        </Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
@@ -292,7 +294,7 @@ const Navbar = () => {
                             {language === "ar" ? "الملف الشخصي" : "Profile"}
                           </Button>
                         </Link>
-                        <Link to={`/${userRole}-dashboard`} onClick={() => setIsMenuOpen(false)}>
+                        <Link to={userRole === 'admin' ? '/admin' : `/${userRole}-dashboard`} onClick={() => setIsMenuOpen(false)}>
                           <Button variant="outline" className="w-full mb-2">
                             {language === "ar" ? "لوحة التحكم" : "Dashboard"}
                           </Button>
