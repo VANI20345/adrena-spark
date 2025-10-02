@@ -1,0 +1,50 @@
+{
+  "name": "Adrena Adventures Arabia",
+  "short_name": "Adrena Adventures",
+  "description": "منصة شاملة لإدارة الفعاليات والخدمات المساندة في المملكة العربية السعودية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait-primary",
+  "categories": ["events", "lifestyle", "entertainment"],
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "إنشاء فعالية جديدة",
+      "short_name": "فعالية جديدة",
+      "description": "إنشاء فعالية جديدة بسرعة",
+      "url": "/create-event",
+      "icons": [{ "src": "/favicon.ico", "sizes": "32x32" }]
+    },
+    {
+      "name": "استكشاف الفعاليات",
+      "short_name": "استكشاف",
+      "description": "تصفح الفعاليات المتاحة",
+      "url": "/explore",
+      "icons": [{ "src": "/favicon.ico", "sizes": "32x32" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
