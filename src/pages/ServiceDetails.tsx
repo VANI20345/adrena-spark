@@ -23,10 +23,11 @@ import {
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
-import { servicesService, reviewsService } from "@/services/supabaseServices";
+import { reviewsService } from "@/services/supabaseServices";
 import { serviceBookingService } from "@/services/serviceBookingService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Service {
   id: string;
@@ -87,7 +88,20 @@ const ServiceDetails = () => {
     if (!id) return;
 
     try {
-      const { data, error } = await servicesService.getById(id);
+      // Fetch service with provider profile details
+      const { data, error } = await supabase
+        .from('services')
+        .select(`
+          *,
+          profiles:provider_id (
+            full_name,
+            phone,
+            avatar_url
+          )
+        `)
+        .eq('id', id)
+        .single();
+      
       if (error) throw error;
       
       setService(data as unknown as Service);

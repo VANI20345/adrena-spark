@@ -21,10 +21,18 @@ export const ServiceCategoriesTab = () => {
       const { data, error } = await supabase
         .from('service_categories')
         .select('*')
-        .order('display_order');
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
       
       if (error) throw error;
-      setCategories(data || []);
+      
+      // Remove any remaining duplicates by name_ar (shouldn't happen after migration)
+      const uniqueCategories = data?.filter((category, index, self) =>
+        index === self.findIndex((c) => c.name_ar === category.name_ar)
+      ) || [];
+      
+      setCategories(uniqueCategories);
+      console.log('Loaded service categories:', uniqueCategories.length);
     } catch (error) {
       console.error('Error loading categories:', error);
       toast.error('حدث خطأ في تحميل التصنيفات');

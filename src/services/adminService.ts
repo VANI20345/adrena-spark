@@ -3,55 +3,92 @@ import { supabase } from '@/integrations/supabase/client';
 export const adminService = {
   // Statistics
   async getOverviewStats() {
-    const now = new Date();
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    try {
+      const now = new Date();
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [
-      { count: totalUsers },
-      { count: lastMonthUsers },
-      { count: totalEvents },
-      { count: lastMonthEvents },
-      { count: totalServices },
-      { data: bookingsData },
-      { data: lastMonthBookings },
-      { count: totalCategories },
-      { count: pendingEvents },
-      { count: pendingServices }
-    ] = await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
-      supabase.from('events').select('*', { count: 'exact', head: true }),
-      supabase.from('events').select('*', { count: 'exact', head: true }).gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
-      supabase.from('services').select('*', { count: 'exact', head: true }),
-      supabase.from('bookings').select('total_amount').eq('status', 'confirmed'),
-      supabase.from('bookings').select('total_amount').eq('status', 'confirmed').gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
-      supabase.from('categories').select('*', { count: 'exact', head: true }),
-      supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('services').select('*', { count: 'exact', head: true }).eq('status', 'pending')
-    ]);
+      const [
+        usersResult,
+        lastMonthUsersResult,
+        eventsResult,
+        lastMonthEventsResult,
+        servicesResult,
+        bookingsResult,
+        lastMonthBookingsResult,
+        categoriesResult,
+        pendingEventsResult,
+        pendingServicesResult
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
+        supabase.from('events').select('*', { count: 'exact', head: true }),
+        supabase.from('events').select('*', { count: 'exact', head: true }).gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
+        supabase.from('services').select('*', { count: 'exact', head: true }),
+        supabase.from('bookings').select('total_amount').eq('status', 'confirmed'),
+        supabase.from('bookings').select('total_amount').eq('status', 'confirmed').gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
+        supabase.from('categories').select('*', { count: 'exact', head: true }),
+        supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('services').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+      ]);
 
-    const pendingReviewsCount = (pendingEvents || 0) + (pendingServices || 0);
+      const totalUsers = usersResult.count || 0;
+      const lastMonthUsers = lastMonthUsersResult.count || 0;
+      const totalEvents = eventsResult.count || 0;
+      const lastMonthEvents = lastMonthEventsResult.count || 0;
+      const totalServices = servicesResult.count || 0;
+      const bookingsData = bookingsResult.data || [];
+      const lastMonthBookings = lastMonthBookingsResult.data || [];
+      const totalCategories = categoriesResult.count || 0;
+      const pendingEvents = pendingEventsResult.count || 0;
+      const pendingServices = pendingServicesResult.count || 0;
 
-    const totalRevenue = bookingsData?.reduce((sum, b) => sum + Number(b.total_amount || 0), 0) || 0;
-    const lastMonthRevenue = lastMonthBookings?.reduce((sum, b) => sum + Number(b.total_amount || 0), 0) || 0;
+      const pendingReviewsCount = pendingEvents + pendingServices;
 
-    const userGrowth = lastMonthUsers ? ((totalUsers - lastMonthUsers) / lastMonthUsers * 100).toFixed(1) : '0';
-    const eventGrowth = lastMonthEvents ? ((totalEvents - lastMonthEvents) / lastMonthEvents * 100).toFixed(1) : '0';
-    const revenueGrowth = lastMonthRevenue ? ((totalRevenue - lastMonthRevenue) / lastMonthRevenue * 100).toFixed(1) : '0';
+      const totalRevenue = bookingsData.reduce((sum, b) => sum + Number(b.total_amount || 0), 0);
+      const lastMonthRevenue = lastMonthBookings.reduce((sum, b) => sum + Number(b.total_amount || 0), 0);
 
-    return {
-      totalUsers: totalUsers || 0,
-      userGrowth: `${userGrowth}%`,
-      totalEvents: totalEvents || 0,
-      eventGrowth: `${eventGrowth}%`,
-      totalServices: totalServices || 0,
-      totalRevenue,
-      revenueGrowth: `${revenueGrowth}%`,
-      activeBookings: bookingsData?.length || 0,
-      totalCategories: totalCategories || 0,
-      pendingReviews: pendingReviewsCount || 0
-    };
+      const userGrowth = lastMonthUsers > 0 ? ((totalUsers - lastMonthUsers) / lastMonthUsers * 100).toFixed(1) : '0';
+      const eventGrowth = lastMonthEvents > 0 ? ((totalEvents - lastMonthEvents) / lastMonthEvents * 100).toFixed(1) : '0';
+      const revenueGrowth = lastMonthRevenue > 0 ? ((totalRevenue - lastMonthRevenue) / lastMonthRevenue * 100).toFixed(1) : '0';
+
+      console.log('Admin Stats:', {
+        totalUsers,
+        totalEvents,
+        totalServices,
+        totalRevenue,
+        activeBookings: bookingsData.length,
+        totalCategories,
+        pendingReviews: pendingReviewsCount
+      });
+
+      return {
+        totalUsers,
+        userGrowth: `${userGrowth}%`,
+        totalEvents,
+        eventGrowth: `${eventGrowth}%`,
+        totalServices,
+        totalRevenue,
+        revenueGrowth: `${revenueGrowth}%`,
+        activeBookings: bookingsData.length,
+        totalCategories,
+        pendingReviews: pendingReviewsCount
+      };
+    } catch (error) {
+      console.error('Error fetching overview stats:', error);
+      return {
+        totalUsers: 0,
+        userGrowth: '0%',
+        totalEvents: 0,
+        eventGrowth: '0%',
+        totalServices: 0,
+        totalRevenue: 0,
+        revenueGrowth: '0%',
+        activeBookings: 0,
+        totalCategories: 0,
+        pendingReviews: 0
+      };
+    }
   },
 
   // Users Management
@@ -91,12 +128,15 @@ export const adminService = {
 
   async suspendUser(userId: string, reason: string, durationDays?: number) {
     try {
+      console.log('Starting user suspension:', { userId, reason, durationDays });
+      
       const suspendedAt = new Date();
       const suspendedUntil = durationDays 
         ? new Date(suspendedAt.getTime() + durationDays * 24 * 60 * 60 * 1000)
         : null;
 
       const currentUser = await supabase.auth.getUser();
+      console.log('Current admin user:', currentUser.data.user?.id);
       
       const { data, error } = await supabase
         .from('profiles')
@@ -110,8 +150,14 @@ export const adminService = {
         .eq('user_id', userId)
         .select();
       
-      if (error) throw error;
+      console.log('Suspension update result:', { data, error });
+      
+      if (error) {
+        console.error('Suspension update failed:', error);
+        throw error;
+      }
 
+      console.log('User suspended successfully, logging activity...');
       await supabase.functions.invoke('log-activity', {
         body: {
           action: 'user_suspended',
@@ -123,12 +169,14 @@ export const adminService = {
             durationDays
           }
         }
-      }).catch(console.error);
+      }).catch(err => console.error('Failed to log activity:', err));
 
+      console.log('Sending suspension email...');
       await supabase.functions.invoke('send-suspension-email', {
         body: { userId, reason, suspendedUntil: suspendedUntil?.toISOString() || null }
-      }).catch(console.error);
+      }).catch(err => console.error('Failed to send email:', err));
       
+      console.log('Suspension completed successfully');
       return data;
     } catch (error) {
       console.error('Error suspending user:', error);
@@ -138,6 +186,8 @@ export const adminService = {
 
   async unsuspendUser(userId: string) {
     try {
+      console.log('Starting user unsuspension:', userId);
+      
       const { data, error } = await supabase
         .from('profiles')
         .update({ 
@@ -150,8 +200,14 @@ export const adminService = {
         .eq('user_id', userId)
         .select();
       
-      if (error) throw error;
+      console.log('Unsuspension result:', { data, error });
+      
+      if (error) {
+        console.error('Unsuspension failed:', error);
+        throw error;
+      }
 
+      console.log('Logging unsuspension activity...');
       await supabase.functions.invoke('log-activity', {
         body: {
           action: 'user_unsuspended',
@@ -159,8 +215,9 @@ export const adminService = {
           entityId: userId,
           details: {}
         }
-      }).catch(console.error);
+      }).catch(err => console.error('Failed to log activity:', err));
 
+      console.log('Unsuspension completed successfully');
       return data;
     } catch (error) {
       console.error('Error unsuspending user:', error);
@@ -178,10 +235,22 @@ export const adminService = {
   },
 
   async deleteUser(userId: string) {
-    const { error } = await supabase.rpc('delete_user_completely', {
-      target_user_id: userId
-    });
-    if (error) throw error;
+    try {
+      console.log('Attempting to delete user:', userId);
+      const { error } = await supabase.rpc('delete_user_completely', {
+        target_user_id: userId
+      });
+      
+      if (error) {
+        console.error('Delete user error:', error);
+        throw error;
+      }
+      
+      console.log('User deleted successfully');
+    } catch (error) {
+      console.error('Error in deleteUser:', error);
+      throw error;
+    }
   },
 
   // Categories Management
