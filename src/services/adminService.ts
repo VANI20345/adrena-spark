@@ -57,11 +57,9 @@ export const adminService = {
   // Users Management
   async getAllUsers() {
     try {
-      // Call edge function with service role access
       const { data, error } = await supabase.functions.invoke('admin-users', {
         method: 'GET'
       });
-
       if (error) throw error;
       return data?.users || [];
     } catch (error) {
@@ -72,13 +70,11 @@ export const adminService = {
 
   async updateUserRole(userId: string, role: 'attendee' | 'organizer' | 'provider' | 'admin') {
     try {
-      // Use edge function with service role to bypass RLS safely
       const { error } = await supabase.functions.invoke('admin-update-user-role', {
         body: { userId, role },
       });
       if (error) throw error;
 
-      // Log the activity
       await supabase.functions.invoke('log-activity', {
         body: {
           action: 'role_update',
@@ -100,8 +96,6 @@ export const adminService = {
         ? new Date(suspendedAt.getTime() + durationDays * 24 * 60 * 60 * 1000)
         : null;
 
-      console.log('Attempting to suspend user:', { userId, reason, durationDays, suspendedUntil });
-
       const currentUser = await supabase.auth.getUser();
       
       const { data, error } = await supabase
@@ -116,44 +110,24 @@ export const adminService = {
         .eq('user_id', userId)
         .select();
       
-      console.log('Suspension update result:', { data, error });
-      
-      if (error) {
-        console.error('Suspension failed with error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // Log the activity
-      try {
-        await supabase.functions.invoke('log-activity', {
-          body: {
-            action: 'user_suspended',
-            entityType: 'user',
-            entityId: userId,
-            details: { 
-              reason, 
-              suspendedUntil: suspendedUntil?.toISOString() || 'permanent',
-              durationDays
-            }
+      await supabase.functions.invoke('log-activity', {
+        body: {
+          action: 'user_suspended',
+          entityType: 'user',
+          entityId: userId,
+          details: { 
+            reason, 
+            suspendedUntil: suspendedUntil?.toISOString() || 'permanent',
+            durationDays
           }
-        });
-      } catch (logError) {
-        console.error('Failed to log suspension:', logError);
-      }
+        }
+      }).catch(console.error);
 
-      // Send suspension email
-      try {
-        await supabase.functions.invoke('send-suspension-email', {
-          body: {
-            userId,
-            reason,
-            suspendedUntil: suspendedUntil?.toISOString() || null
-          }
-        });
-      } catch (emailError) {
-        console.error('Failed to send suspension email:', emailError);
-        // Don't throw - suspension succeeded even if email failed
-      }
+      await supabase.functions.invoke('send-suspension-email', {
+        body: { userId, reason, suspendedUntil: suspendedUntil?.toISOString() || null }
+      }).catch(console.error);
       
       return data;
     } catch (error) {
@@ -163,7 +137,6 @@ export const adminService = {
   },
 
   async unsuspendUser(userId: string) {
-<<<<<<< HEAD
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -179,43 +152,21 @@ export const adminService = {
       
       if (error) throw error;
 
-      // Log the activity
-      try {
-        await supabase.functions.invoke('log-activity', {
-          body: {
-            action: 'user_unsuspended',
-            entityType: 'user',
-            entityId: userId,
-            details: {}
-          }
-        });
-      } catch (logError) {
-        console.error('Failed to log unsuspension:', logError);
-      }
-      
+      await supabase.functions.invoke('log-activity', {
+        body: {
+          action: 'user_unsuspended',
+          entityType: 'user',
+          entityId: userId,
+          details: {}
+        }
+      }).catch(console.error);
+
       return data;
     } catch (error) {
       console.error('Error unsuspending user:', error);
       throw error;
     }
-=======
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ 
-        suspended: false,
-        suspension_reason: null,
-        suspended_at: null,
-        suspended_until: null,
-        suspended_by: null
-      })
-      .eq('user_id', userId)
-      .select();
-    
-    if (error) throw error;
-    return data;
->>>>>>> 54efb3b3a4fd42c02748c1929ebdaefb981e0769
   },
-
   async getSuspendedUsers() {
     const { data, error } = await supabase
       .from('suspended_users')
@@ -383,3 +334,4 @@ export const adminService = {
     link.click();
   }
 };
+
