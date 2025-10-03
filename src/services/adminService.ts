@@ -22,9 +22,11 @@ export const adminService = {
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
-        supabase.from('events').select('*', { count: 'exact', head: true }),
-        supabase.from('events').select('*', { count: 'exact', head: true }).gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
-        supabase.from('services').select('*', { count: 'exact', head: true }),
+        // احتساب الفعاليات المقبولة فقط
+        supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
+        supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'approved').gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
+        // احتساب الخدمات المقبولة فقط
+        supabase.from('services').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
         supabase.from('bookings').select('total_amount').eq('status', 'confirmed'),
         supabase.from('bookings').select('total_amount').eq('status', 'confirmed').gte('created_at', lastMonth.toISOString()).lt('created_at', thisMonth.toISOString()),
         supabase.from('categories').select('*', { count: 'exact', head: true }),
@@ -52,10 +54,10 @@ export const adminService = {
       const eventGrowth = lastMonthEvents > 0 ? ((totalEvents - lastMonthEvents) / lastMonthEvents * 100).toFixed(1) : '0';
       const revenueGrowth = lastMonthRevenue > 0 ? ((totalRevenue - lastMonthRevenue) / lastMonthRevenue * 100).toFixed(1) : '0';
 
-      console.log('Admin Stats:', {
+      console.log('✅ Admin Stats (Approved Only):', {
         totalUsers,
-        totalEvents,
-        totalServices,
+        totalEvents: `${totalEvents} (approved only)`,
+        totalServices: `${totalServices} (approved only)`,
         totalRevenue,
         activeBookings: bookingsData.length,
         totalCategories,
