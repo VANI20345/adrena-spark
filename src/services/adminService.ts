@@ -163,6 +163,7 @@ export const adminService = {
   },
 
   async unsuspendUser(userId: string) {
+<<<<<<< HEAD
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -197,6 +198,22 @@ export const adminService = {
       console.error('Error unsuspending user:', error);
       throw error;
     }
+=======
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ 
+        suspended: false,
+        suspension_reason: null,
+        suspended_at: null,
+        suspended_until: null,
+        suspended_by: null
+      })
+      .eq('user_id', userId)
+      .select();
+    
+    if (error) throw error;
+    return data;
+>>>>>>> 54efb3b3a4fd42c02748c1929ebdaefb981e0769
   },
 
   async getSuspendedUsers() {
