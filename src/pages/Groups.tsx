@@ -126,6 +126,7 @@ const Groups = () => {
           description: 'أنت عضو بالفعل في هذه المجموعة',
           variant: 'default'
         });
+        setSelectedGroup(allRegionGroups.find(g => g.id === groupId) || eventGroups.find(g => g.id === groupId) || null);
         return;
       }
 
@@ -134,12 +135,10 @@ const Groups = () => {
         .from('event_groups')
         .select('current_members, max_members')
         .eq('id', groupId)
-        .single();
+        .maybeSingle();
 
-      if (fetchError) throw fetchError;
-
-      // Check if group is full
-      if (groupData.current_members >= groupData.max_members) {
+      // Check if group is full (only for event groups)
+      if (groupData && groupData.current_members >= groupData.max_members) {
         toast({
           title: 'خطأ',
           description: 'المجموعة ممتلئة',
@@ -159,15 +158,17 @@ const Groups = () => {
 
       if (memberError) throw memberError;
 
-      // Increment current_members count
-      const { error } = await supabase
-        .from('event_groups')
-        .update({ 
-          current_members: (groupData.current_members || 0) + 1
-        })
-        .eq('id', groupId);
+      // Increment current_members count only for event groups
+      if (groupData) {
+        const { error } = await supabase
+          .from('event_groups')
+          .update({ 
+            current_members: (groupData.current_members || 0) + 1
+          })
+          .eq('id', groupId);
 
-      if (error) throw error;
+        if (error) throw error;
+      }
 
       toast({
         title: 'تم بنجاح!',
@@ -177,6 +178,9 @@ const Groups = () => {
       refetchRegional();
       refetchRegionType();
       refetchEvent();
+      
+      // فتح المجموعة بعد الانضمام
+      setSelectedGroup(allRegionGroups.find(g => g.id === groupId) || eventGroups.find(g => g.id === groupId) || null);
     } catch (error) {
       console.error('Error joining group:', error);
       toast({
@@ -273,26 +277,29 @@ const Groups = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center gap-2">
                           <div className="flex items-center text-sm text-muted-foreground">
                             <Users className="w-4 h-4 ml-2" />
-                            {group.current_members} / {group.max_members} {t('groups.member', 'عضو')}
+                            {group.created_by === 'admin' ? 'متاح للجميع' : `${group.current_members} / ${group.max_members} ${t('groups.member', 'عضو')}`}
                           </div>
-                          {group.created_by !== 'admin' && (
+                          <div className="flex gap-2">
                             <Button 
                               size="sm"
                               onClick={() => handleJoinGroup(group.id)}
-                              disabled={group.current_members >= group.max_members}
+                              disabled={group.created_by !== 'admin' && group.current_members >= group.max_members}
                             >
                               <UserPlus className="w-4 h-4 ml-1" />
                               {t('groups.joinGroup', 'انضم')}
                             </Button>
-                          )}
-                          {group.created_by === 'admin' && (
-                            <Badge variant="secondary">
-                              مفتوحة للجميع
-                            </Badge>
-                          )}
+                            <Button 
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedGroup(group)}
+                            >
+                              <MessageSquare className="w-4 h-4 ml-1" />
+                              دردشة
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>

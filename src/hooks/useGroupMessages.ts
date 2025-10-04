@@ -20,7 +20,11 @@ export const useGroupMessages = (groupId: string) => {
     if (!groupId) return;
 
     loadMessages();
-    setupRealtimeSubscription();
+    const cleanup = setupRealtimeSubscription();
+    
+    return () => {
+      if (cleanup) cleanup();
+    };
   }, [groupId]);
 
   const loadMessages = async () => {
