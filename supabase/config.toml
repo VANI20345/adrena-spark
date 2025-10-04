@@ -1,0 +1,34 @@
+project_id = "nzuppbjtxmfrgutyagev"
+
+[functions.admin-users]
+verify_jwt = true
+
+[functions.send-notifications]
+verify_jwt = true
+
+[functions.backup-database]
+verify_jwt = true
+
+[functions.calculate-statistics]
+verify_jwt = false
+
+[functions.calculate-ratings]
+verify_jwt = false
+
+[functions.create-booking]
+verify_jwt = true
+
+[functions.process-payment]
+verify_jwt = true
+
+[functions.payment-webhook]
+verify_jwt = false
+
+[functions.send-notification]
+verify_jwt = true
+
+[functions.send-suspension-email]
+verify_jwt = false
+
+[functions.check-expired-suspensions]
+verify_jwt = false
