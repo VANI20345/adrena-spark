@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,10 +45,9 @@ const Groups = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguageContext();
   const { toast } = useToast();
-  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [userMemberships, setUserMemberships] = useState<string[]>([]);
 
   // Load ALL region groups from event_groups (الآن كلها في جدول واحد)
   const { data: allRegionalGroups = [], isLoading: regionalLoading, refetch: refetchRegional } = useSupabaseQuery({
@@ -87,6 +87,28 @@ const Groups = () => {
   const allRegionGroups = allRegionalGroups || [];
   const isRegionLoading = regionalLoading;
 
+  // Load user memberships
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadMemberships = async () => {
+      const { data } = await supabase
+        .from('group_members')
+        .select('group_id')
+        .eq('user_id', user.id);
+      
+      if (data) {
+        setUserMemberships(data.map(m => m.group_id));
+      }
+    };
+
+    loadMemberships();
+  }, [user]);
+
+  const isUserMember = (groupId: string) => {
+    return userMemberships.includes(groupId);
+  };
+
   const handleJoinGroup = async (groupId: string) => {
     if (!user) {
       toast({
@@ -107,17 +129,12 @@ const Groups = () => {
         .maybeSingle();
 
       if (existingMember) {
-        toast({
-          title: 'تنبيه',
-          description: 'أنت عضو بالفعل في هذه المجموعة',
-          variant: 'default'
-        });
-        setSelectedGroup(allRegionGroups.find(g => g.id === groupId) || eventGroups.find(g => g.id === groupId) || null);
+        navigate(`/groups/${groupId}`);
         return;
       }
 
       // Get current group data
-      const { data: groupData, error: fetchError } = await supabase
+      const { data: groupData } = await supabase
         .from('event_groups')
         .select('current_members, max_members')
         .eq('id', groupId)
@@ -144,16 +161,14 @@ const Groups = () => {
 
       if (memberError) throw memberError;
 
-      // Increment current_members count only for event groups
+      // Increment current_members count
       if (groupData) {
-        const { error } = await supabase
+        await supabase
           .from('event_groups')
           .update({ 
             current_members: (groupData.current_members || 0) + 1
           })
           .eq('id', groupId);
-
-        if (error) throw error;
       }
 
       toast({
@@ -164,8 +179,8 @@ const Groups = () => {
       refetchRegional();
       refetchEvent();
       
-      // فتح المجموعة بعد الانضمام
-      setSelectedGroup(allRegionGroups.find(g => g.id === groupId) || eventGroups.find(g => g.id === groupId) || null);
+      // Navigate to group details page
+      navigate(`/groups/${groupId}`);
     } catch (error) {
       console.error('Error joining group:', error);
       toast({
@@ -174,27 +189,6 @@ const Groups = () => {
         variant: 'destructive'
       });
     }
-  };
-
-  const handleGroupCreated = () => {
-    refetchRegional();
-    refetchEvent();
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedGroup) return;
-
-    // This would involve sending a message to the chat
-    // For now, we'll just add it locally
-    const message = {
-      id: Date.now().toString(),
-      content: newMessage,
-      sender: user?.email || 'أنت',
-      timestamp: new Date().toLocaleTimeString('ar-SA')
-    };
-
-    setChatMessages(prev => [...prev, message]);
-    setNewMessage('');
   };
 
   const filteredRegionGroups = allRegionGroups.filter(group =>
@@ -213,7 +207,10 @@ const Groups = () => {
           {userRole === 'organizer' && (
             <CreateGroupDialog 
               events={Array.isArray(userEvents) ? userEvents : []}
-              onGroupCreated={handleGroupCreated}
+              onGroupCreated={() => {
+                refetchRegional();
+                refetchEvent();
+              }}
             />
           )}
         </div>
@@ -265,22 +262,24 @@ const Groups = () => {
                             {group.current_members || 0} / {group.max_members} {t('groups.member', 'عضو')}
                           </div>
                           <div className="flex gap-2">
-                            <Button 
-                              size="sm"
-                              onClick={() => handleJoinGroup(group.id)}
-                              disabled={group.current_members >= group.max_members}
-                            >
-                              <UserPlus className="w-4 h-4 ml-1" />
-                              {t('groups.joinGroup', 'انضم')}
-                            </Button>
-                            <Button 
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setSelectedGroup(group)}
-                            >
-                              <MessageSquare className="w-4 h-4 ml-1" />
-                              دردشة
-                            </Button>
+                            {isUserMember(group.id) ? (
+                              <Button 
+                                size="sm"
+                                onClick={() => navigate(`/groups/${group.id}`)}
+                              >
+                                <MessageSquare className="w-4 h-4 ml-1" />
+                                عرض المجموعة
+                              </Button>
+                            ) : (
+                              <Button 
+                                size="sm"
+                                onClick={() => handleJoinGroup(group.id)}
+                                disabled={group.current_members >= group.max_members}
+                              >
+                                <UserPlus className="w-4 h-4 ml-1" />
+                                {t('groups.joinGroup', 'انضم')}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -354,7 +353,7 @@ const Groups = () => {
                           <Button 
                             size="sm" 
                             className="flex-1"
-                            onClick={() => setSelectedGroup(group)}
+                            onClick={() => navigate(`/groups/${group.id}`)}
                           >
                             <MessageSquare className="w-4 h-4 ml-1" />
                             {t('groups.chat', 'دردشة')}
@@ -369,16 +368,6 @@ const Groups = () => {
                           {group.created_by === user?.id && (
                             <Button size="sm" variant="outline">
                               <Settings className="w-4 h-4" />
-                            </Button>
-                          )}
-                          
-                          {group.group_link && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => window.open(group.group_link, '_blank')}
-                            >
-                              WhatsApp
                             </Button>
                           )}
                         </div>
@@ -407,17 +396,6 @@ const Groups = () => {
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* Chat Interface (would be shown when a group is selected) */}
-        {selectedGroup && (
-          <div className="mt-6">
-            <GroupChat 
-              groupId={selectedGroup.id} 
-              groupName={selectedGroup.group_name}
-              isOwner={selectedGroup.created_by === user?.id}
-            />
-          </div>
-        )}
       </main>
       <Footer />
     </div>

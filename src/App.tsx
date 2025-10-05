@@ -34,6 +34,7 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import AttendeeDashboard from "./pages/AttendeeDashboard";
 import Groups from "./pages/Groups";
+import GroupDetails from "./pages/GroupDetails";
 import Notifications from "./pages/Notifications";
 import QRScanner from "./pages/QRScanner";
 import Help from "./pages/Help";
@@ -210,6 +211,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireAuth={true}>
                   <Groups />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups/:groupId" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <GroupDetails />
                 </ProtectedRoute>
               } 
             />
