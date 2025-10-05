@@ -34,21 +34,25 @@ export const useGroupMessages = (groupId: string) => {
     try {
       const { data, error } = await supabase
         .from('group_messages')
-        .select(`
-          *,
-          profiles:sender_id (
-            full_name
-          )
-        `)
+        .select('*')
         .eq('group_id', groupId)
         .order('created_at', { ascending: true })
         .limit(100);
 
       if (error) throw error;
 
-      const messagesWithNames = (data || []).map((msg: any) => ({
-        ...msg,
-        sender_name: msg.profiles?.full_name || 'مستخدم'
+      // Fetch sender names separately
+      const messagesWithNames = await Promise.all((data || []).map(async (msg: any) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', msg.sender_id)
+          .single();
+        
+        return {
+          ...msg,
+          sender_name: profile?.full_name || 'مستخدم'
+        };
       }));
 
       setMessages(messagesWithNames);

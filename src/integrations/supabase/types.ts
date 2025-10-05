@@ -314,7 +314,7 @@ export type Database = {
           created_at: string
           created_by: string
           current_members: number | null
-          event_id: string
+          event_id: string | null
           group_id_external: string | null
           group_link: string | null
           group_name: string
@@ -329,7 +329,7 @@ export type Database = {
           created_at?: string
           created_by: string
           current_members?: number | null
-          event_id: string
+          event_id?: string | null
           group_id_external?: string | null
           group_link?: string | null
           group_name: string
@@ -344,7 +344,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           current_members?: number | null
-          event_id?: string
+          event_id?: string | null
           group_id_external?: string | null
           group_link?: string | null
           group_name?: string
@@ -490,13 +490,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_group_members_group_id"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "event_groups"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "group_members_group_id_fkey"
             columns: ["group_id"]

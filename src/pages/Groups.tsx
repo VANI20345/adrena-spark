@@ -49,15 +49,9 @@ const Groups = () => {
   const [newMessage, setNewMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Load regional groups from regional_groups table (created by admin)
-  const { data: regionalGroupsData = [], isLoading: regionalLoading, refetch: refetchRegional } = useSupabaseQuery({
-    queryKey: ['regional-groups'],
-    queryFn: useCallback(() => supabaseServices.groups.getRegionGroups(), [])
-  });
-
-  // Load region-type groups from event_groups table (created by organizers)
-  const { data: regionTypeGroups = [], isLoading: regionTypeLoading, refetch: refetchRegionType } = useSupabaseQuery({
-    queryKey: ['region-type-groups'],
+  // Load ALL region groups from event_groups (الآن كلها في جدول واحد)
+  const { data: allRegionalGroups = [], isLoading: regionalLoading, refetch: refetchRegional } = useSupabaseQuery({
+    queryKey: ['all-regional-groups'],
     queryFn: useCallback(async () => {
       const { data, error } = await supabase
         .from('event_groups')
@@ -71,7 +65,15 @@ const Groups = () => {
 
   const { data: eventGroups = [], isLoading: eventLoading, refetch: refetchEvent } = useSupabaseQuery({
     queryKey: ['event-groups', user?.id],
-    queryFn: useCallback(() => supabaseServices.groups.getEventGroups(user?.id || ''), [user?.id]),
+    queryFn: useCallback(async () => {
+      const { data, error } = await supabase
+        .from('event_groups')
+        .select('*')
+        .neq('group_type', 'region')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    }, [user?.id]),
     enabled: !!user?.id
   });
 
@@ -81,25 +83,9 @@ const Groups = () => {
     enabled: !!user?.id && userRole === 'organizer'
   });
 
-  // Combine all region groups (from regional_groups table + event_groups with type='region')
-  const allRegionGroups = [
-    // Map regional_groups to match the Group interface
-    ...(regionalGroupsData || []).map((rg: any) => ({
-      id: rg.id,
-      group_name: rg.name_ar || rg.name,
-      group_type: 'region',
-      current_members: 0, // Regional groups don't track members yet
-      max_members: 500,
-      group_link: undefined,
-      event_id: undefined,
-      created_by: 'admin',
-      created_at: rg.created_at
-    })),
-    // Add region-type groups from event_groups
-    ...(regionTypeGroups || [])
-  ];
-
-  const isRegionLoading = regionalLoading || regionTypeLoading;
+  // استخدام المجموعات الإقليمية مباشرة من event_groups
+  const allRegionGroups = allRegionalGroups || [];
+  const isRegionLoading = regionalLoading;
 
   const handleJoinGroup = async (groupId: string) => {
     if (!user) {
@@ -176,7 +162,6 @@ const Groups = () => {
       });
 
       refetchRegional();
-      refetchRegionType();
       refetchEvent();
       
       // فتح المجموعة بعد الانضمام
@@ -193,7 +178,6 @@ const Groups = () => {
 
   const handleGroupCreated = () => {
     refetchRegional();
-    refetchRegionType();
     refetchEvent();
   };
 
@@ -271,22 +255,20 @@ const Groups = () => {
                           </Badge>
                         </div>
                         <CardDescription>
-                          {group.created_by === 'admin' 
-                            ? 'مجموعة إقليمية عامة - متاحة لجميع المستخدمين' 
-                            : t('groupDescription', 'قروب عام لمحبي المغامرة')}
+                          مجموعة إقليمية عامة - متاحة لجميع المستخدمين
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="flex justify-between items-center gap-2">
                           <div className="flex items-center text-sm text-muted-foreground">
                             <Users className="w-4 h-4 ml-2" />
-                            {group.created_by === 'admin' ? 'متاح للجميع' : `${group.current_members} / ${group.max_members} ${t('groups.member', 'عضو')}`}
+                            {group.current_members || 0} / {group.max_members} {t('groups.member', 'عضو')}
                           </div>
                           <div className="flex gap-2">
                             <Button 
                               size="sm"
                               onClick={() => handleJoinGroup(group.id)}
-                              disabled={group.created_by !== 'admin' && group.current_members >= group.max_members}
+                              disabled={group.current_members >= group.max_members}
                             >
                               <UserPlus className="w-4 h-4 ml-1" />
                               {t('groups.joinGroup', 'انضم')}
