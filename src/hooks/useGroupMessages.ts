@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -26,19 +26,23 @@ export const useGroupMessages = (groupId: string) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (!groupId) return;
 
     loadMessages();
-    const cleanup = setupRealtimeSubscription();
+    setupRealtimeSubscription();
     
     return () => {
-      if (cleanup) cleanup();
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [groupId]);
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     if (!groupId || !user) return;
     
     setIsLoading(true);
@@ -93,9 +97,14 @@ export const useGroupMessages = (groupId: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [groupId, user]);
 
-  const setupRealtimeSubscription = () => {
+  const setupRealtimeSubscription = useCallback(() => {
+    // Clean up existing channel if any
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
     const channel = supabase
       .channel(`group-messages-${groupId}`)
       .on(
@@ -155,12 +164,10 @@ export const useGroupMessages = (groupId: string) => {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
+    channelRef.current = channel;
+  }, [groupId, user]);
 
-  const sendMessage = async (content: string, attachments?: File[]) => {
+  const sendMessage = useCallback(async (content: string, attachments?: File[]) => {
     if ((!content.trim() && !attachments?.length) || !user || !groupId) return false;
 
     try {
@@ -273,7 +280,7 @@ export const useGroupMessages = (groupId: string) => {
       console.error('❌ Error sending message:', error);
       return false;
     }
-  };
+  }, [user, groupId]);
 
   return {
     messages,

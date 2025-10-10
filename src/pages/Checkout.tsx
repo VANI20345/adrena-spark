@@ -90,7 +90,6 @@ const CheckoutPage = () => {
         .from('events')
         .select(`
           *,
-          profiles!fk_events_organizer_id(full_name),
           categories(name_ar)
         `)
         .eq('id', eventId)
