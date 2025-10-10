@@ -1,0 +1,282 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Adrena Design System - Adventure & Nature Theme
+All colors are HSL for perfect theming support. Design inspired by natural outdoor colors.
+*/
+
+@layer base {
+  :root {
+    /* Nature-inspired color palette */
+    --background: 0 0% 100%;
+    --foreground: 220 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+
+    /* Adventure Green - Main brand color */
+    --primary: 140 60% 35%;
+    --primary-glow: 140 55% 45%;
+    --primary-foreground: 0 0% 98%;
+
+    /* Mountain Stone */
+    --secondary: 210 8% 92%;
+    --secondary-foreground: 220 15% 15%;
+
+    /* Muted Earth */
+    --muted: 30 10% 95%;
+    --muted-foreground: 220 10% 45%;
+
+    /* Sky Accent */
+    --accent: 200 80% 92%;
+    --accent-foreground: 200 80% 25%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 210 12% 88%;
+    --input: 210 12% 88%;
+    --ring: 140 60% 35%;
+
+    --radius: 0.75rem;
+
+    /* Adventure Theme Extensions */
+    --gradient-adventure: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-hero: linear-gradient(135deg, hsl(140 60% 35%) 0%, hsl(120 50% 45%) 100%);
+    --gradient-sunset: linear-gradient(45deg, hsl(25 85% 60%) 0%, hsl(45 90% 65%) 100%);
+    --shadow-adventure: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.4);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark mode with green adventure theme */
+    --background: 140 30% 8%;
+    --foreground: 140 10% 95%;
+
+    --card: 140 25% 12%;
+    --card-foreground: 140 10% 95%;
+
+    --popover: 140 25% 12%;
+    --popover-foreground: 140 10% 95%;
+
+    /* Keep green as primary in dark mode */
+    --primary: 140 60% 45%;
+    --primary-glow: 140 55% 55%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 140 20% 18%;
+    --secondary-foreground: 140 10% 95%;
+
+    --muted: 140 15% 15%;
+    --muted-foreground: 140 10% 65%;
+
+    --accent: 140 25% 20%;
+    --accent-foreground: 140 60% 60%;
+
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 140 20% 20%;
+    --input: 140 20% 20%;
+    --ring: 140 60% 45%;
+
+    /* Dark mode gradients with green */
+    --gradient-adventure: linear-gradient(135deg, hsl(140 60% 35%), hsl(140 55% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(140 60% 25%) 0%, hsl(120 50% 35%) 100%);
+    --gradient-dark-green: linear-gradient(180deg, hsl(140 30% 8%) 0%, hsl(140 40% 15%) 100%);
+    --shadow-adventure: 0 10px 30px -10px hsl(140 60% 35% / 0.4);
+    --shadow-glow: 0 0 40px hsl(140 55% 45% / 0.3);
+
+    --sidebar-background: 140 30% 10%;
+    --sidebar-foreground: 140 10% 90%;
+    --sidebar-primary: 140 60% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 140 25% 15%;
+    --sidebar-accent-foreground: 140 10% 90%;
+    --sidebar-border: 140 20% 18%;
+    --sidebar-ring: 140 60% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    direction: rtl;
+  }
+
+  /* Dark mode gradient background */
+  .dark body {
+    background: linear-gradient(180deg, hsl(140 30% 8%) 0%, hsl(140 40% 12%) 50%, hsl(140 30% 8%) 100%);
+  }
+
+  /* RTL Support */
+  [dir="ltr"] body {
+    direction: ltr;
+  }
+
+  /* Mobile-first responsive improvements */
+  .container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Adventure-specific component styles */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  .adventure-shadow {
+    box-shadow: var(--shadow-adventure);
+  }
+
+  .smooth-transition {
+    transition: var(--transition-smooth);
+  }
+
+  /* Enhanced mobile responsiveness */
+  .mobile-nav {
+    @apply md:hidden;
+  }
+
+  .desktop-nav {
+    @apply hidden md:flex;
+  }
+
+  /* Mobile-optimized card grid */
+  .events-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  .dashboard-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+
+  .stats-grid {
+    @apply grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6;
+  }
+
+  /* Mobile-friendly buttons */
+  .mobile-button {
+    @apply min-h-[44px] min-w-[44px] touch-manipulation;
+  }
+
+  /* Enhanced typography for mobile */
+  .mobile-heading {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight;
+  }
+
+  .mobile-text {
+    @apply text-sm sm:text-base leading-relaxed;
+  }
+
+  /* Mobile form improvements */
+  .mobile-form-field {
+    @apply w-full min-h-[44px] px-4 py-3 text-base;
+  }
+
+  /* Mobile card improvements */
+  .mobile-card {
+    @apply rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  /* Mobile spacing utilities */
+  .mobile-section {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+
+  .mobile-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Mobile-optimized navigation */
+  .mobile-nav-item {
+    @apply block px-4 py-3 text-base font-medium rounded-lg hover:bg-accent transition-colors;
+  }
+
+  /* Enhanced mobile search */
+  .mobile-search {
+    @apply w-full px-4 py-3 text-base border border-input rounded-lg bg-background;
+  }
+
+  /* Mobile-friendly modals and dialogs */
+  .mobile-dialog {
+    @apply w-full max-w-md mx-4 sm:mx-auto;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary-glow));
+  }
+
+  /* Mobile-specific animation optimizations */
+  @media (prefers-reduced-motion: reduce) {
+    .smooth-transition {
+      transition: none;
+    }
+  }
+
+  /* Enhanced mobile touch interactions */
+  .touch-feedback {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+
+  /* Mobile-optimized hero section */
+  .mobile-hero {
+    @apply min-h-[60vh] sm:min-h-[70vh] lg:min-h-[80vh];
+  }
+
+  /* Mobile-friendly image handling */
+  .responsive-image {
+    @apply w-full h-auto object-cover;
+  }
+
+  /* Mobile navigation improvements */
+  .mobile-nav-header {
+    @apply sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+  }
+}
