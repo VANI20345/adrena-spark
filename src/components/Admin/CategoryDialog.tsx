@@ -35,6 +35,18 @@ export const CategoryDialog = ({ onSuccess, category, type = 'service' }: Catego
   });
 
   useEffect(() => {
+    if (category) {
+      setFormData({
+        name: category.name || '',
+        name_ar: category.name_ar || '',
+        icon_name: category.icon_name || '',
+        parent_id: category.parent_id || null,
+        display_order: category.display_order || 0
+      });
+    }
+  }, [category]);
+
+  useEffect(() => {
     if (type === 'service' && open) {
       loadMainCategories();
     }
@@ -63,7 +75,7 @@ export const CategoryDialog = ({ onSuccess, category, type = 'service' }: Catego
     try {
       const tableName = type === 'service' ? 'service_categories' : 'categories';
       
-      if (category) {
+      if (category && category.id) {
         const { error } = await supabase
           .from(tableName)
           .update(formData)
@@ -92,20 +104,29 @@ export const CategoryDialog = ({ onSuccess, category, type = 'service' }: Catego
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {category ? (
+        {category?.id ? (
           <Button size="sm" variant="outline">تعديل</Button>
+        ) : category?.parent_id ? (
+          <Button size="sm">
+            <Plus className="w-4 h-4 ml-2" />
+            إضافة فئة فرعية
+          </Button>
         ) : (
           <Button>
             <Plus className="w-4 h-4 ml-2" />
-            إضافة فئة
+            إضافة فئة رئيسية
           </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{category ? 'تعديل الفئة' : 'إضافة فئة جديدة'}</DialogTitle>
+          <DialogTitle>{category?.id ? 'تعديل الفئة' : 'إضافة فئة جديدة'}</DialogTitle>
           <DialogDescription>
-            {category ? 'قم بتحديث معلومات الفئة' : 'أضف فئة جديدة للفعاليات والخدمات'}
+            {category?.parent_id && !category?.id
+              ? 'إضافة فئة فرعية جديدة' 
+              : category?.id
+                ? 'قم بتحديث معلومات الفئة' 
+                : 'أضف فئة جديدة للفعاليات والخدمات'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -130,7 +151,7 @@ export const CategoryDialog = ({ onSuccess, category, type = 'service' }: Catego
             </div>
           </div>
 
-          {type === 'service' && (
+          {type === 'service' && !category?.parent_id && (
             <div>
               <Label htmlFor="parent_id">القسم الرئيسي (اختياري)</Label>
               <Select
@@ -195,7 +216,7 @@ export const CategoryDialog = ({ onSuccess, category, type = 'service' }: Catego
               إلغاء
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'جاري الحفظ...' : category ? 'تحديث' : 'إضافة'}
+              {loading ? 'جاري الحفظ...' : category?.id ? 'تحديث' : 'إضافة'}
             </Button>
           </div>
         </form>

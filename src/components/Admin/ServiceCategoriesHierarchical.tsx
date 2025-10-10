@@ -157,6 +157,7 @@ export const ServiceCategoriesHierarchical = () => {
                       <CategoryDialog
                         type="service"
                         onSuccess={loadCategories}
+                        category={{ parent_id: primary.id }}
                       />
                     </div>
                     {primary.subcategories && primary.subcategories.length > 0 ? (

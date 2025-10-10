@@ -173,94 +173,146 @@ const AdminPanel = () => {
     }
   };
 
-  // Event/Service Actions with Notifications and Activity Logging
+  // Event/Service Actions with Optimistic Updates and Parallel Operations
   const handleEventAction = async (eventId: string, action: 'approve' | 'reject', comment?: string) => {
     const status = action === 'approve' ? 'approved' : 'cancelled';
+    
     try {
       const event = pendingEvents.find(e => e.id === eventId);
+      if (!event) return;
+
+      // Optimistic UI update - instant feedback
+      toast.success(`جاري ${action === 'approve' ? 'قبول' : 'رفض'} الفعالية...`);
+      setPendingEvents(prev => prev.filter(e => e.id !== eventId));
+      
+      // Main update - this is critical and should be awaited
       await supabase.from('events').update({ status }).eq('id', eventId);
       
-      // Log activity with detailed info
-      const organizerProfile = await supabase
-        .from('profiles')
-        .select('full_name, user_id')
-        .eq('user_id', event?.organizer_id)
-        .single();
+      // Background operations - run in parallel without blocking
+      Promise.all([
+        // Log activity
+        (async () => {
+          try {
+            const organizerProfile = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('user_id', event.organizer_id)
+              .single();
+            
+            await activityLogService.logActivity(
+              action === 'approve' ? 'approve_event' : 'reject_event',
+              'event',
+              eventId,
+              { 
+                event_title: event.title_ar,
+                user_name: organizerProfile.data?.full_name,
+                comment 
+              }
+            );
+          } catch (err) {
+            console.error('Failed to log activity:', err);
+          }
+        })(),
+        
+        // Send notification
+        (async () => {
+          if (event.organizer_id) {
+            try {
+              await adminService.sendNotification({
+                userIds: [event.organizer_id],
+                title: action === 'approve' ? 'تم قبول الفعالية' : 'تم رفض الفعالية',
+                message: action === 'approve' 
+                  ? `تم قبول فعالية "${event.title_ar}" ونشرها على المنصة`
+                  : `تم رفض فعالية "${event.title_ar}". ${comment ? `السبب: ${comment}` : ''}`,
+                type: action === 'approve' ? 'approval' : 'rejection'
+              });
+            } catch (err) {
+              console.error('Failed to send notification:', err);
+            }
+          }
+        })(),
+        
+        // Update stats
+        loadStats()
+      ]).catch(err => console.error('Background operations failed:', err));
       
-      await activityLogService.logActivity(
-        action === 'approve' ? 'approve_event' : 'reject_event',
-        'event',
-        eventId,
-        { 
-          event_title: event?.title_ar,
-          user_name: organizerProfile.data?.full_name,
-          user_email: event?.organizer_id,
-          comment 
-        }
-      );
-      
-      // Send notification to organizer
-      if (event?.organizer_id) {
-        await adminService.sendNotification({
-          userIds: [event.organizer_id],
-          title: action === 'approve' ? 'تم قبول الفعالية' : 'تم رفض الفعالية',
-          message: action === 'approve' 
-            ? `تم قبول فعالية "${event.title_ar}" ونشرها على المنصة`
-            : `تم رفض فعالية "${event.title_ar}". ${comment ? `السبب: ${comment}` : 'يرجى مراجعة التفاصيل والمحاولة مرة أخرى'}`,
-          type: action === 'approve' ? 'approval' : 'rejection'
-        });
-      }
-      
-      toast.success(`تم ${action === 'approve' ? 'قبول' : 'رفض'} الفعالية`);
-      setPendingEvents(prev => prev.filter(e => e.id !== eventId));
-      loadStats();
+      toast.success(`تم ${action === 'approve' ? 'قبول' : 'رفض'} الفعالية بنجاح`);
     } catch (error) {
-      toast.error('حدث خطأ');
+      console.error('Event action error:', error);
+      toast.error('حدث خطأ في العملية');
+      // Rollback optimistic update
+      loadPendingItems();
     }
   };
 
   const handleServiceAction = async (serviceId: string, action: 'approve' | 'reject', comment?: string) => {
     const status = action === 'approve' ? 'approved' : 'cancelled';
+    
     try {
       const service = pendingServices.find(s => s.id === serviceId);
+      if (!service) return;
+
+      // Optimistic UI update - instant feedback
+      toast.success(`جاري ${action === 'approve' ? 'قبول' : 'رفض'} الخدمة...`);
+      setPendingServices(prev => prev.filter(s => s.id !== serviceId));
+      
+      // Main update - this is critical and should be awaited
       await supabase.from('services').update({ status }).eq('id', serviceId);
       
-      // Log activity with detailed info
-      const providerProfile = await supabase
-        .from('profiles')
-        .select('full_name, user_id')
-        .eq('user_id', service?.provider_id)
-        .single();
+      // Background operations - run in parallel without blocking
+      Promise.all([
+        // Log activity
+        (async () => {
+          try {
+            const providerProfile = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('user_id', service.provider_id)
+              .single();
+            
+            await activityLogService.logActivity(
+              action === 'approve' ? 'approve_service' : 'reject_service',
+              'service',
+              serviceId,
+              { 
+                service_name: service.name_ar,
+                user_name: providerProfile.data?.full_name,
+                comment 
+              }
+            );
+          } catch (err) {
+            console.error('Failed to log activity:', err);
+          }
+        })(),
+        
+        // Send notification
+        (async () => {
+          if (service.provider_id) {
+            try {
+              await adminService.sendNotification({
+                userIds: [service.provider_id],
+                title: action === 'approve' ? 'تم قبول الخدمة' : 'تم رفض الخدمة',
+                message: action === 'approve' 
+                  ? `تم قبول خدمة "${service.name_ar}" ونشرها على المنصة`
+                  : `تم رفض خدمة "${service.name_ar}". ${comment ? `السبب: ${comment}` : ''}`,
+                type: action === 'approve' ? 'approval' : 'rejection'
+              });
+            } catch (err) {
+              console.error('Failed to send notification:', err);
+            }
+          }
+        })(),
+        
+        // Update stats
+        loadStats()
+      ]).catch(err => console.error('Background operations failed:', err));
       
-      await activityLogService.logActivity(
-        action === 'approve' ? 'approve_service' : 'reject_service',
-        'service',
-        serviceId,
-        { 
-          service_name: service?.name_ar,
-          user_name: providerProfile.data?.full_name,
-          user_email: service?.provider_id,
-          comment 
-        }
-      );
-      
-      // Send notification to provider
-      if (service?.provider_id) {
-        await adminService.sendNotification({
-          userIds: [service.provider_id],
-          title: action === 'approve' ? 'تم قبول الخدمة' : 'تم رفض الخدمة',
-          message: action === 'approve' 
-            ? `تم قبول خدمة "${service.name_ar}" ونشرها على المنصة`
-            : `تم رفض خدمة "${service.name_ar}". ${comment ? `السبب: ${comment}` : 'يرجى مراجعة التفاصيل والمحاولة مرة أخرى'}`,
-          type: action === 'approve' ? 'approval' : 'rejection'
-        });
-      }
-      
-      toast.success(`تم ${action === 'approve' ? 'قبول' : 'رفض'} الخدمة`);
-      setPendingServices(prev => prev.filter(s => s.id !== serviceId));
-      loadStats();
+      toast.success(`تم ${action === 'approve' ? 'قبول' : 'رفض'} الخدمة بنجاح`);
     } catch (error) {
-      toast.error('حدث خطأ');
+      console.error('Service action error:', error);
+      toast.error('حدث خطأ في العملية');
+      // Rollback optimistic update
+      loadPendingItems();
     }
   };
 
@@ -999,7 +1051,7 @@ const AdminPanel = () => {
 
           {/* Service Categories Tab */}
           <TabsContent value="service-categories" className="space-y-6">
-            <ServiceCategoriesTab />
+            <ServiceCategoriesHierarchical />
           </TabsContent>
 
           {/* Regional Groups Tab */}
