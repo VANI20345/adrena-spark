@@ -101,18 +101,16 @@ export function CreateGroupDialog({ open, onOpenChange }: CreateGroupDialogProps
 
     setLoading(true);
     try {
-      const chatId = await createChat(name, Array.from(selectedFriends));
+      // Create chat with all details in one call
+      const chatId = await createChat(
+        name, 
+        Array.from(selectedFriends),
+        undefined, // eventId
+        description,
+        visibility
+      );
       
       if (chatId) {
-        // Update visibility
-        await supabase
-          .from("friend_group_chats")
-          .update({ 
-            description,
-            visibility 
-          })
-          .eq("id", chatId);
-
         toast({
           title: "تم الإنشاء",
           description: "تم إنشاء المجموعة بنجاح",

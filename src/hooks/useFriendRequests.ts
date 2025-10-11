@@ -155,6 +155,14 @@ export const useFriendRequests = () => {
 
   const acceptRequest = async (requestId: string) => {
     try {
+      // Optimistic update - instant UI feedback
+      setIncomingRequests(prev => prev.filter(req => req.id !== requestId));
+      
+      toast({
+        title: 'جاري القبول...',
+        description: 'جاري معالجة طلب الصداقة'
+      });
+
       const { error } = await supabase.functions.invoke('manage-friend-request', {
         body: { request_id: requestId, action: 'accept' }
       });
@@ -165,8 +173,6 @@ export const useFriendRequests = () => {
         title: 'تم قبول الطلب',
         description: 'أصبحتما أصدقاء الآن'
       });
-
-      fetchRequests();
     } catch (error: any) {
       console.error('Error accepting request:', error);
       toast({
@@ -174,11 +180,21 @@ export const useFriendRequests = () => {
         description: 'فشل قبول طلب الصداقة',
         variant: 'destructive'
       });
+      // Rollback on error
+      fetchRequests();
     }
   };
 
   const rejectRequest = async (requestId: string) => {
     try {
+      // Optimistic update
+      setIncomingRequests(prev => prev.filter(req => req.id !== requestId));
+      
+      toast({
+        title: 'جاري الرفض...',
+        description: 'جاري معالجة الطلب'
+      });
+
       const { error } = await supabase.functions.invoke('manage-friend-request', {
         body: { request_id: requestId, action: 'reject' }
       });
@@ -189,8 +205,6 @@ export const useFriendRequests = () => {
         title: 'تم رفض الطلب',
         description: 'تم رفض طلب الصداقة'
       });
-
-      fetchRequests();
     } catch (error: any) {
       console.error('Error rejecting request:', error);
       toast({
@@ -198,11 +212,20 @@ export const useFriendRequests = () => {
         description: 'فشل رفض طلب الصداقة',
         variant: 'destructive'
       });
+      fetchRequests();
     }
   };
 
   const cancelRequest = async (requestId: string) => {
     try {
+      // Optimistic update
+      setOutgoingRequests(prev => prev.filter(req => req.id !== requestId));
+      
+      toast({
+        title: 'جاري الإلغاء...',
+        description: 'جاري معالجة الطلب'
+      });
+
       const { error } = await supabase.functions.invoke('manage-friend-request', {
         body: { request_id: requestId, action: 'cancel' }
       });
@@ -213,8 +236,6 @@ export const useFriendRequests = () => {
         title: 'تم إلغاء الطلب',
         description: 'تم إلغاء طلب الصداقة'
       });
-
-      fetchRequests();
     } catch (error: any) {
       console.error('Error cancelling request:', error);
       toast({
@@ -222,6 +243,7 @@ export const useFriendRequests = () => {
         description: 'فشل إلغاء طلب الصداقة',
         variant: 'destructive'
       });
+      fetchRequests();
     }
   };
 

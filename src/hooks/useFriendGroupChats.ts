@@ -156,15 +156,22 @@ export const useFriendGroupChats = () => {
     }
   };
 
-  const createChat = async (name: string, friendIds: string[], eventId?: string) => {
+  const createChat = async (name: string, friendIds: string[], eventId?: string, description?: string, visibility?: 'private' | 'public') => {
     if (!user) return null;
 
     try {
-      // Create the chat
+      toast({
+        title: 'جاري الإنشاء...',
+        description: 'جاري إنشاء المحادثة الجماعية'
+      });
+
+      // Create the chat with all info in one go
       const { data: chatData, error: chatError } = await supabase
         .from('friend_group_chats')
         .insert({
           name,
+          description: description || null,
+          visibility: visibility || 'private',
           created_by: user.id,
           event_id: eventId || null
         })
@@ -173,18 +180,19 @@ export const useFriendGroupChats = () => {
 
       if (chatError) throw chatError;
 
-      // Add creator as admin
-      await supabase
-        .from('friend_group_chat_members')
-        .insert({
-          chat_id: chatData.id,
-          user_id: user.id,
-          role: 'admin'
-        });
-
-      // Add friends as members
-      if (friendIds.length > 0) {
-        await supabase
+      // Add all members in parallel
+      await Promise.all([
+        // Add creator as admin
+        supabase
+          .from('friend_group_chat_members')
+          .insert({
+            chat_id: chatData.id,
+            user_id: user.id,
+            role: 'admin'
+          }),
+        
+        // Add friends as members (if any)
+        friendIds.length > 0 ? supabase
           .from('friend_group_chat_members')
           .insert(
             friendIds.map(friendId => ({
@@ -192,14 +200,15 @@ export const useFriendGroupChats = () => {
               user_id: friendId,
               role: 'member'
             }))
-          );
-      }
+          ) : Promise.resolve()
+      ]);
 
       toast({
         title: 'تم الإنشاء',
         description: 'تم إنشاء المحادثة الجماعية بنجاح'
       });
 
+      // Background refresh
       fetchChats();
       return chatData.id;
     } catch (error: any) {
@@ -358,6 +367,19 @@ export const useFriendGroupChatMessages = (chatId: string) => {
     if (!content.trim() || !user || !chatId) return false;
 
     try {
+      // Optimistic update - instant UI feedback
+      const tempMessage: GroupChatMessage = {
+        id: `temp-${Date.now()}`,
+        chat_id: chatId,
+        sender_id: user.id,
+        sender_name: 'أنت',
+        sender_avatar: null,
+        content: content.trim(),
+        created_at: new Date().toISOString()
+      };
+      
+      setMessages(prev => [...prev, tempMessage]);
+
       const { error } = await supabase
         .from('friend_group_chat_messages')
         .insert({
@@ -366,7 +388,11 @@ export const useFriendGroupChatMessages = (chatId: string) => {
           content: content.trim()
         });
 
-      if (error) throw error;
+      if (error) {
+        // Remove optimistic message on error
+        setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
+        throw error;
+      }
 
       return true;
     } catch (error) {

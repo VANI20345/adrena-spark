@@ -11,6 +11,9 @@ import { MaintenanceCheck } from "@/middleware/maintenanceMode";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { SuspensionCheck } from "@/components/SuspensionCheck";
+import { lazy, Suspense } from "react";
+
+// Immediate pages (no lazy loading)
 import Index from "./pages/Index";
 import Explore from "./pages/Explore";
 import Services from "./pages/Services";
@@ -21,22 +24,6 @@ import AccountType from "./pages/AccountType";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import CreateEvent from "./pages/CreateEvent";
-import EditEvent from "./pages/EditEvent";
-import CreateService from "./pages/CreateService";
-import WalletPage from "./pages/Wallet";
-import PointsPage from "./pages/Points";
-import MyEventsPage from "./pages/MyEvents";
-import ManageEventsPage from "./pages/ManageEvents";
-import ManageServicesPage from "./pages/ManageServices";
-import AdminPanel from "./pages/AdminPanel";
-import OrganizerDashboard from "./pages/OrganizerDashboard";
-import ProviderDashboard from "./pages/ProviderDashboard";
-import AttendeeDashboard from "./pages/AttendeeDashboard";
-import Groups from "./pages/Groups";
-import GroupDetails from "./pages/GroupDetails";
-import Notifications from "./pages/Notifications";
-import QRScanner from "./pages/QRScanner";
 import Help from "./pages/Help";
 import Contact from "./pages/Contact";
 import Safety from "./pages/Safety";
@@ -46,12 +33,37 @@ import Refund from "./pages/Refund";
 import NotFound from "./pages/NotFound";
 import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
-import Tickets from "./pages/Tickets";
-import ServiceRequestsPage from "./pages/ServiceRequestsPage";
-import EventParticipants from "./pages/EventParticipants";
-import Friends from "./pages/Friends";
-import SearchUsers from "./pages/SearchUsers";
-import PublicProfile from "./pages/PublicProfile";
+
+// Lazy loaded pages (for performance)
+const CreateEvent = lazy(() => import("./pages/CreateEvent"));
+const EditEvent = lazy(() => import("./pages/EditEvent"));
+const CreateService = lazy(() => import("./pages/CreateService"));
+const WalletPage = lazy(() => import("./pages/Wallet"));
+const PointsPage = lazy(() => import("./pages/Points"));
+const MyEventsPage = lazy(() => import("./pages/MyEvents"));
+const ManageEventsPage = lazy(() => import("./pages/ManageEvents"));
+const ManageServicesPage = lazy(() => import("./pages/ManageServices"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const OrganizerDashboard = lazy(() => import("./pages/OrganizerDashboard"));
+const ProviderDashboard = lazy(() => import("./pages/ProviderDashboard"));
+const AttendeeDashboard = lazy(() => import("./pages/AttendeeDashboard"));
+const Groups = lazy(() => import("./pages/Groups"));
+const GroupDetails = lazy(() => import("./pages/GroupDetails"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const QRScanner = lazy(() => import("./pages/QRScanner"));
+const Tickets = lazy(() => import("./pages/Tickets"));
+const ServiceRequestsPage = lazy(() => import("./pages/ServiceRequestsPage"));
+const EventParticipants = lazy(() => import("./pages/EventParticipants"));
+const Friends = lazy(() => import("./pages/Friends"));
+const SearchUsers = lazy(() => import("./pages/SearchUsers"));
+const PublicProfile = lazy(() => import("./pages/PublicProfile"));
+
+// Loading component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -68,9 +80,10 @@ const App = () => (
                 <AuthProvider>
                   <SuspensionCheck />
                   <MaintenanceCheck>
-                    <Routes>
-                    <Route path="/" element={<Index />} />
-            <Route path="/explore" element={<Explore />} />
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/explore" element={<Explore />} />
             <Route path="/services" element={<Services />} />
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/service/:id" element={<ServiceDetails />} />
@@ -291,9 +304,10 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
                   </MaintenanceCheck>
                 </AuthProvider>
               </LanguageProvider>
