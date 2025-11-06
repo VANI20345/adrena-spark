@@ -14,11 +14,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Plus, Users } from 'lucide-react';
 
 const formSchema = z.object({
-  group_name: z.string().min(3, 'اسم المجموعة يجب أن يكون 3 أحرف على الأقل'),
+  group_name: z.string().min(3),
   group_type: z.enum(['event', 'region']),
   event_id: z.string().optional(),
-  max_members: z.number().min(2, 'أقل عدد أعضاء هو 2').max(500, 'أقصى عدد أعضاء هو 500'),
-  group_link: z.string().url('رابط غير صحيح').optional().or(z.literal(''))
+  max_members: z.number().min(2).max(500),
+  group_link: z.string().url().optional().or(z.literal('')),
+  description: z.string().optional(),
+  privacy: z.enum(['public', 'private']).default('public'),
+  default_language: z.enum(['ar', 'en']).default('ar')
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -42,7 +45,10 @@ export const CreateGroupDialog = ({ events = [], onGroupCreated }: CreateGroupDi
       group_type: 'event',
       event_id: '',
       max_members: 50,
-      group_link: ''
+      group_link: '',
+      description: '',
+      privacy: 'public' as const,
+      default_language: 'ar' as const
     }
   });
 

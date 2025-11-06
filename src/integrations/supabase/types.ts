@@ -1067,6 +1067,98 @@ export type Database = {
           },
         ]
       }
+      group_posts: {
+        Row: {
+          comments_count: number | null
+          content: string
+          created_at: string
+          group_id: string
+          id: string
+          likes_count: number | null
+          media_type: string | null
+          media_urls: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comments_count?: number | null
+          content: string
+          created_at?: string
+          group_id: string
+          id?: string
+          likes_count?: number | null
+          media_type?: string | null
+          media_urls?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          likes_count?: number | null
+          media_type?: string | null
+          media_urls?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_posts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "event_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leaderboard_entries: {
+        Row: {
+          created_at: string
+          events_attended: number | null
+          groups_joined: number | null
+          id: string
+          period_end: string
+          period_start: string
+          period_type: string
+          points: number
+          posts_created: number | null
+          rank: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          events_attended?: number | null
+          groups_joined?: number | null
+          id?: string
+          period_end: string
+          period_start: string
+          period_type: string
+          points?: number
+          posts_created?: number | null
+          rank?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          events_attended?: number | null
+          groups_joined?: number | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          points?: number
+          posts_created?: number | null
+          rank?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       loyalty_ledger: {
         Row: {
           created_at: string
@@ -1234,6 +1326,70 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "group_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "group_posts"
             referencedColumns: ["id"]
           },
         ]
