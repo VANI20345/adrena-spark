@@ -38,8 +38,12 @@ const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const OrganizerDashboard = lazy(() => import("./pages/OrganizerDashboard"));
 const ProviderDashboard = lazy(() => import("./pages/ProviderDashboard"));
 const AttendeeDashboard = lazy(() => import("./pages/AttendeeDashboard"));
-const Groups = lazy(() => import("./pages/Groups"));
+const GroupsOverview = lazy(() => import("./pages/GroupsOverview"));
+const MyGroups = lazy(() => import("./pages/MyGroups"));
+const FilterGroups = lazy(() => import("./pages/FilterGroups"));
 const GroupDetails = lazy(() => import("./pages/GroupDetails"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const QRScanner = lazy(() => import("./pages/QRScanner"));
 const Help = lazy(() => import("./pages/Help"));
@@ -228,7 +232,23 @@ const App = () => (
               path="/groups" 
               element={
                 <ProtectedRoute requireAuth={true}>
-                  <Groups />
+                  <GroupsOverview />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups/my-groups" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <MyGroups />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups/filter" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <FilterGroups />
                 </ProtectedRoute>
               } 
             />
@@ -237,6 +257,22 @@ const App = () => (
               element={
                 <ProtectedRoute requireAuth={true}>
                   <GroupDetails />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/events" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <EventsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/leaderboard" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Leaderboard />
                 </ProtectedRoute>
               } 
             />
