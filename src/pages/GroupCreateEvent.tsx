@@ -29,15 +29,7 @@ const formSchema = z.object({
   isPaid: z.enum(['free', 'paid']),
   price: z.number().min(0).optional(),
   totalTickets: z.number().min(1, 'At least 1 ticket required'),
-  maxParticipants: z.number().min(1, 'At least 1 participant required'),
-}).refine((data) => {
-  if (data.isPaid === 'paid' && (!data.price || data.price <= 0)) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Price is required for paid events',
-  path: ['price']
+  allowedParticipants: z.number().min(1, 'At least 1 participant required'),
 });
 
 interface PricingPlan {
@@ -72,7 +64,7 @@ const GroupCreateEvent = () => {
       isPaid: 'free',
       price: 0,
       totalTickets: 50,
-      maxParticipants: 50,
+      allowedParticipants: 50,
     },
   });
 
@@ -124,6 +116,11 @@ const GroupCreateEvent = () => {
 
       const uploadedUrls = await Promise.all(uploadPromises);
       setImages([...images, ...uploadedUrls]);
+      
+      toast({
+        title: isRTL ? 'تم' : 'Success',
+        description: isRTL ? 'تم رفع الصور بنجاح' : 'Images uploaded successfully',
+      });
     } catch (error) {
       console.error('Error uploading images:', error);
       toast({
@@ -185,6 +182,15 @@ const GroupCreateEvent = () => {
       return;
     }
 
+    if (isPaid && (!data.price || data.price <= 0)) {
+      toast({
+        title: isRTL ? 'خطأ' : 'Error',
+        description: isRTL ? 'يرجى إدخال السعر' : 'Please enter price',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Convert schedules to start/end dates
@@ -224,7 +230,7 @@ const GroupCreateEvent = () => {
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
           price: isPaid ? data.price || 0 : 0,
-          max_attendees: data.maxParticipants,
+          max_attendees: data.allowedParticipants,
           organizer_id: user.id,
           image_url: images[0],
           status: 'pending',
@@ -388,24 +394,12 @@ const GroupCreateEvent = () => {
                 </div>
 
                 {/* Image Upload */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label>{isRTL ? 'الصور' : 'Images'}</Label>
-                  <div className="flex flex-wrap gap-4">
-                    {images.map((img, index) => (
-                      <div key={index} className="relative w-24 h-24 rounded-lg overflow-hidden border">
-                        <img src={img} alt={`Upload ${index + 1}`} className="w-full h-full object-cover" />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-1 right-1 h-6 w-6"
-                          onClick={() => removeImage(index)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                    <label className="w-24 h-24 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
+                  
+                  {/* Upload Button */}
+                  <div>
+                    <label className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary hover:bg-accent/50 cursor-pointer transition-colors">
                       <input
                         type="file"
                         multiple
@@ -415,12 +409,35 @@ const GroupCreateEvent = () => {
                         disabled={uploadingImage}
                       />
                       {uploadingImage ? (
-                        <span className="text-xs text-muted-foreground">{isRTL ? 'جاري...' : 'Loading...'}</span>
+                        <span className="text-sm text-muted-foreground">{isRTL ? 'جاري الرفع...' : 'Uploading...'}</span>
                       ) : (
-                        <Plus className="h-8 w-8 text-muted-foreground" />
+                        <>
+                          <Plus className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm font-medium">{isRTL ? 'رفع صور' : 'Upload Images'}</span>
+                        </>
                       )}
                     </label>
                   </div>
+
+                  {/* Images Preview - Horizontal Row */}
+                  {images.length > 0 && (
+                    <div className="flex flex-wrap gap-3">
+                      {images.map((img, index) => (
+                        <div key={index} className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-border group">
+                          <img src={img} alt={`Upload ${index + 1}`} className="w-full h-full object-cover" />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => removeImage(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Location */}
@@ -439,30 +456,31 @@ const GroupCreateEvent = () => {
                 </div>
 
                 {/* Free or Paid */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label>{isRTL ? 'مجاني / مدفوع' : 'Free / Paid'}</Label>
                   <RadioGroup
                     value={form.watch('isPaid')}
                     onValueChange={(val) => form.setValue('isPaid', val as 'free' | 'paid')}
+                    className="flex gap-4"
                   >
                     <div className="flex items-center space-x-2 space-x-reverse">
                       <RadioGroupItem value="free" id="free" />
-                      <Label htmlFor="free" className="cursor-pointer">
+                      <Label htmlFor="free" className="cursor-pointer font-normal">
                         {isRTL ? 'مجاني' : 'Free'}
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2 space-x-reverse">
                       <RadioGroupItem value="paid" id="paid" />
-                      <Label htmlFor="paid" className="cursor-pointer">
+                      <Label htmlFor="paid" className="cursor-pointer font-normal">
                         {isRTL ? 'مدفوع' : 'Paid'}
                       </Label>
                     </div>
                   </RadioGroup>
                 </div>
 
-                {/* Price (if paid) */}
+                {/* Price (if paid) - Shows when Paid is selected */}
                 {isPaid && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 bg-muted/30 p-4 rounded-lg">
                     <Label htmlFor="price">
                       {isRTL ? 'السعر (ريال سعودي)' : 'Price (SAR)'} <span className="text-destructive">*</span>
                     </Label>
@@ -480,52 +498,61 @@ const GroupCreateEvent = () => {
                   </div>
                 )}
 
-                {/* Add Pricing Plan (optional) */}
+                {/* Add Pricing Plan (optional) - Only for paid events */}
                 {isPaid && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label>{isRTL ? 'خطط التسعير (اختياري)' : 'Add Pricing Plan (optional)'}</Label>
                       <Button type="button" variant="outline" size="sm" onClick={addPricingPlan}>
-                        <Plus className="h-4 w-4 ml-2" />
+                        <Plus className="h-4 w-4 mr-2" />
                         {isRTL ? 'إضافة خطة' : 'Add Plan'}
                       </Button>
                     </div>
-                    {pricingPlans.map((plan) => (
-                      <Card key={plan.id} className="p-4">
-                        <div className="flex items-end gap-4">
-                          <div className="flex-1 space-y-2">
-                            <Label>{isRTL ? 'السعر' : 'Price'}</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              value={plan.price}
-                              onChange={(e) =>
-                                updatePricingPlan(plan.id, 'price', parseFloat(e.target.value) || 0)
-                              }
-                            />
-                          </div>
-                          <div className="flex-1 space-y-2">
-                            <Label>{isRTL ? 'عدد التذاكر' : 'Ticket Limit'}</Label>
-                            <Input
-                              type="number"
-                              min="1"
-                              value={plan.ticketLimit}
-                              onChange={(e) =>
-                                updatePricingPlan(plan.id, 'ticketLimit', parseInt(e.target.value) || 1)
-                              }
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => removePricingPlan(plan.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </Card>
-                    ))}
+                    
+                    {pricingPlans.length > 0 && (
+                      <div className="space-y-3">
+                        {pricingPlans.map((plan) => (
+                          <Card key={plan.id} className="p-4 bg-muted/50">
+                            <div className="flex items-end gap-3">
+                              <div className="flex-1 space-y-2">
+                                <Label className="text-xs">{isRTL ? 'السعر' : 'Price'}</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={plan.price}
+                                  onChange={(e) =>
+                                    updatePricingPlan(plan.id, 'price', parseFloat(e.target.value) || 0)
+                                  }
+                                  placeholder="0"
+                                />
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                <Label className="text-xs">{isRTL ? 'حد التذاكر' : 'Ticket Limit'}</Label>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  value={plan.ticketLimit}
+                                  onChange={(e) =>
+                                    updatePricingPlan(plan.id, 'ticketLimit', parseInt(e.target.value) || 1)
+                                  }
+                                  placeholder="10"
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => removePricingPlan(plan.id)}
+                                className="shrink-0"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -547,42 +574,65 @@ const GroupCreateEvent = () => {
 
                 {/* Allowed Participants */}
                 <div className="space-y-2">
-                  <Label htmlFor="maxParticipants">
+                  <Label htmlFor="allowedParticipants">
                     {isRTL ? 'المشاركون المسموح لهم' : 'Allowed Participants'} <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    id="maxParticipants"
+                    id="allowedParticipants"
                     type="number"
                     min="1"
-                    {...form.register('maxParticipants', { valueAsNumber: true })}
+                    {...form.register('allowedParticipants', { valueAsNumber: true })}
                   />
-                  {form.formState.errors.maxParticipants && (
-                    <p className="text-sm text-destructive">{form.formState.errors.maxParticipants.message}</p>
+                  {form.formState.errors.allowedParticipants && (
+                    <p className="text-sm text-destructive">{form.formState.errors.allowedParticipants.message}</p>
                   )}
                 </div>
 
                 {/* Set Date & Time Button */}
-                <div className="space-y-2">
-                  <Label>{isRTL ? 'التاريخ والوقت' : 'Date & Time'} <span className="text-destructive">*</span></Label>
+                <div className="space-y-3">
+                  <Label>
+                    {isRTL ? 'التاريخ والوقت' : 'Date & Time'} <span className="text-destructive">*</span>
+                  </Label>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant={schedules.length > 0 ? "default" : "outline"}
                     onClick={() => setShowDateDialog(true)}
-                    className="w-full justify-start"
+                    className="w-full justify-start h-auto py-3"
                   >
-                    <CalendarIcon className="h-4 w-4 ml-2" />
-                    {schedules.length === 0 
-                      ? (isRTL ? 'تحديد التاريخ والوقت' : 'Set Date & Time')
-                      : (isRTL ? `${schedules.length} يوم محدد` : `${schedules.length} day(s) scheduled`)
-                    }
+                    <CalendarIcon className="h-5 w-5 mr-2" />
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">
+                        {schedules.length === 0 
+                          ? (isRTL ? 'تحديد التاريخ والوقت' : 'Set Date & Time')
+                          : (isRTL ? `تم تحديد ${schedules.length} يوم` : `${schedules.length} day(s) scheduled`)
+                        }
+                      </span>
+                      {schedules.length > 0 && (
+                        <span className="text-xs opacity-70">
+                          {format(schedules[0].date, 'PPP', { locale: isRTL ? ar : undefined })}
+                        </span>
+                      )}
+                    </div>
                   </Button>
+                  
+                  {/* Show all scheduled days */}
                   {schedules.length > 0 && (
-                    <div className="mt-3 p-3 bg-muted rounded-lg space-y-1">
+                    <div className="mt-3 p-4 bg-muted/50 rounded-lg space-y-2 border">
+                      <p className="text-sm font-semibold mb-2">
+                        {isRTL ? 'الأيام المحددة:' : 'Scheduled Days:'}
+                      </p>
                       {schedules.map((schedule, idx) => (
-                        <div key={idx} className="text-sm">
-                          {format(schedule.date, 'PPP', { locale: isRTL ? ar : undefined })} -{' '}
-                          {schedule.startTime}:{schedule.startPeriod} {isRTL ? 'إلى' : 'to'}{' '}
-                          {schedule.endTime}:{schedule.endPeriod}
+                        <div key={idx} className="text-sm flex items-center justify-between py-2 px-3 bg-background rounded border">
+                          <div>
+                            <span className="font-medium">
+                              {format(schedule.date, 'PPP', { locale: isRTL ? ar : undefined })}
+                            </span>
+                            <span className="mx-2 text-muted-foreground">•</span>
+                            <span className="text-muted-foreground">
+                              {schedule.startTime}:{schedule.startPeriod} {isRTL ? 'إلى' : 'to'}{' '}
+                              {schedule.endTime}:{schedule.endPeriod}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -590,14 +640,15 @@ const GroupCreateEvent = () => {
                 </div>
 
                 {/* Submit Button */}
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 text-base font-semibold" 
+                  disabled={isSubmitting}
+                >
                   {isSubmitting
-                    ? isRTL
-                      ? 'جاري الإنشاء...'
-                      : 'Creating...'
-                    : isRTL
-                    ? 'إضافة الفعالية'
-                    : 'Add Event'}
+                    ? (isRTL ? 'جاري الإنشاء...' : 'Creating...')
+                    : (isRTL ? 'إضافة فعالية' : 'Add Event')
+                  }
                 </Button>
               </CardContent>
             </Card>
@@ -611,7 +662,10 @@ const GroupCreateEvent = () => {
       <EventDateTimeDialog
         open={showDateDialog}
         onClose={() => setShowDateDialog(false)}
-        onSave={(newSchedules) => setSchedules(newSchedules)}
+        onSave={(newSchedules) => {
+          setSchedules(newSchedules);
+          setShowDateDialog(false);
+        }}
         initialSchedules={schedules}
       />
     </div>
