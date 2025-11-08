@@ -30,6 +30,14 @@ const formSchema = z.object({
   price: z.number().min(0).optional(),
   totalTickets: z.number().min(1, 'At least 1 ticket required'),
   maxParticipants: z.number().min(1, 'At least 1 participant required'),
+}).refine((data) => {
+  if (data.isPaid === 'paid' && (!data.price || data.price <= 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Price is required for paid events',
+  path: ['price']
 });
 
 interface PricingPlan {
@@ -456,26 +464,30 @@ const GroupCreateEvent = () => {
                 {isPaid && (
                   <div className="space-y-2">
                     <Label htmlFor="price">
-                      {isRTL ? 'السعر (SAR)' : 'Price (SAR)'}
+                      {isRTL ? 'السعر (ريال سعودي)' : 'Price (SAR)'} <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="price"
                       type="number"
                       min="0"
+                      step="0.01"
                       placeholder="0"
                       {...form.register('price', { valueAsNumber: true })}
                     />
+                    {form.formState.errors.price && (
+                      <p className="text-sm text-destructive">{form.formState.errors.price.message}</p>
+                    )}
                   </div>
                 )}
 
-                {/* Pricing Plans */}
+                {/* Add Pricing Plan (optional) */}
                 {isPaid && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label>{isRTL ? 'خطط التسعير' : 'Pricing Plans'}</Label>
+                      <Label>{isRTL ? 'خطط التسعير (اختياري)' : 'Add Pricing Plan (optional)'}</Label>
                       <Button type="button" variant="outline" size="sm" onClick={addPricingPlan}>
                         <Plus className="h-4 w-4 ml-2" />
-                        {isRTL ? 'إضافة خطة تسعير' : 'Add Pricing Plan'}
+                        {isRTL ? 'إضافة خطة' : 'Add Plan'}
                       </Button>
                     </div>
                     {pricingPlans.map((plan) => (
@@ -533,10 +545,10 @@ const GroupCreateEvent = () => {
                   )}
                 </div>
 
-                {/* Max Participants */}
+                {/* Allowed Participants */}
                 <div className="space-y-2">
                   <Label htmlFor="maxParticipants">
-                    {isRTL ? 'المشاركون المسموح لهم' : 'Max Participants'} <span className="text-destructive">*</span>
+                    {isRTL ? 'المشاركون المسموح لهم' : 'Allowed Participants'} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="maxParticipants"
@@ -549,17 +561,20 @@ const GroupCreateEvent = () => {
                   )}
                 </div>
 
-                {/* Date & Time Button */}
+                {/* Set Date & Time Button */}
                 <div className="space-y-2">
-                  <Label>{isRTL ? 'التاريخ والوقت' : 'Date & Time'}</Label>
+                  <Label>{isRTL ? 'التاريخ والوقت' : 'Date & Time'} <span className="text-destructive">*</span></Label>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setShowDateDialog(true)}
-                    className="w-full"
+                    className="w-full justify-start"
                   >
                     <CalendarIcon className="h-4 w-4 ml-2" />
-                    {isRTL ? 'تحديد التاريخ والوقت' : 'Set Date & Time'}
+                    {schedules.length === 0 
+                      ? (isRTL ? 'تحديد التاريخ والوقت' : 'Set Date & Time')
+                      : (isRTL ? `${schedules.length} يوم محدد` : `${schedules.length} day(s) scheduled`)
+                    }
                   </Button>
                   {schedules.length > 0 && (
                     <div className="mt-3 p-3 bg-muted rounded-lg space-y-1">
