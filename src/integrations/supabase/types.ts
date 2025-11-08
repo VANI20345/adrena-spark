@@ -470,6 +470,42 @@ export type Database = {
           },
         ]
       }
+      event_interests: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          interest_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          interest_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          interest_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_interests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_interests_interest_id_fkey"
+            columns: ["interest_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_schedules: {
         Row: {
           created_at: string
@@ -498,41 +534,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "event_schedules_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      event_shares: {
-        Row: {
-          created_at: string
-          event_id: string
-          id: string
-          message: string | null
-          shared_by: string
-          shared_with: string
-        }
-        Insert: {
-          created_at?: string
-          event_id: string
-          id?: string
-          message?: string | null
-          shared_by: string
-          shared_with: string
-        }
-        Update: {
-          created_at?: string
-          event_id?: string
-          id?: string
-          message?: string | null
-          shared_by?: string
-          shared_with?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_shares_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
@@ -632,386 +633,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
-          },
-        ]
-      }
-      followers: {
-        Row: {
-          created_at: string
-          follower_id: string
-          following_id: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          follower_id: string
-          following_id: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          follower_id?: string
-          following_id?: string
-          id?: string
-        }
-        Relationships: []
-      }
-      friend_activities: {
-        Row: {
-          activity_data: Json | null
-          activity_type: string
-          created_at: string
-          event_id: string | null
-          id: string
-          user_id: string
-        }
-        Insert: {
-          activity_data?: Json | null
-          activity_type: string
-          created_at?: string
-          event_id?: string | null
-          id?: string
-          user_id: string
-        }
-        Update: {
-          activity_data?: Json | null
-          activity_type?: string
-          created_at?: string
-          event_id?: string | null
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friend_activities_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      friend_group_chat_members: {
-        Row: {
-          chat_id: string
-          id: string
-          joined_at: string
-          last_read_at: string | null
-          role: string
-          user_id: string
-        }
-        Insert: {
-          chat_id: string
-          id?: string
-          joined_at?: string
-          last_read_at?: string | null
-          role?: string
-          user_id: string
-        }
-        Update: {
-          chat_id?: string
-          id?: string
-          joined_at?: string
-          last_read_at?: string | null
-          role?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friend_group_chat_members_chat_id_fkey"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "friend_group_chats"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      friend_group_chat_messages: {
-        Row: {
-          chat_id: string
-          content: string
-          created_at: string
-          id: string
-          sender_id: string
-          updated_at: string
-        }
-        Insert: {
-          chat_id: string
-          content: string
-          created_at?: string
-          id?: string
-          sender_id: string
-          updated_at?: string
-        }
-        Update: {
-          chat_id?: string
-          content?: string
-          created_at?: string
-          id?: string
-          sender_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friend_group_chat_messages_chat_id_fkey"
-            columns: ["chat_id"]
-            isOneToOne: false
-            referencedRelation: "friend_group_chats"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      friend_group_chats: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string | null
-          event_id: string | null
-          id: string
-          name: string
-          updated_at: string
-          visibility: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description?: string | null
-          event_id?: string | null
-          id?: string
-          name: string
-          updated_at?: string
-          visibility?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          event_id?: string | null
-          id?: string
-          name?: string
-          updated_at?: string
-          visibility?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friend_group_chats_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      friend_list_members: {
-        Row: {
-          added_at: string
-          friend_id: string
-          id: string
-          list_id: string
-        }
-        Insert: {
-          added_at?: string
-          friend_id: string
-          id?: string
-          list_id: string
-        }
-        Update: {
-          added_at?: string
-          friend_id?: string
-          id?: string
-          list_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friend_list_members_list_id_fkey"
-            columns: ["list_id"]
-            isOneToOne: false
-            referencedRelation: "friend_lists"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      friend_lists: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          updated_at: string
-          user_id: string
-          visibility: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          updated_at?: string
-          user_id: string
-          visibility?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          updated_at?: string
-          user_id?: string
-          visibility?: string
-        }
-        Relationships: []
-      }
-      friend_messages: {
-        Row: {
-          created_at: string
-          id: string
-          message: string
-          read: boolean
-          receiver_id: string
-          sender_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message: string
-          read?: boolean
-          receiver_id: string
-          sender_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string
-          read?: boolean
-          receiver_id?: string
-          sender_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      friend_requests: {
-        Row: {
-          created_at: string
-          id: string
-          message: string | null
-          receiver_id: string
-          sender_id: string
-          status: Database["public"]["Enums"]["friend_request_status"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message?: string | null
-          receiver_id: string
-          sender_id: string
-          status?: Database["public"]["Enums"]["friend_request_status"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string | null
-          receiver_id?: string
-          sender_id?: string
-          status?: Database["public"]["Enums"]["friend_request_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friend_requests_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "friend_requests_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "suspended_users"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "friend_requests_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "friend_requests_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "suspended_users"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      friendships: {
-        Row: {
-          accepted_at: string | null
-          created_at: string
-          friend_id: string
-          id: string
-          requested_at: string
-          requested_by: string
-          status: Database["public"]["Enums"]["friendship_status"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          accepted_at?: string | null
-          created_at?: string
-          friend_id: string
-          id?: string
-          requested_at?: string
-          requested_by: string
-          status?: Database["public"]["Enums"]["friendship_status"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          accepted_at?: string | null
-          created_at?: string
-          friend_id?: string
-          id?: string
-          requested_at?: string
-          requested_by?: string
-          status?: Database["public"]["Enums"]["friendship_status"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friendships_friend_id_fkey"
-            columns: ["friend_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "friendships_friend_id_fkey"
-            columns: ["friend_id"]
-            isOneToOne: false
-            referencedRelation: "suspended_users"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "friendships_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "friendships_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "suspended_users"
-            referencedColumns: ["user_id"]
           },
         ]
       }

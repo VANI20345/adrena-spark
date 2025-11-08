@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { X, Plus, Calendar as CalendarIcon, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
@@ -28,8 +29,8 @@ const formSchema = z.object({
   location: z.string().min(3, 'Location is required'),
   isPaid: z.enum(['free', 'paid']),
   price: z.number().min(0).optional(),
-  totalTickets: z.number().min(1, 'At least 1 ticket required'),
   allowedParticipants: z.number().min(1, 'At least 1 participant required'),
+  interests: z.array(z.string()).min(1, 'Please select at least one interest'),
 });
 
 interface PricingPlan {
@@ -47,6 +48,7 @@ const GroupCreateEvent = () => {
   const isRTL = language === 'ar';
 
   const [myGroups, setMyGroups] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([]);
@@ -63,8 +65,8 @@ const GroupCreateEvent = () => {
       location: '',
       isPaid: 'free',
       price: 0,
-      totalTickets: 50,
       allowedParticipants: 50,
+      interests: [],
     },
   });
 
@@ -87,7 +89,19 @@ const GroupCreateEvent = () => {
       }
     };
 
+    const loadCategories = async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, name_ar')
+        .order('name_ar');
+
+      if (!error && data) {
+        setCategories(data);
+      }
+    };
+
     loadMyGroups();
+    loadCategories();
   }, [user]);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,6 +287,20 @@ const GroupCreateEvent = () => {
         .insert(schedulesToInsert);
 
       if (schedulesError) throw schedulesError;
+
+      // Insert event interests
+      if (data.interests && data.interests.length > 0) {
+        const interestsToInsert = data.interests.map((interestId) => ({
+          event_id: eventData.id,
+          interest_id: interestId,
+        }));
+
+        const { error: interestsError } = await supabase
+          .from('event_interests')
+          .insert(interestsToInsert);
+
+        if (interestsError) throw interestsError;
+      }
 
       // Insert pricing plans if paid event
       if (isPaid && pricingPlans.length > 0) {
@@ -556,19 +584,34 @@ const GroupCreateEvent = () => {
                   </div>
                 )}
 
-                {/* Total Tickets */}
-                <div className="space-y-2">
-                  <Label htmlFor="totalTickets">
-                    {isRTL ? 'إجمالي التذاكر' : 'Total Tickets'} <span className="text-destructive">*</span>
+                {/* Event Interests */}
+                <div className="space-y-3">
+                  <Label>
+                    {isRTL ? 'اهتمامات الفعالية' : 'Event Interests'} <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="totalTickets"
-                    type="number"
-                    min="1"
-                    {...form.register('totalTickets', { valueAsNumber: true })}
-                  />
-                  {form.formState.errors.totalTickets && (
-                    <p className="text-sm text-destructive">{form.formState.errors.totalTickets.message}</p>
+                  <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg">
+                    {categories.map((category) => (
+                      <div key={category.id} className="flex items-center space-x-2 space-x-reverse">
+                        <Checkbox
+                          id={`interest-${category.id}`}
+                          checked={form.watch('interests')?.includes(category.id)}
+                          onCheckedChange={(checked) => {
+                            const current = form.watch('interests') || [];
+                            if (checked) {
+                              form.setValue('interests', [...current, category.id]);
+                            } else {
+                              form.setValue('interests', current.filter(id => id !== category.id));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`interest-${category.id}`} className="cursor-pointer font-normal">
+                          {isRTL ? category.name_ar : category.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  {form.formState.errors.interests && (
+                    <p className="text-sm text-destructive">{form.formState.errors.interests.message}</p>
                   )}
                 </div>
 

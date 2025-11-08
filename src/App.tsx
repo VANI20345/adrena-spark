@@ -19,7 +19,6 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 // Lazy loaded pages for better performance
-const Explore = lazy(() => import("./pages/Explore"));
 const Services = lazy(() => import("./pages/Services"));
 const EventDetails = lazy(() => import("./pages/EventDetails"));
 const ServiceDetails = lazy(() => import("./pages/ServiceDetails"));
@@ -60,9 +59,6 @@ const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
 const Tickets = lazy(() => import("./pages/Tickets"));
 const ServiceRequestsPage = lazy(() => import("./pages/ServiceRequestsPage"));
 const EventParticipants = lazy(() => import("./pages/EventParticipants"));
-const Friends = lazy(() => import("./pages/Friends"));
-const SearchUsers = lazy(() => import("./pages/SearchUsers"));
-const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 
 // Optimized Query Client with caching
 const queryClient = new QueryClient({
@@ -100,8 +96,7 @@ const App = () => (
                     <Suspense fallback={<PageLoader />}>
                       <Routes>
                         <Route path="/" element={<Index />} />
-                        <Route path="/explore" element={<Explore />} />
-            <Route path="/services" element={<Services />} />
+                        <Route path="/services" element={<Services />} />
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/service/:id" element={<ServiceDetails />} />
             <Route path="/auth" element={<Auth />} />
@@ -342,30 +337,6 @@ const App = () => (
               element={
                 <ProtectedRoute requireAuth={true} requiredRole={['attendee', 'admin']}>
                   <EventParticipants />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/friends" 
-              element={
-                <ProtectedRoute requireAuth={true}>
-                  <Friends />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/search-users" 
-              element={
-                <ProtectedRoute requireAuth={true}>
-                  <SearchUsers />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile/:userId" 
-              element={
-                <ProtectedRoute requireAuth={true}>
-                  <PublicProfile />
                 </ProtectedRoute>
               } 
             />

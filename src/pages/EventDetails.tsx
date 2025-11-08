@@ -30,8 +30,6 @@ import { eventsService } from "@/services/supabaseServices";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { ShareEventDialog } from "@/components/Friends/ShareEventDialog";
-import { FriendsAttending } from "@/components/Friends/FriendsAttending";
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -39,7 +37,6 @@ const EventDetails = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [showShareDialog, setShowShareDialog] = useState(false);
 
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -256,17 +253,6 @@ const EventDetails = () => {
             >
               <Heart className={`w-5 h-5 ${isBookmarked ? 'fill-red-500 text-red-500' : ''}`} />
             </Button>
-            {user && (
-              <Button 
-                size="icon" 
-                variant="secondary" 
-                className="bg-white/90 hover:bg-white" 
-                onClick={() => setShowShareDialog(true)}
-                title="مشاركة مع الأصدقاء"
-              >
-                <UserPlus className="w-5 h-5" />
-              </Button>
-            )}
             <Button size="icon" variant="secondary" className="bg-white/90 hover:bg-white" onClick={handleShare}>
               <Share2 className="w-5 h-5" />
             </Button>
@@ -302,8 +288,6 @@ const EventDetails = () => {
               <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
                 {event.title_ar || event.title}
               </h1>
-              
-              {user && <FriendsAttending eventId={event.id} />}
               
               <div className="flex flex-wrap gap-6 text-muted-foreground mt-4">
                 <div className="flex items-center gap-2">
@@ -493,15 +477,6 @@ const EventDetails = () => {
       </main>
 
       <Footer />
-      
-      {showShareDialog && event && (
-        <ShareEventDialog
-          open={showShareDialog}
-          onOpenChange={setShowShareDialog}
-          eventId={event.id}
-          eventTitle={event.title_ar || event.title}
-        />
-      )}
     </div>
   );
 };

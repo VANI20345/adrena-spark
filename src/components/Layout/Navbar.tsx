@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Bell, Wallet, Globe, Menu, User, LogOut, Users } from 'lucide-react';
-import { useFriendRequests } from '@/hooks/useFriendRequests';
-import { useFriendMessages } from '@/hooks/useFriendMessages';
+import { Bell, Wallet, Globe, Menu, User, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import adrenaLogo from '@/assets/adrena_logo.png';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -24,11 +22,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { language, setLanguage, t, isRTL } = useLanguageContext();
   const { user, userRole, signOut, profile } = useAuth();
-  const { incomingCount } = useFriendRequests();
-  const { unreadCount: unreadMessagesCount } = useFriendMessages();
   const navigate = useNavigate();
-
-  const totalFriendNotifications = incomingCount + unreadMessagesCount;
 
   const handleSignOut = async () => {
     await signOut();
@@ -57,7 +51,6 @@ const Navbar = () => {
     if (!role) {
       return [
         ...baseItems,
-        { title: "استكشاف", href: "/explore", titleEn: "Explore" },
         { title: "الخدمات", href: "/services", titleEn: "Services" },
         { title: "تواصل معنا", href: "/contact", titleEn: "Contact" },
       ];
@@ -67,9 +60,7 @@ const Navbar = () => {
       case 'attendee':
         return [
           ...baseItems,
-          { title: "استكشاف", href: "/explore", titleEn: "Explore" },
           { title: "فعالياتي", href: "/my-events", titleEn: "My Events" },
-          { title: "الأصدقاء", href: "/friends", titleEn: "Friends" },
           { title: "القروبات", href: "/groups", titleEn: "Groups" },
           { title: "النقاط", href: "/points", titleEn: "Points" },
           { title: "تواصل معنا", href: "/contact", titleEn: "Contact" },
@@ -94,7 +85,6 @@ const Navbar = () => {
       case 'admin':
         return [
           ...baseItems,
-          { title: "استكشاف", href: "/explore", titleEn: "Explore" },
           { title: "الخدمات", href: "/services", titleEn: "Services" },
           { title: "القروبات", href: "/groups", titleEn: "Groups" },
           { title: "لوحة الإدارة", href: "/admin", titleEn: "Admin Panel" },
@@ -158,23 +148,6 @@ const Navbar = () => {
               <>
                 {/* Notifications Dropdown */}
                 <NotificationDropdown />
-
-                {/* Friends */}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="relative"
-                  asChild
-                >
-                  <Link to="/friends">
-                    <Users className="w-4 h-4" />
-                    {totalFriendNotifications > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center px-1">
-                        {totalFriendNotifications > 99 ? '99+' : totalFriendNotifications}
-                      </span>
-                    )}
-                  </Link>
-                </Button>
 
                 {/* Wallet */}
                 <Button variant="ghost" size="icon" asChild>
@@ -315,16 +288,6 @@ const Navbar = () => {
                      {user && (
                        <>
                          <NotificationDropdown />
-                         <Button variant="ghost" size="icon" className="relative" asChild>
-                           <Link to="/friends">
-                             <Users className="w-4 h-4" />
-                             {totalFriendNotifications > 0 && (
-                               <span className="absolute -top-1 -right-1 min-w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center px-1">
-                                 {totalFriendNotifications > 99 ? '99+' : totalFriendNotifications}
-                               </span>
-                             )}
-                           </Link>
-                         </Button>
                          <Button variant="ghost" size="icon" asChild>
                            <Link to="/wallet">
                              <Wallet className="w-4 h-4" />

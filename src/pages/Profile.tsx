@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { FollowerStats } from '@/components/Profile/FollowerStats';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -389,13 +388,6 @@ const Profile = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Follower Stats */}
-          {user && (
-            <div className="mb-8">
-              <FollowerStats userId={user.id} isOwnProfile={true} />
-            </div>
-          )}
 
           <Tabs defaultValue="info" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2">
