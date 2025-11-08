@@ -1,0 +1,387 @@
+import { lazy, Suspense } from 'react';
+import GlobalErrorBoundary from '@/components/GlobalErrorBoundary';
+import { LoadingBoundary } from '@/components/LoadingBoundary';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { MaintenanceCheck } from "@/middleware/maintenanceMode";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { SuspensionCheck } from "@/components/SuspensionCheck";
+
+// Critical pages - loaded immediately
+import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import NotFound from "./pages/NotFound";
+
+// Lazy loaded pages for better performance
+const Explore = lazy(() => import("./pages/Explore"));
+const Services = lazy(() => import("./pages/Services"));
+const EventDetails = lazy(() => import("./pages/EventDetails"));
+const ServiceDetails = lazy(() => import("./pages/ServiceDetails"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Settings = lazy(() => import("./pages/Settings"));
+const CreateEvent = lazy(() => import("./pages/CreateEvent"));
+const EditEvent = lazy(() => import("./pages/EditEvent"));
+const CreateService = lazy(() => import("./pages/CreateService"));
+const WalletPage = lazy(() => import("./pages/Wallet"));
+const PointsPage = lazy(() => import("./pages/Points"));
+const MyEventsPage = lazy(() => import("./pages/MyEvents"));
+const ManageEventsPage = lazy(() => import("./pages/ManageEvents"));
+const ManageServicesPage = lazy(() => import("./pages/ManageServices"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const OrganizerDashboard = lazy(() => import("./pages/OrganizerDashboard"));
+const ProviderDashboard = lazy(() => import("./pages/ProviderDashboard"));
+const AttendeeDashboard = lazy(() => import("./pages/AttendeeDashboard"));
+const GroupsOverview = lazy(() => import("./pages/GroupsOverview"));
+const JoinedGroups = lazy(() => import("./pages/JoinedGroups"));
+const OrganizedGroups = lazy(() => import("./pages/OrganizedGroups"));
+const DiscoverGroups = lazy(() => import("./pages/DiscoverGroups"));
+const FilterGroups = lazy(() => import("./pages/FilterGroups"));
+const GroupDetails = lazy(() => import("./pages/GroupDetails"));
+const GroupCreateEvent = lazy(() => import("./pages/GroupCreateEvent"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const QRScanner = lazy(() => import("./pages/QRScanner"));
+const Help = lazy(() => import("./pages/Help"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Safety = lazy(() => import("./pages/Safety"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Refund = lazy(() => import("./pages/Refund"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
+const Tickets = lazy(() => import("./pages/Tickets"));
+const ServiceRequestsPage = lazy(() => import("./pages/ServiceRequestsPage"));
+const EventParticipants = lazy(() => import("./pages/EventParticipants"));
+const Friends = lazy(() => import("./pages/Friends"));
+const SearchUsers = lazy(() => import("./pages/SearchUsers"));
+const PublicProfile = lazy(() => import("./pages/PublicProfile"));
+
+// Optimized Query Client with caching
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+    },
+  },
+});
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <GlobalErrorBoundary>
+        <ErrorBoundary>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <div className="min-h-screen flex flex-col">
+              <LanguageProvider>
+                <AuthProvider>
+                  <SuspensionCheck />
+                  <MaintenanceCheck>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/explore" element={<Explore />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/event/:id" element={<EventDetails />} />
+            <Route path="/service/:id" element={<ServiceDetails />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route
+              path="/dashboard" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Settings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/create-event" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['attendee', 'admin']}>
+                  <CreateEvent />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/edit-event/:id" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['attendee', 'admin']}>
+                  <EditEvent />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/create-service" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['provider', 'admin']}>
+                  <CreateService />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/wallet" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <WalletPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/points" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <PointsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-events" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="attendee">
+                  <MyEventsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/manage-events" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['attendee', 'admin']}>
+                  <ManageEventsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/manage-services" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['provider', 'admin']}>
+                  <ManageServicesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/help" element={<Help />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/safety" element={<Safety />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/refund" element={<Refund />} />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="admin">
+                  <AdminPanel />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/organizer-dashboard" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="attendee">
+                  <OrganizerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/provider-dashboard" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="provider">
+                  <ProviderDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/attendee-dashboard" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="attendee">
+                  <AttendeeDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <GroupsOverview />
+                </ProtectedRoute>
+              } 
+            />
+            <Route
+              path="/groups/joined-groups" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <JoinedGroups />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups/organized-groups" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <OrganizedGroups />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups/discover-groups" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <DiscoverGroups />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups/filter" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <FilterGroups />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups/:groupId" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <GroupDetails />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/groups/create-event" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <GroupCreateEvent />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/events" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <EventsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/leaderboard" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Leaderboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/notifications" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Notifications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route
+              path="/qr-scanner" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['attendee', 'admin']}>
+                  <QRScanner />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout/success" element={<CheckoutSuccess />} />
+            <Route 
+              path="/tickets" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Tickets />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/service-requests" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['attendee', 'provider', 'admin']}>
+                  <ServiceRequestsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/event/:eventId/participants" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole={['attendee', 'admin']}>
+                  <EventParticipants />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/friends" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <Friends />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/search-users" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <SearchUsers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile/:userId" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <PublicProfile />
+                </ProtectedRoute>
+              } 
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </MaintenanceCheck>
+                </AuthProvider>
+              </LanguageProvider>
+            </div>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </GlobalErrorBoundary>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;
