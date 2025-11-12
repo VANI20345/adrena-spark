@@ -1,177 +1,128 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Globe, 
-  Camera, 
-  Star,
-  Calendar,
-  DollarSign,
-  Gift,
-  TrendingUp,
+  Edit2, 
   Award,
-  Settings,
-  Edit3,
-  Upload,
   Users,
-  Heart
+  CalendarCheck,
+  ChevronRight,
+  Trophy,
+  Lock,
+  Heart,
+  BookOpen,
+  Trash2,
+  LogOut,
+  MapPin,
+  UserCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import Navbar from '@/components/Layout/Navbar';
 
-const Profile = () => {
-  const { user, profile, userRole, loading, updateProfile } = useAuth();
-  const navigate = useNavigate();
-  
-  const [isEditing, setIsEditing] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [interestsList, setInterestsList] = useState<Array<{ id: string; name: string; name_ar: string }>>([]);
-  const [formData, setFormData] = useState({
-    full_name: '',
-    bio: '',
-    phone: '',
-    city: '',
-    interests_visibility: 'private' as 'private' | 'public'
-  });
-  
-  const [stats, setStats] = useState({
-    events_attended: 0,
-    events_organized: 0,
-    services_provided: 0,
-    total_earnings: 0
-  });
+interface UserStats {
+  points: number;
+  followers: number;
+  eventsAttended: number;
+}
 
-  // Redirect if not authenticated
+interface Follower {
+  id: string;
+  full_name: string;
+  avatar_url: string | null;
+}
+
+interface Training {
+  id: string;
+  title: string;
+  city: string;
+  status: string;
+  current_attendees: number;
+  max_attendees: number;
+}
+
+interface Group {
+  id: string;
+  group_name: string;
+  image_url: string | null;
+}
+
+const Profile = () => {
+  const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
+  const [isUploading, setIsUploading] = useState(false);
+  const [stats, setStats] = useState<UserStats>({ points: 0, followers: 0, eventsAttended: 0 });
+  const [followers, setFollowers] = useState<Follower[]>([]);
+  const [trainings, setTrainings] = useState<Training[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+
   useEffect(() => {
     if (!user && !loading) {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
 
-  // Load interests list
-  useEffect(() => {
-    const fetchInterests = async () => {
-      const { data } = await supabase
-        .from('user_interests' as any)
-        .select('id, name, name_ar')
-        .order('name_ar');
-
-      if (data) {
-        setInterestsList(data as unknown as Array<{ id: string; name: string; name_ar: string }>);
-      }
-    };
-
-    fetchInterests();
-  }, []);
-
-  // Initialize form data
-  useEffect(() => {
-    if (profile) {
-      setFormData({
-        full_name: profile.full_name || '',
-        bio: profile.bio || '',
-        phone: profile.phone || '',
-        city: profile.city || '',
-        interests_visibility: (profile as any).interests_visibility || 'private'
-      });
-    }
-  }, [profile]);
-
-  const loadUserStats = useCallback(async () => {
-    try {
-      // Load events attended/organized
-      const { data: eventsData } = await supabase
-        .from('events')
-        .select('*')
-        .eq(userRole === 'attendee' ? 'organizer_id' : 'id', user?.id);
-
-      // Load services (for providers)
-      const { data: servicesData } = await supabase
-        .from('services')
-        .select('*')
-        .eq('provider_id', user?.id);
-
-      // Load real user data from database instead of mock data
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('points_balance')
-        .eq('user_id', user?.id)
-        .single();
-
-      const { data: walletData } = await supabase
-        .from('user_wallets')
-        .select('balance, total_earned')
-        .eq('user_id', user?.id)
-        .single();
-
-      // Calculate average rating from reviews
-      const { data: reviewsData } = await supabase
-        .from('reviews')
-        .select('rating')
-        .eq('user_id', user?.id);
-
-      const averageRating = reviewsData && reviewsData.length > 0
-        ? reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviewsData.length
-        : 0;
-
-      setStats({
-        events_attended: userRole === 'attendee' ? 0 : 0, // Will be calculated from bookings
-        events_organized: userRole === 'attendee' ? (eventsData?.length || 0) : 0,
-        services_provided: userRole === 'provider' ? (servicesData?.length || 0) : 0,
-        total_earnings: walletData?.total_earned || 0
-      });
-    } catch (error) {
-      console.error('Error loading stats:', error);
-      // Set default stats on error
-      setStats({
-        events_attended: 0,
-        events_organized: 0,
-        services_provided: 0,
-        total_earnings: 0
-      });
-    }
-  }, [user?.id, userRole]);
-
-  // Load user statistics
   useEffect(() => {
     if (user) {
-      loadUserStats();
+      loadUserData();
     }
-  }, [user, loadUserStats]);
+  }, [user]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const loadUserData = async () => {
     try {
-      const updateData = {
-        ...formData,
-        interests_visibility: formData.interests_visibility
-      };
-      const { error } = await updateProfile(updateData as any);
-      if (error) {
-        toast.error('حدث خطأ في تحديث الملف الشخصي');
-      } else {
-        toast.success('تم تحديث الملف الشخصي بنجاح');
-        setIsEditing(false);
+      const [profileData, bookingsData, followersData] = await Promise.all([
+        supabase.from('profiles').select('points_balance, followers_count').eq('user_id', user!.id).single(),
+        supabase.from('bookings').select('id').eq('user_id', user!.id).eq('status', 'confirmed'),
+        supabase.from('profiles').select('user_id, full_name, avatar_url').limit(10)
+      ]);
+
+      setStats({
+        points: profileData.data?.points_balance || 0,
+        followers: profileData.data?.followers_count || 0,
+        eventsAttended: bookingsData.data?.length || 0
+      });
+
+      if (followersData.data) {
+        setFollowers(followersData.data.map(f => ({
+          id: f.user_id,
+          full_name: f.full_name || 'مستخدم',
+          avatar_url: f.avatar_url
+        })));
+      }
+
+      const { data: trainingsData } = await supabase
+        .from('events')
+        .select('id, title, location')
+        .eq('organizer_id', user!.id)
+        .limit(3);
+
+      if (trainingsData) {
+        setTrainings(trainingsData.map(t => ({
+          id: t.id,
+          title: t.title || 'تدريب',
+          city: t.location || '',
+          status: 'active',
+          current_attendees: 0,
+          max_attendees: 0
+        })));
+      }
+
+      const { data: groupsData } = await supabase
+        .from('event_groups')
+        .select('id, group_name, image_url')
+        .eq('created_by', user!.id)
+        .limit(3);
+
+      if (groupsData) {
+        setGroups(groupsData);
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('حدث خطأ غير متوقع');
+      console.error('Error loading user data:', error);
     }
   };
 
@@ -179,13 +130,11 @@ const Profile = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('يرجى اختيار ملف صورة صالح');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
       return;
@@ -194,9 +143,25 @@ const Profile = () => {
     setIsUploading(true);
 
     try {
-      // Upload to storage (when storage is configured)
-      // For now, just show success message
-      toast.success('سيتم تفعيل رفع الصور قريباً');
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user!.id}-${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', user!.id);
+
+      toast.success('تم تحديث الصورة الشخصية بنجاح');
+      setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       toast.error('حدث خطأ في رفع الصورة');
     } finally {
@@ -204,358 +169,277 @@ const Profile = () => {
     }
   };
 
-  const getRoleDisplay = () => {
-    switch (userRole) {
-      case 'attendee':
-        return 'باحث عن فعالية';
-      case 'provider':
-        return 'مقدم خدمة';
-      default:
-        return 'غير محدد';
-    }
-  };
-
-  const getRoleBadgeColor = () => {
-    switch (userRole) {
-      case 'attendee':
-        return 'bg-blue-100 text-blue-800';
-      case 'provider':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background">
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-8 px-4">
-        <div className="max-w-6xl mx-auto">
-          {/* Profile Header */}
-          <Card className="mb-8">
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row items-start gap-6">
-                {/* Avatar Section */}
-                <div className="relative">
-                  <Avatar className="h-32 w-32">
-                    <AvatarImage src={profile?.avatar_url || ''} />
-                    <AvatarFallback className="text-2xl">
-                      {profile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <label className="absolute bottom-0 right-0 cursor-pointer">
-                    <div className="bg-primary text-primary-foreground rounded-full p-2 hover:bg-primary/90 transition-colors">
-                      <Camera className="h-4 w-4" />
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                      disabled={isUploading}
-                    />
-                  </label>
-                </div>
-
-                {/* Profile Info */}
-                <div className="flex-1">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                    <div>
-                      <h1 className="text-3xl font-bold mb-2">
-                        {profile?.full_name || 'اسم المستخدم'}
-                      </h1>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge className={getRoleBadgeColor()}>
-                          {getRoleDisplay()}
-                        </Badge>
-                        {profile?.display_id && (
-                          <Badge variant="outline" className="font-mono">
-                            {profile.display_id}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Mail className="h-4 w-4" />
-                          {user.email}
-                        </div>
-                        {profile?.phone && (
-                          <div className="flex items-center gap-1">
-                            <Phone className="h-4 w-4" />
-                            {profile.phone}
-                          </div>
-                        )}
-                        {profile?.city && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {profile.city}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-4 md:mt-0">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setIsEditing(!isEditing)}
-                      >
-                        <Edit3 className="h-4 w-4 mr-2" />
-                        {isEditing ? 'إلغاء' : 'تعديل'}
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => navigate('/settings')}
-                      >
-                        <Settings className="h-4 w-4 mr-2" />
-                        الإعدادات
-                      </Button>
-                    </div>
+      
+      <div className="container max-w-4xl mx-auto py-8 px-4 space-y-6">
+        {/* Header with Avatar and User Info */}
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-glow opacity-10" />
+          
+          <CardContent className="relative pt-8 pb-6">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="relative">
+                <Avatar className="h-24 w-24 ring-4 ring-primary/20">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback className="text-3xl bg-primary text-primary-foreground">
+                    {profile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <label className="absolute bottom-0 right-0 cursor-pointer group">
+                  <div className="bg-primary text-primary-foreground rounded-full p-2 hover:bg-primary-glow transition-all shadow-lg group-hover:scale-110">
+                    <Edit2 className="h-4 w-4" />
                   </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
+                </label>
+              </div>
 
-                  {profile?.bio && (
-                    <p className="text-muted-foreground mb-4">{profile.bio}</p>
-                  )}
-
-                  {/* Interests Section */}
-                  {(profile as any)?.interests && Array.isArray((profile as any).interests) && (profile as any).interests.length > 0 && (
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-sm font-medium text-muted-foreground">الاهتمامات</h3>
-                        <Badge variant="outline" className="text-xs">
-                          {(profile as any).interests_visibility === 'public' ? 'عام' : 'خاص'}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {((profile as any).interests as string[]).map((interest: string, index: number) => {
-                          const interestData = interestsList.find(i => i.name === interest);
-                          return (
-                            <Badge key={index} variant="secondary">
-                              {interestData?.name_ar || interest}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {userRole === 'attendee' && (
-                      <>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-primary">{stats.events_attended}</div>
-                          <div className="text-sm text-muted-foreground">فعالية حضرتها</div>
-                        </div>
-                      </>
-                    )}
-                    
-                    {userRole === 'attendee' && (
-                      <>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-primary">{stats.events_organized}</div>
-                          <div className="text-sm text-muted-foreground">فعالية نظمتها</div>
-                        </div>
-                      </>
-                    )}
-                    
-                    {userRole === 'provider' && (
-                      <>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-primary">{stats.services_provided}</div>
-                          <div className="text-sm text-muted-foreground">خدمة قدمتها</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-primary">{stats.total_earnings} ر.س</div>
-                          <div className="text-sm text-muted-foreground">إجمالي الأرباح</div>
-                        </div>
-                      </>
-                    )}
-                  </div>
+              <div>
+                <h1 className="text-2xl font-bold mb-2">
+                  {profile?.full_name || 'اسم المستخدم'}
+                </h1>
+                <div className="flex items-center justify-center gap-2">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                    بطل لوحة الصدارة
+                  </Badge>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          <Tabs defaultValue="info" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="info">المعلومات</TabsTrigger>
-              <TabsTrigger value="reviews">التقييمات</TabsTrigger>
-            </TabsList>
-
-            {/* Personal Information Tab */}
-            <TabsContent value="info">
-              <Card>
-                <CardHeader>
-                  <CardTitle>المعلومات الشخصية</CardTitle>
-                  <CardDescription>إدارة معلوماتك الأساسية والملف الشخصي</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isEditing ? (
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="full_name">الاسم الكامل</Label>
-                          <Input
-                            id="full_name"
-                            value={formData.full_name}
-                            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                            placeholder="أدخل اسمك الكامل"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">رقم الجوال</Label>
-                          <Input
-                            id="phone"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            placeholder="05xxxxxxxx"
-                            dir="ltr"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="city">المدينة</Label>
-                          <Input
-                            id="city"
-                            value={formData.city}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            placeholder="اختر مدينتك"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="bio">نبذة شخصية</Label>
-                        <Textarea
-                          id="bio"
-                          value={formData.bio}
-                          onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                          placeholder="اكتب نبذة مختصرة عن نفسك (250 حرف كحد أقصى)"
-                          maxLength={250}
-                          className="min-h-[100px]"
-                        />
-                        <div className="text-xs text-muted-foreground text-left">
-                          {formData.bio.length}/250
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>إظهار الاهتمامات</Label>
-                        <div className="flex items-center gap-4">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              name="interests_visibility"
-                              value="private"
-                              checked={formData.interests_visibility === 'private'}
-                              onChange={(e) => setFormData({ ...formData, interests_visibility: 'private' })}
-                              className="w-4 h-4"
-                            />
-                            <span>خاص (أنا فقط)</span>
-                          </label>
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              name="interests_visibility"
-                              value="public"
-                              checked={formData.interests_visibility === 'public'}
-                              onChange={(e) => setFormData({ ...formData, interests_visibility: 'public' })}
-                              className="w-4 h-4"
-                            />
-                            <span>عام (الجميع)</span>
-                          </label>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Button type="submit">حفظ التغييرات</Button>
-                        <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                          إلغاء
-                        </Button>
-                      </div>
-                    </form>
-                  ) : (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">الاسم الكامل</Label>
-                          <p className="text-lg">{profile?.full_name || 'غير محدد'}</p>
-                        </div>
-                        
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</Label>
-                          <p className="text-lg" dir="ltr">{user.email}</p>
-                        </div>
-                        
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">رقم الجوال</Label>
-                          <p className="text-lg" dir="ltr">{profile?.phone || 'غير محدد'}</p>
-                        </div>
-                        
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">المدينة</Label>
-                          <p className="text-lg">{profile?.city || 'غير محدد'}</p>
-                        </div>
-                        
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">نوع الحساب</Label>
-                          <p className="text-lg">{getRoleDisplay()}</p>
-                        </div>
-                        
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">تاريخ الانضمام</Label>
-                          <p className="text-lg">
-                            {new Date(user.created_at).toLocaleDateString('ar-SA')}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {profile?.bio && (
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">النبذة الشخصية</Label>
-                          <p className="text-lg mt-1">{profile.bio}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Reviews Tab */}
-            <TabsContent value="reviews">
-              <Card>
-                <CardHeader>
-                  <CardTitle>التقييمات والمراجعات</CardTitle>
-                  <CardDescription>التقييمات التي تلقيتها من المستخدمين</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center p-8">
-                    <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">لا توجد تقييمات بعد</h3>
-                    <p className="text-muted-foreground">
-                      لم تتلق أي تقييمات من المستخدمين حتى الآن
-                    </p>
+              <div className="grid grid-cols-3 gap-6 w-full mt-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-1">
+                    <Award className="h-5 w-5 text-primary ml-1" />
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+                  <div className="text-2xl font-bold text-primary">{stats.points}</div>
+                  <div className="text-xs text-muted-foreground">النقاط</div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-1">
+                    <Users className="h-5 w-5 text-primary ml-1" />
+                  </div>
+                  <div className="text-2xl font-bold text-primary">{stats.followers}</div>
+                  <div className="text-xs text-muted-foreground">المتابعون</div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-1">
+                    <CalendarCheck className="h-5 w-5 text-primary ml-1" />
+                  </div>
+                  <div className="text-2xl font-bold text-primary">{stats.eventsAttended}</div>
+                  <div className="text-xs text-muted-foreground">الفعاليات</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Followers Section */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">المتابعون</h2>
+              <Button variant="ghost" size="sm">
+                عرض الكل
+                <ChevronRight className="h-4 w-4 mr-1" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-5 gap-4">
+              {followers.slice(0, 10).map((follower) => (
+                <div key={follower.id} className="text-center">
+                  <Avatar className="h-12 w-12 mx-auto mb-2">
+                    <AvatarImage src={follower.avatar_url || ''} />
+                    <AvatarFallback className="text-xs bg-primary/10">
+                      {follower.full_name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-xs truncate">{follower.full_name}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Trainings Section */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">تدريباتي</h2>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/manage-services')}>
+                عرض الكل
+                <ChevronRight className="h-4 w-4 mr-1" />
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {trainings.map((training) => (
+                <Card key={training.id} className="border-l-4 border-l-primary">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold mb-1">{training.title}</h3>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          <span>{training.city}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {training.status === 'active' ? 'نشط' : 'منتهي'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <Button size="sm" variant="ghost" onClick={() => navigate(`/service/${training.id}`)}>
+                        تفاصيل
+                      </Button>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>المشاركون: {training.current_attendees}/{training.max_attendees}</span>
+                        <span>45%</span>
+                      </div>
+                      <Progress value={45} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Groups Section */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">مجموعاتي</h2>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/organized-groups')}>
+                عرض الكل
+                <ChevronRight className="h-4 w-4 mr-1" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {groups.map((group) => (
+                <div
+                  key={group.id}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => navigate(`/groups/${group.id}`)}
+                >
+                  <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-primary/5">
+                    {group.image_url ? (
+                      <img src={group.image_url} alt={group.group_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Users className="h-8 w-8 text-primary/40" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm font-medium text-center truncate">{group.group_name}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Settings Section */}
+        <Card>
+          <CardContent className="pt-6 space-y-2">
+            <h2 className="text-lg font-bold mb-4">الإعدادات</h2>
+            
+            <Button
+              variant="ghost"
+              className="w-full justify-between hover:bg-primary/5"
+              onClick={() => navigate('/settings')}
+            >
+              <div className="flex items-center gap-3">
+                <UserCircle className="h-5 w-5 text-primary" />
+                <span>تعديل البيانات</span>
+              </div>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="w-full justify-between hover:bg-primary/5"
+              onClick={() => navigate('/settings')}
+            >
+              <div className="flex items-center gap-3">
+                <Lock className="h-5 w-5 text-primary" />
+                <span>تغيير كلمة المرور</span>
+              </div>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="w-full justify-between hover:bg-primary/5"
+              onClick={() => navigate('/settings')}
+            >
+              <div className="flex items-center gap-3">
+                <Heart className="h-5 w-5 text-primary" />
+                <span>الاهتمامات</span>
+              </div>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="w-full justify-between hover:bg-primary/5"
+              onClick={() => navigate('/tickets')}
+            >
+              <div className="flex items-center gap-3">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <span>الحجوزات</span>
+              </div>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="w-full justify-between hover:bg-destructive/5 text-destructive"
+              onClick={() => {
+                if (confirm('هل أنت متأكد من حذف حسابك؟')) {
+                  toast.error('سيتم تفعيل هذه الميزة قريباً');
+                }
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <Trash2 className="h-5 w-5" />
+                <span>حذف الحساب</span>
+              </div>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="w-full justify-between hover:bg-destructive/5 text-destructive"
+              onClick={handleLogout}
+            >
+              <div className="flex items-center gap-3">
+                <LogOut className="h-5 w-5" />
+                <span>تسجيل الخروج</span>
+              </div>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
