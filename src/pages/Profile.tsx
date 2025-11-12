@@ -9,7 +9,6 @@ import { Progress } from '@/components/ui/progress';
 import { 
   Edit2, 
   Award,
-  Users,
   CalendarCheck,
   ChevronRight,
   Trophy,
@@ -19,7 +18,8 @@ import {
   Trash2,
   LogOut,
   MapPin,
-  UserCircle
+  UserCircle,
+  Users
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -27,23 +27,19 @@ import Navbar from '@/components/Layout/Navbar';
 
 interface UserStats {
   points: number;
-  followers: number;
   eventsAttended: number;
-}
-
-interface Follower {
-  id: string;
-  full_name: string;
-  avatar_url: string | null;
+  groupsCount: number;
 }
 
 interface Training {
   id: string;
   title: string;
-  city: string;
+  title_ar: string;
+  location: string;
+  location_ar: string;
   status: string;
   current_attendees: number;
-  max_attendees: number;
+  max_attendees: number | null;
 }
 
 interface Group {
@@ -56,8 +52,7 @@ const Profile = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [isUploading, setIsUploading] = useState(false);
-  const [stats, setStats] = useState<UserStats>({ points: 0, followers: 0, eventsAttended: 0 });
-  const [followers, setFollowers] = useState<Follower[]>([]);
+  const [stats, setStats] = useState<UserStats>({ points: 0, eventsAttended: 0, groupsCount: 0 });
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
 
@@ -75,48 +70,51 @@ const Profile = () => {
 
   const loadUserData = async () => {
     try {
-      const [profileData, bookingsData, followersData] = await Promise.all([
-        supabase.from('profiles').select('points_balance, followers_count').eq('user_id', user!.id).single(),
-        supabase.from('bookings').select('id').eq('user_id', user!.id).eq('status', 'confirmed'),
-        supabase.from('profiles').select('user_id, full_name, avatar_url').limit(10)
-      ]);
+      // Load profile data
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('points_balance')
+        .eq('user_id', user!.id)
+        .single();
+
+      // Load bookings count
+      const { data: bookingsData } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('user_id', user!.id)
+        .eq('status', 'confirmed');
+
+      // Load groups count
+      const { data: groupsCountData } = await supabase
+        .from('group_members')
+        .select('id')
+        .eq('user_id', user!.id);
 
       setStats({
-        points: profileData.data?.points_balance || 0,
-        followers: profileData.data?.followers_count || 0,
-        eventsAttended: bookingsData.data?.length || 0
+        points: profileData?.points_balance || 0,
+        eventsAttended: bookingsData?.length || 0,
+        groupsCount: groupsCountData?.length || 0
       });
 
-      if (followersData.data) {
-        setFollowers(followersData.data.map(f => ({
-          id: f.user_id,
-          full_name: f.full_name || 'مستخدم',
-          avatar_url: f.avatar_url
-        })));
-      }
-
-      const { data: trainingsData } = await supabase
+      // Load user's events
+      const { data: eventsData } = await supabase
         .from('events')
-        .select('id, title, location')
+        .select('id, title, title_ar, location, location_ar, status, current_attendees, max_attendees')
         .eq('organizer_id', user!.id)
+        .order('created_at', { ascending: false })
         .limit(3);
 
-      if (trainingsData) {
-        setTrainings(trainingsData.map(t => ({
-          id: t.id,
-          title: t.title || 'تدريب',
-          city: t.location || '',
-          status: 'active',
-          current_attendees: 0,
-          max_attendees: 0
-        })));
+      if (eventsData) {
+        setTrainings(eventsData);
       }
 
+      // Load user's groups
       const { data: groupsData } = await supabase
         .from('event_groups')
         .select('id, group_name, image_url')
         .eq('created_by', user!.id)
-        .limit(3);
+        .order('created_at', { ascending: false })
+        .limit(6);
 
       if (groupsData) {
         setGroups(groupsData);
@@ -174,6 +172,11 @@ const Profile = () => {
     navigate('/auth');
   };
 
+  const getProgressPercentage = (current: number, max: number | null) => {
+    if (!max || max === 0) return 0;
+    return Math.round((current / max) * 100);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background">
@@ -185,178 +188,175 @@ const Profile = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container max-w-4xl mx-auto py-8 px-4 space-y-6">
-        {/* Header with Avatar and User Info */}
-        <Card className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-glow opacity-10" />
-          
-          <CardContent className="relative pt-8 pb-6">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="relative">
-                <Avatar className="h-24 w-24 ring-4 ring-primary/20">
-                  <AvatarImage src={profile?.avatar_url || ''} />
-                  <AvatarFallback className="text-3xl bg-primary text-primary-foreground">
-                    {profile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <label className="absolute bottom-0 right-0 cursor-pointer group">
-                  <div className="bg-primary text-primary-foreground rounded-full p-2 hover:bg-primary-glow transition-all shadow-lg group-hover:scale-110">
-                    <Edit2 className="h-4 w-4" />
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    className="hidden"
-                    disabled={isUploading}
-                  />
-                </label>
+      {/* Curved Green Header Background */}
+      <div className="relative">
+        <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-br from-primary to-primary-glow">
+          <svg
+            className="absolute bottom-0 w-full h-16 text-background"
+            preserveAspectRatio="none"
+            viewBox="0 0 1440 54"
+            fill="currentColor"
+          >
+            <path d="M0 22L120 16.7C240 11 480 1.00001 720 0.700012C960 1.00001 1200 11 1320 16.7L1440 22V54H1320C1200 54 960 54 720 54C480 54 240 54 120 54H0V22Z" />
+          </svg>
+        </div>
+
+        {/* Profile Content */}
+        <div className="relative container max-w-4xl mx-auto px-4 pt-16">
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="relative mb-4">
+              <Avatar className="h-32 w-32 ring-4 ring-background shadow-xl">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
+                  {profile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              
+              <label className="absolute bottom-0 right-0 cursor-pointer group">
+                <div className="bg-primary text-primary-foreground rounded-full p-3 hover:bg-primary-glow transition-all shadow-lg group-hover:scale-110">
+                  <Edit2 className="h-5 w-5" />
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+              </label>
+            </div>
+
+            {/* User Name */}
+            <h1 className="text-3xl font-bold mb-2 text-foreground">
+              {profile?.full_name || 'اسم المستخدم'}
+            </h1>
+
+            {/* Badge */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-4 py-1">
+                عضو نشط
+              </Badge>
+            </div>
+
+            {/* Stats Section */}
+            <div className="grid grid-cols-3 gap-8 w-full max-w-md">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Award className="h-6 w-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary">{stats.points}</div>
+                <div className="text-sm text-muted-foreground mt-1">النقاط</div>
               </div>
-
-              <div>
-                <h1 className="text-2xl font-bold mb-2">
-                  {profile?.full_name || 'اسم المستخدم'}
-                </h1>
-                <div className="flex items-center justify-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                    بطل لوحة الصدارة
-                  </Badge>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
+                <div className="text-3xl font-bold text-primary">{stats.groupsCount}</div>
+                <div className="text-sm text-muted-foreground mt-1">المجموعات</div>
               </div>
-
-              <div className="grid grid-cols-3 gap-6 w-full mt-6">
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <Award className="h-5 w-5 text-primary ml-1" />
-                  </div>
-                  <div className="text-2xl font-bold text-primary">{stats.points}</div>
-                  <div className="text-xs text-muted-foreground">النقاط</div>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <CalendarCheck className="h-6 w-6 text-primary" />
                 </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <Users className="h-5 w-5 text-primary ml-1" />
-                  </div>
-                  <div className="text-2xl font-bold text-primary">{stats.followers}</div>
-                  <div className="text-xs text-muted-foreground">المتابعون</div>
-                </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <CalendarCheck className="h-5 w-5 text-primary ml-1" />
-                  </div>
-                  <div className="text-2xl font-bold text-primary">{stats.eventsAttended}</div>
-                  <div className="text-xs text-muted-foreground">الفعاليات</div>
-                </div>
+                <div className="text-3xl font-bold text-primary">{stats.eventsAttended}</div>
+                <div className="text-sm text-muted-foreground mt-1">الفعاليات</div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </div>
 
-        {/* Followers Section */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">المتابعون</h2>
-              <Button variant="ghost" size="sm">
-                عرض الكل
-                <ChevronRight className="h-4 w-4 mr-1" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-5 gap-4">
-              {followers.slice(0, 10).map((follower) => (
-                <div key={follower.id} className="text-center">
-                  <Avatar className="h-12 w-12 mx-auto mb-2">
-                    <AvatarImage src={follower.avatar_url || ''} />
-                    <AvatarFallback className="text-xs bg-primary/10">
-                      {follower.full_name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-xs truncate">{follower.full_name}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Trainings Section */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">تدريباتي</h2>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/manage-services')}>
-                عرض الكل
-                <ChevronRight className="h-4 w-4 mr-1" />
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {trainings.map((training) => (
-                <Card key={training.id} className="border-l-4 border-l-primary">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold mb-1">{training.title}</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          <span>{training.city}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {training.status === 'active' ? 'نشط' : 'منتهي'}
-                          </Badge>
+      {/* Content Sections */}
+      <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Trainings/Events Section */}
+        {trainings.length > 0 && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold">فعالياتي</h2>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/manage-events')}>
+                  عرض الكل
+                  <ChevronRight className="h-4 w-4 mr-1" />
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {trainings.map((training) => {
+                  const progress = getProgressPercentage(training.current_attendees, training.max_attendees);
+                  return (
+                    <Card key={training.id} className="border-l-4 border-l-primary">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h3 className="font-semibold mb-1">{training.title_ar || training.title}</h3>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <MapPin className="h-3 w-3" />
+                              <span>{training.location_ar || training.location}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {training.status === 'approved' ? 'نشط' : training.status === 'pending' ? 'معلق' : 'منتهي'}
+                              </Badge>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="ghost" onClick={() => navigate(`/events/${training.id}`)}>
+                            تفاصيل
+                          </Button>
                         </div>
-                      </div>
-                      <Button size="sm" variant="ghost" onClick={() => navigate(`/service/${training.id}`)}>
-                        تفاصيل
-                      </Button>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>المشاركون: {training.current_attendees}/{training.max_attendees}</span>
-                        <span>45%</span>
-                      </div>
-                      <Progress value={45} className="h-2" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                        {training.max_attendees && (
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <span>المشاركون: {training.current_attendees}/{training.max_attendees}</span>
+                              <span>{progress}%</span>
+                            </div>
+                            <Progress value={progress} className="h-2" />
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Groups Section */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">مجموعاتي</h2>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/organized-groups')}>
-                عرض الكل
-                <ChevronRight className="h-4 w-4 mr-1" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              {groups.map((group) => (
-                <div
-                  key={group.id}
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => navigate(`/groups/${group.id}`)}
-                >
-                  <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-primary/5">
-                    {group.image_url ? (
-                      <img src={group.image_url} alt={group.group_name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Users className="h-8 w-8 text-primary/40" />
-                      </div>
-                    )}
+        {groups.length > 0 && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold">مجموعاتي</h2>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/organized-groups')}>
+                  عرض الكل
+                  <ChevronRight className="h-4 w-4 mr-1" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {groups.map((group) => (
+                  <div
+                    key={group.id}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => navigate(`/groups/${group.id}`)}
+                  >
+                    <div className="aspect-square rounded-lg overflow-hidden mb-2 bg-primary/5">
+                      {group.image_url ? (
+                        <img src={group.image_url} alt={group.group_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Users className="h-8 w-8 text-primary/40" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm font-medium text-center truncate">{group.group_name}</p>
                   </div>
-                  <p className="text-sm font-medium text-center truncate">{group.group_name}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Settings Section */}
         <Card>
