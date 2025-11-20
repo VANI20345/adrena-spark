@@ -57,7 +57,7 @@ const ServiceTypeSelection = () => {
             {serviceTypes.map((service) => (
               <Card 
                 key={service.type}
-                className="hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                className="hover:shadow-lg transition-all duration-300 cursor-pointer group h-full flex flex-col"
                 onClick={() => navigate(service.path)}
               >
                 <CardHeader className="text-center">
@@ -69,11 +69,11 @@ const ServiceTypeSelection = () => {
                     {service.titleEn}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-muted-foreground mb-4">{service.description}</p>
+                <CardContent className="text-center flex flex-col flex-1">
+                  <p className="text-muted-foreground mb-2">{service.description}</p>
                   <p className="text-sm text-muted-foreground mb-4">{service.descriptionEn}</p>
                   <Button 
-                    className="w-full"
+                    className="w-full mt-auto"
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate(service.path);
