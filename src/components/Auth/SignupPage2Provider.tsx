@@ -346,32 +346,32 @@ const SignupPage2Provider = ({ data, updateData, onBack, onSubmit, isSubmitting 
 
       {/* Agreements */}
       <div className="space-y-3 pt-4 border-t text-right">
-        <div className="flex items-start space-x-2 space-x-reverse">
-          <Checkbox
-            id="agreeTerms"
-            checked={agreeTerms}
-            onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
-          />
-          <Label htmlFor="agreeTerms" className="cursor-pointer text-sm leading-relaxed text-right">
+        <div className="flex items-start gap-2 flex-row-reverse">
+          <Label htmlFor="agreeTerms" className="cursor-pointer text-sm leading-relaxed text-right flex-1">
             أوافق على{' '}
             <Link to="/terms" className="text-primary hover:underline" target="_blank">
               الشروط والأحكام
             </Link>
           </Label>
+          <Checkbox
+            id="agreeTerms"
+            checked={agreeTerms}
+            onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
+          />
         </div>
 
-        <div className="flex items-start space-x-2 space-x-reverse">
-          <Checkbox
-            id="agreePrivacy"
-            checked={agreePrivacy}
-            onCheckedChange={(checked) => setAgreePrivacy(checked as boolean)}
-          />
-          <Label htmlFor="agreePrivacy" className="cursor-pointer text-sm leading-relaxed text-right">
+        <div className="flex items-start gap-2 flex-row-reverse">
+          <Label htmlFor="agreePrivacy" className="cursor-pointer text-sm leading-relaxed text-right flex-1">
             أوافق على{' '}
             <Link to="/privacy" className="text-primary hover:underline" target="_blank">
               سياسة الخصوصية
             </Link>
           </Label>
+          <Checkbox
+            id="agreePrivacy"
+            checked={agreePrivacy}
+            onCheckedChange={(checked) => setAgreePrivacy(checked as boolean)}
+          />
         </div>
       </div>
 
