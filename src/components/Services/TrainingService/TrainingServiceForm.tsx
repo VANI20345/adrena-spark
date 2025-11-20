@@ -34,7 +34,7 @@ const trainingServiceSchema = z.object({
   city_id: z.string().min(1, "يجب اختيار المدينة"),
   location: z.string().min(3, "الموقع مطلوب"),
   location_ar: z.string().min(3, "الموقع بالعربية مطلوب"),
-  duration_per_set: z.number().min(30, "المدة يجب أن تكون 30 دقيقة على الأقل"),
+  duration_per_set: z.string().min(1, "يجب اختيار المدة"),
   number_of_sets: z.number().min(1, "يجب إدخال عدد صحيح"),
   is_free: z.boolean(),
   price: z.number().optional(),
@@ -87,7 +87,7 @@ const TrainingServiceForm = () => {
       city_id: "",
       location: "",
       location_ar: "",
-      duration_per_set: 60,
+      duration_per_set: "",
       number_of_sets: 1,
       is_free: false,
       price: 0,
@@ -155,7 +155,7 @@ const TrainingServiceForm = () => {
         start_date: data.start_date,
         max_capacity: data.max_capacity,
         current_capacity: 0,
-        duration_per_set: data.duration_per_set,
+        duration_per_set: parseInt(data.duration_per_set),
         number_of_sets: data.number_of_sets,
         city_id: data.city_id,
         is_free: data.is_free,
@@ -376,16 +376,24 @@ const TrainingServiceForm = () => {
                       name="duration_per_set"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>المدة لكل جلسة (بالدقائق)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              min="30"
-                              placeholder="60"
-                              {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
-                            />
-                          </FormControl>
+                          <FormLabel>المدة لكل جلسة</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر المدة" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="30">30 دقيقة</SelectItem>
+                              <SelectItem value="60">ساعة واحدة</SelectItem>
+                              <SelectItem value="90">ساعة ونصف</SelectItem>
+                              <SelectItem value="120">ساعتان</SelectItem>
+                              <SelectItem value="180">3 ساعات</SelectItem>
+                              <SelectItem value="240">4 ساعات</SelectItem>
+                              <SelectItem value="300">5 ساعات</SelectItem>
+                              <SelectItem value="360">6 ساعات</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
