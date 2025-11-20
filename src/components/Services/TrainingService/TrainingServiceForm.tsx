@@ -59,7 +59,7 @@ const TrainingServiceForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [trainingSets, setTrainingSets] = useState<TrainingSet[]>([]);
 
-  const { data: cities = [] } = useSupabaseQuery({
+  const { data: cities } = useSupabaseQuery({
     queryKey: ['cities'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -72,6 +72,9 @@ const TrainingServiceForm = () => {
       return data || [];
     }
   });
+
+  // Ensure cities is always an array
+  const cityList = cities || [];
 
   const form = useForm<FormData>({
     resolver: zodResolver(trainingServiceSchema),
@@ -318,7 +321,7 @@ const TrainingServiceForm = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {cities.map((city) => (
+                            {cityList.map((city) => (
                               <SelectItem key={city.id} value={city.id}>
                                 {city.name_ar}
                               </SelectItem>
