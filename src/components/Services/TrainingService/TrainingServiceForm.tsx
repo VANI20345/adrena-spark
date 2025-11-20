@@ -234,14 +234,14 @@ const TrainingServiceForm = () => {
                     name="training_level"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>مستوى التدريب</FormLabel>
+                        <FormLabel className="text-right block">مستوى التدريب</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="text-right" dir="rtl">
                               <SelectValue placeholder="اختر المستوى" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="text-right" dir="rtl">
                             <SelectItem value="beginner">مبتدئ (Beginner)</SelectItem>
                             <SelectItem value="intermediate">متوسط (Intermediate)</SelectItem>
                             <SelectItem value="advanced">متقدم (Advanced)</SelectItem>
@@ -313,14 +313,14 @@ const TrainingServiceForm = () => {
                     name="city_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>المدينة</FormLabel>
+                        <FormLabel className="text-right block">المدينة</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="text-right" dir="rtl">
                               <SelectValue placeholder="اختر المدينة" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="text-right" dir="rtl">
                             {cityList.map((city) => (
                               <SelectItem key={city.id} value={city.id}>
                                 {city.name_ar}
@@ -379,14 +379,14 @@ const TrainingServiceForm = () => {
                       name="duration_per_set"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>المدة لكل جلسة</FormLabel>
+                          <FormLabel className="text-right block">المدة لكل جلسة</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="text-right" dir="rtl">
                                 <SelectValue placeholder="اختر المدة" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="text-right" dir="rtl">
                               <SelectItem value="30">30 دقيقة</SelectItem>
                               <SelectItem value="60">ساعة واحدة</SelectItem>
                               <SelectItem value="90">ساعة ونصف</SelectItem>
@@ -436,6 +436,8 @@ const TrainingServiceForm = () => {
                   <TrainingSetsScheduler 
                     trainingSets={trainingSets}
                     setTrainingSets={setTrainingSets}
+                    maxCapacity={form.watch("max_capacity")}
+                    durationPerSet={parseInt(form.watch("duration_per_set") || "0")}
                   />
                 </CardContent>
               </Card>
