@@ -30,6 +30,7 @@ const Auth = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [isResetting, setIsResetting] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -88,14 +89,18 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success('تم إرسال رسالة بنجاح إلى بريدك الإلكتروني');
-      setShowForgotPassword(false);
-      setResetEmail('');
+      setResetSuccess(true);
     } catch (err: any) {
       toast.error('حدث خطأ في إرسال رسالة استعادة كلمة المرور');
     } finally {
       setIsResetting(false);
     }
+  };
+
+  const handleCloseForgotPassword = () => {
+    setShowForgotPassword(false);
+    setResetEmail('');
+    setResetSuccess(false);
   };
 
   if (loading) {
@@ -230,42 +235,63 @@ const Auth = () => {
       </Card>
 
       {/* Forgot Password Dialog */}
-      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+      <Dialog open={showForgotPassword} onOpenChange={handleCloseForgotPassword}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-right">استعادة كلمة المرور</DialogTitle>
             <DialogDescription className="text-right">
-              أدخل بريدك الإلكتروني وسنرسل لك رسالة لتحديث كلمة المرور
+              {resetSuccess 
+                ? 'تم إرسال رابط استعادة كلمة المرور بنجاح'
+                : 'أدخل بريدك الإلكتروني وسنرسل لك رسالة لتحديث كلمة المرور'
+              }
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleResetPassword} className="space-y-4">
-            <div className="space-y-2 text-right">
-              <Label htmlFor="reset-email" className="text-right block">البريد الإلكتروني</Label>
-              <Input
-                id="reset-email"
-                type="email"
-                placeholder="أدخل بريدك الإلكتروني"
-                value={resetEmail}
-                onChange={(e) => setResetEmail(e.target.value)}
-                required
-                dir="ltr"
-                className="text-right"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowForgotPassword(false)}
-                className="flex-1"
+          
+          {resetSuccess ? (
+            <div className="space-y-4">
+              <Alert className="bg-green-50 border-green-200">
+                <AlertDescription className="text-right text-green-800">
+                  تم إرسال رسالة بنجاح إلى بريدك الإلكتروني <strong>{resetEmail}</strong>. 
+                  يرجى التحقق من صندوق الوارد الخاص بك واتباع التعليمات لإعادة تعيين كلمة المرور.
+                </AlertDescription>
+              </Alert>
+              <Button 
+                onClick={handleCloseForgotPassword}
+                className="w-full"
               >
-                إلغاء
-              </Button>
-              <Button type="submit" disabled={isResetting} className="flex-1">
-                {isResetting ? 'جاري الإرسال...' : 'إرسال'}
+                حسناً
               </Button>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-2 text-right">
+                <Label htmlFor="reset-email" className="text-right block">البريد الإلكتروني</Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="أدخل بريدك الإلكتروني"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                  dir="ltr"
+                  className="text-right"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseForgotPassword}
+                  className="flex-1"
+                >
+                  إلغاء
+                </Button>
+                <Button type="submit" disabled={isResetting} className="flex-1">
+                  {isResetting ? 'جاري الإرسال...' : 'إرسال'}
+                </Button>
+              </div>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>

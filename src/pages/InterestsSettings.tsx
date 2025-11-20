@@ -118,11 +118,11 @@ const InterestsSettings = () => {
         <div className="mb-6">
           <Button
             variant="ghost"
-            onClick={() => navigate('/settings')}
+            onClick={() => navigate('/profile')}
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 ml-2" />
-            رجوع للإعدادات
+            رجوع للملف الشخصي
           </Button>
           
           <h1 className="text-3xl font-bold text-foreground">الاهتمامات</h1>
@@ -184,7 +184,7 @@ const InterestsSettings = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate('/settings')}
+                onClick={() => navigate('/profile')}
                 className="flex-1"
               >
                 إلغاء
