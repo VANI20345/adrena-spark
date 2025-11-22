@@ -19,12 +19,14 @@ import {
   Star,
   DollarSign,
   Phone,
-  Mail
+  Mail,
+  FileText
 } from 'lucide-react';
 import { servicesService, profilesService } from '@/services/supabaseServices';
 import { serviceBookingService } from '@/services/serviceBookingService';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import ProviderReports from '@/components/ProviderReports';
 
 interface Service {
   id: string;
@@ -88,6 +90,7 @@ const ProviderDashboard = () => {
     avgRating: 0
   });
   const [loading, setLoading] = useState(true);
+  const [showReports, setShowReports] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -195,16 +198,16 @@ const ProviderDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2">
-                Welcome, {profile?.full_name || 'Service Provider'}!
+                مرحباً، {profile?.full_name || 'مقدم الخدمة'}!
               </h1>
               <p className="text-muted-foreground">
-                Manage your services and track organizer requests
+                إدارة خدماتك وتتبع طلبات المنظمين
               </p>
             </div>
             <Button asChild className="gap-2">
               <Link to="/create-service">
                 <Plus className="h-4 w-4" />
-                Add New Service
+                إضافة خدمة جديدة
               </Link>
             </Button>
           </div>
@@ -213,67 +216,67 @@ const ProviderDashboard = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Services</CardTitle>
+                <CardTitle className="text-sm font-medium">إجمالي الخدمات</CardTitle>
                 <Briefcase className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalServices}</div>
                 <p className="text-xs text-muted-foreground">
-                  +1 this month
+                  +1 هذا الشهر
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {stats.totalRevenue.toLocaleString()} SAR
+                  {stats.totalRevenue.toLocaleString()} ريال
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  +20% from last month
+                  +20% من الشهر الماضي
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+                <CardTitle className="text-sm font-medium">إجمالي الحجوزات</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalBookings}</div>
                 <p className="text-xs text-muted-foreground">
-                  +12 this month
+                  +12 هذا الشهر
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Services</CardTitle>
+                <CardTitle className="text-sm font-medium">الخدمات النشطة</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary">{stats.activeServices}</div>
                 <p className="text-xs text-muted-foreground">
-                  Available for booking
+                  متاح للحجز
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+                <CardTitle className="text-sm font-medium">متوسط التقييم</CardTitle>
                 <Star className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-yellow-600">{stats.avgRating}</div>
                 <p className="text-xs text-muted-foreground">
-                  Out of 5 stars
+                  من 5 نجوم
                 </p>
               </CardContent>
             </Card>
@@ -285,19 +288,19 @@ const ProviderDashboard = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Briefcase className="h-5 w-5" />
-                  My Active Services
+                  خدماتي النشطة
                 </CardTitle>
-                <Button variant="outline" size="sm">
-                  View All
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/manage-services">عرض الكل</Link>
                 </Button>
               </div>
               <CardDescription>
-                Services currently available for booking
+                الخدمات المتاحة حالياً للحجز
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-center py-8">Loading...</div>
+                <div className="text-center py-8">جاري التحميل...</div>
               ) : services.length > 0 ? (
                 <div className="space-y-4">
                   {services.slice(0, 3).map((service) => (
@@ -319,27 +322,27 @@ const ProviderDashboard = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold">{service.name_ar || service.name}</h3>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                          <span>Service</span>
+                          <span>خدمة</span>
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {service.location_ar || service.location || 'Not specified'}
+                            {service.location_ar || service.location || 'غير محدد'}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant={service.status === 'approved' ? 'default' : 'secondary'}>
-                            {service.status === 'approved' ? 'Active' : 
-                             service.status === 'pending' ? 'Pending' : 'Inactive'}
+                            {service.status === 'approved' ? 'نشطة' : 
+                             service.status === 'pending' ? 'قيد المراجعة' : 'غير نشطة'}
                           </Badge>
                           {service.featured && (
-                            <Badge variant="outline">Featured</Badge>
+                            <Badge variant="outline">مميزة</Badge>
                           )}
                         </div>
                       </div>
                       
-                      <div className="text-left">
-                        <p className="font-semibold">{service.price} SAR</p>
+                      <div className="text-right">
+                        <p className="font-semibold">{service.price} ريال</p>
                         <p className="text-xs text-muted-foreground">
-                          {service.duration_minutes ? `${service.duration_minutes} minutes` : 'Service price'}
+                          {service.duration_minutes ? `${service.duration_minutes} دقيقة` : 'سعر الخدمة'}
                         </p>
                       </div>
                       
@@ -347,13 +350,13 @@ const ProviderDashboard = () => {
                         <Button asChild variant="outline" size="sm" className="gap-1">
                           <Link to={`/service/${service.id}`}>
                             <Eye className="h-3 w-3" />
-                            View
+                            عرض
                           </Link>
                         </Button>
                         <Button asChild variant="outline" size="sm" className="gap-1">
                           <Link to="/manage-services">
                             <Settings className="h-3 w-3" />
-                            Manage
+                            إدارة
                           </Link>
                         </Button>
                       </div>
@@ -362,7 +365,7 @@ const ProviderDashboard = () => {
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  No services currently available
+                  لا توجد خدمات متاحة حالياً
                 </div>
               )}
             </CardContent>
@@ -609,18 +612,29 @@ const ProviderDashboard = () => {
                   <span>الرسائل</span>
                 </Button>
                 
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
-                  <Wallet className="h-6 w-6" />
-                  <span>المحفظة</span>
+                <Button asChild variant="outline" className="h-auto p-4 flex flex-col gap-2">
+                  <Link to="/wallet">
+                    <Wallet className="h-6 w-6" />
+                    <span>المحفظة</span>
+                  </Link>
                 </Button>
                 
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
+                <Button 
+                  variant="outline" 
+                  className="h-auto p-4 flex flex-col gap-2"
+                  onClick={() => setShowReports(!showReports)}
+                >
                   <TrendingUp className="h-6 w-6" />
                   <span>التقارير</span>
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Reports Section */}
+          {showReports && (
+            <ProviderReports />
+          )}
         </div>
       </main>
       <Footer />
