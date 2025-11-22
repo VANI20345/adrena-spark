@@ -113,59 +113,11 @@ const HeroSection = () => {
               انضم لأفضل الفعاليات والمغامرات في المملكة العربية السعودية واستمتع بتجارب استثنائية
             </p>
 
-            {/* Search Banner */}
-            <Card className="bg-white/10 dark:bg-primary/20 backdrop-blur-sm border-white/20 dark:border-primary/30 p-6 mb-8">
-              <CardContent className="p-0">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Select value={searchCity} onValueChange={setSearchCity}>
-                    <SelectTrigger className="bg-white/90 dark:bg-card border-white/30 dark:border-border">
-                      <SelectValue placeholder="اختر المدينة" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background z-50">
-                      {cities.map((city) => (
-                        <SelectItem key={city.id} value={city.name_ar.toLowerCase()}>
-                          {city.name_ar}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={searchCategory} onValueChange={setSearchCategory}>
-                    <SelectTrigger className="bg-white/90 dark:bg-card border-white/30 dark:border-border">
-                      <SelectValue placeholder="نوع الفعالية" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background z-50">
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name_ar}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Input
-                    type="date"
-                    value={searchDate}
-                    onChange={(e) => setSearchDate(e.target.value)}
-                    className="bg-white/90 dark:bg-card border-white/30 dark:border-border"
-                  />
-
-                  <Button 
-                    onClick={handleSearch}
-                    className="bg-primary hover:bg-primary-glow text-white font-semibold"
-                  >
-                    <Search className="w-4 h-4 ml-2" />
-                    بحث
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="text-lg px-8 bg-primary hover:bg-primary-glow" asChild>
-                <Link to="/explore">
-                  استكشف الفعاليات
+                <Link to="/discover-groups">
+                  قم بالانضمام الى قروبات
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-8 bg-white/10 dark:bg-primary/20 border-white/30 dark:border-primary/40 text-white hover:bg-white/20 dark:hover:bg-primary/30" asChild>
