@@ -18,8 +18,7 @@ const DiscountedEvents = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center gap-3">
-              <Tag className="w-8 h-8 text-destructive" />
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               الخصومات
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl">
@@ -49,8 +48,7 @@ const DiscountedEvents = () => {
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center gap-3">
-            <Tag className="w-8 h-8 text-destructive" />
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             الخصومات
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl">

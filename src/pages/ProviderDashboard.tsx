@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
@@ -20,13 +20,25 @@ import {
   DollarSign,
   Phone,
   Mail,
-  FileText
+  FileText,
+  CreditCard,
+  Download,
+  ArrowUpRight,
+  ArrowDownLeft,
+  AlertCircle
 } from 'lucide-react';
 import { servicesService, profilesService } from '@/services/supabaseServices';
 import { serviceBookingService } from '@/services/serviceBookingService';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import ProviderReports from '@/components/ProviderReports';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useSupabaseQuery } from '@/hooks/useSupabaseQuery';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Service {
   id: string;
@@ -91,6 +103,105 @@ const ProviderDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [showReports, setShowReports] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [selectedBank, setSelectedBank] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  // Fetch wallet data
+  const { data: walletData, isLoading: walletLoading } = useSupabaseQuery({
+    queryKey: ['wallet', user?.id],
+    queryFn: useCallback(async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from('user_wallets')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    }, [user?.id]),
+    enabled: !!user?.id
+  });
+
+  const banks = [
+    { id: 'rajhi', name: 'مصرف الراجحي' },
+    { id: 'ncb', name: 'البنك الأهلي التجاري' },
+    { id: 'riyad', name: 'بنك الرياض' },
+    { id: 'samba', name: 'بنك سامبا' },
+    { id: 'arab', name: 'البنك العربي الوطني' }
+  ];
+
+  const currentBalance = walletData?.balance || 0;
+  const totalEarnings = walletData?.total_earned || 0;
+  const totalWithdrawn = walletData?.total_withdrawn || 0;
+  const availableForWithdraw = Math.max(0, currentBalance - 50);
+
+  const handleWithdraw = async () => {
+    if (!withdrawAmount || !selectedBank || !accountNumber) {
+      toast({
+        title: "خطأ",
+        description: "يرجى ملء جميع الحقول المطلوبة",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const amount = parseFloat(withdrawAmount);
+    const availableBalance = (walletData?.balance || 0) - 50;
+
+    if (amount < 100) {
+      toast({
+        title: "خطأ",
+        description: "الحد الأدنى للسحب هو 100 ريال",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (amount > availableBalance) {
+      toast({
+        title: "خطأ",
+        description: "المبلغ أكبر من الرصيد المتاح",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsWithdrawing(true);
+    try {
+      const { error } = await supabase
+        .from('wallet_transactions')
+        .insert({
+          user_id: user!.id,
+          type: 'withdraw',
+          amount: -amount,
+          description: `سحب إلى ${banks.find(b => b.id === selectedBank)?.name} - ${accountNumber}`,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+      
+      toast({
+        title: "تم بنجاح!",
+        description: `تم طلب سحب ${amount} ريال. ستتم المعالجة خلال 1-3 أيام عمل.`
+      });
+      
+      setWithdrawAmount('');
+      setSelectedBank('');
+      setAccountNumber('');
+    } catch (error) {
+      console.error('Error creating withdrawal request:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في طلب السحب",
+        variant: "destructive"
+      });
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -211,6 +322,119 @@ const ProviderDashboard = () => {
               </Link>
             </Button>
           </div>
+
+          {/* Wallet Section */}
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-primary" />
+                المحفظة الرقمية
+              </CardTitle>
+              <CardDescription>إدارة أموالك ومتابعة الأرباح</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">الرصيد الحالي</p>
+                  <p className="text-2xl font-bold text-primary">{currentBalance.toLocaleString()} ريال</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">المتاح للسحب</p>
+                  <p className="text-2xl font-bold text-green-600">{availableForWithdraw.toLocaleString()} ريال</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">إجمالي الأرباح</p>
+                  <p className="text-2xl font-bold text-blue-600">{totalEarnings.toLocaleString()} ريال</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">إجمالي السحوبات</p>
+                  <p className="text-2xl font-bold text-orange-600">{totalWithdrawn.toLocaleString()} ريال</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2" disabled={availableForWithdraw < 100}>
+                      <CreditCard className="h-4 w-4" />
+                      سحب الأموال
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>سحب الأموال</DialogTitle>
+                      <DialogDescription>
+                        اسحب أموالك إلى حسابك البنكي
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="amount">المبلغ (ريال)</Label>
+                        <Input
+                          id="amount"
+                          type="number"
+                          min="100"
+                          max={availableForWithdraw}
+                          placeholder="أدخل المبلغ"
+                          value={withdrawAmount}
+                          onChange={(e) => setWithdrawAmount(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          المتاح للسحب: {availableForWithdraw} ريال
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="bank">البنك</Label>
+                        <Select value={selectedBank} onValueChange={setSelectedBank}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر البنك" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {banks.map((bank) => (
+                              <SelectItem key={bank.id} value={bank.id}>
+                                {bank.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="account">رقم الحساب</Label>
+                        <Input
+                          id="account"
+                          placeholder="أدخل رقم الحساب البنكي"
+                          value={accountNumber}
+                          onChange={(e) => setAccountNumber(e.target.value)}
+                        />
+                      </div>
+                      
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          مدة المعالجة: 1-3 أيام عمل. رسوم السحب: 5 ريال
+                        </AlertDescription>
+                      </Alert>
+                      
+                      <Button 
+                        onClick={handleWithdraw} 
+                        disabled={isWithdrawing}
+                        className="w-full"
+                      >
+                        {isWithdrawing ? "جاري المعالجة..." : "تأكيد السحب"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button variant="outline" asChild className="gap-2">
+                  <Link to="/wallet">
+                    <ArrowUpRight className="h-4 w-4" />
+                    عرض المحفظة الكاملة
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Stats Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
