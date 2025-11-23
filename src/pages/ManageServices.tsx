@@ -216,7 +216,7 @@ const ManageServicesPage = () => {
                 </Button>
                 {service.status !== 'rejected' && (
                   <>
-                    <Button size="sm" variant="outline" asChild className="gap-2" disabled={service.status === 'approved'}>
+                    <Button size="sm" variant="outline" asChild className="gap-2">
                       <Link to={`/create-service?edit=${service.id}`}>
                         <Edit className="h-4 w-4" />
                         تعديل

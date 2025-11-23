@@ -81,8 +81,7 @@ const JoinSuggestions = () => {
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center gap-3">
-              <Sparkles className="w-8 h-8 text-primary" />
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               مقترحات للانضمام
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl">
@@ -110,8 +109,7 @@ const JoinSuggestions = () => {
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center gap-3">
-              <Sparkles className="w-8 h-8 text-primary" />
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               مقترحات للانضمام
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl">
@@ -130,8 +128,7 @@ const JoinSuggestions = () => {
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center gap-3">
-            <Sparkles className="w-8 h-8 text-primary" />
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             مقترحات للانضمام
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl">
