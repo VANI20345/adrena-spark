@@ -45,16 +45,35 @@ interface DetailedBooking {
 const ProviderReports = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [reportType, setReportType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
+  const [reportType, setReportType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly' | 'all-time'>('monthly');
   const [reportData, setReportData] = useState<ReportData[]>([]);
   const [detailedBookings, setDetailedBookings] = useState<DetailedBooking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [joinDate, setJoinDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    if (user) {
+    const fetchJoinDate = async () => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('created_at')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile) {
+          setJoinDate(new Date(profile.created_at));
+        }
+      }
+    };
+
+    fetchJoinDate();
+  }, [user]);
+
+  useEffect(() => {
+    if (user && joinDate) {
       fetchReportData();
     }
-  }, [user, reportType]);
+  }, [user, reportType, joinDate]);
 
   const fetchReportData = async () => {
     if (!user) return;
@@ -320,7 +339,7 @@ const ProviderReports = () => {
           <CardContent>
             <div className="text-2xl font-bold">{reportData.length}</div>
             <p className="text-xs text-muted-foreground">
-              {reportType === 'daily' ? 'أيام' : reportType === 'weekly' ? 'أسابيع' : reportType === 'monthly' ? 'أشهر' : 'سنوات'}
+              {reportType === 'all-time' ? 'منذ الانضمام' : reportType === 'daily' ? 'أيام' : reportType === 'weekly' ? 'أسابيع' : reportType === 'monthly' ? 'أشهر' : 'سنوات'}
             </p>
           </CardContent>
         </Card>
@@ -328,11 +347,12 @@ const ProviderReports = () => {
 
       {/* Report Tabs */}
       <Tabs value={reportType} onValueChange={(value) => setReportType(value as any)} dir="rtl">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="daily">يومي</TabsTrigger>
           <TabsTrigger value="weekly">أسبوعي</TabsTrigger>
           <TabsTrigger value="monthly">شهري</TabsTrigger>
           <TabsTrigger value="yearly">سنوي</TabsTrigger>
+          <TabsTrigger value="all-time">كل الوقت</TabsTrigger>
         </TabsList>
 
         <TabsContent value={reportType} className="space-y-4">
