@@ -549,6 +549,11 @@ const AdminPanel = () => {
             <ReportedMessagesTab />
           </TabsContent>
 
+          {/* Reports Tab */}
+          <TabsContent value="reports">
+            <AdminReportsTab />
+          </TabsContent>
+
           {/* System Tab */}
           <TabsContent value="system" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
