@@ -28,6 +28,7 @@ import { AdminEventsTab } from '@/components/Admin/AdminEventsTab';
 import { AdminServicesTab } from '@/components/Admin/AdminServicesTab';
 import { AdminUsersTab } from '@/components/Admin/AdminUsersTab';
 import { ProviderVerificationTab } from '@/components/Admin/ProviderVerificationTab';
+import { AdminReportsTab } from '@/components/Admin/AdminReportsTab';
 import { adminService } from '@/services/adminService';
 import { activityLogService } from '@/services/activityLogService';
 import { 
@@ -423,6 +424,7 @@ const AdminPanel = () => {
               <TabsTrigger value="regional-groups" className="whitespace-nowrap">مجموعات إقليمية</TabsTrigger>
               <TabsTrigger value="groups-management" className="whitespace-nowrap">إدارة المجموعات</TabsTrigger>
               <TabsTrigger value="reported-messages" className="whitespace-nowrap">الرسائل المبلغ عنها</TabsTrigger>
+              <TabsTrigger value="reports" className="whitespace-nowrap">التقارير</TabsTrigger>
               <TabsTrigger value="system" className="whitespace-nowrap">النظام</TabsTrigger>
               <TabsTrigger value="notifications" className="whitespace-nowrap">الإشعارات</TabsTrigger>
               <TabsTrigger value="activity" className="whitespace-nowrap">سجل النشاطات</TabsTrigger>

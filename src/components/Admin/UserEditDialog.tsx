@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { adminService } from '@/services/adminService';
 
 interface UserEditDialogProps {
   open: boolean;
@@ -27,16 +28,19 @@ export const UserEditDialog = ({ open, onOpenChange, user, onSuccess }: UserEdit
     full_name: '',
     phone: '',
     city: '',
-    bio: ''
+    bio: '',
+    role: 'attendee'
   });
 
   useEffect(() => {
     if (user) {
+      const currentRole = user.user_roles?.[0]?.role || 'attendee';
       setFormData({
         full_name: user.full_name || '',
         phone: user.phone || '',
         city: user.city || '',
-        bio: user.bio || ''
+        bio: user.bio || '',
+        role: currentRole
       });
     }
   }, [user]);
@@ -46,12 +50,24 @@ export const UserEditDialog = ({ open, onOpenChange, user, onSuccess }: UserEdit
     setLoading(true);
 
     try {
-      const { error } = await supabase
+      // Update profile data
+      const { error: profileError } = await supabase
         .from('profiles')
-        .update(formData)
+        .update({
+          full_name: formData.full_name,
+          phone: formData.phone,
+          city: formData.city,
+          bio: formData.bio
+        })
         .eq('user_id', user.user_id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Update user role if changed
+      const currentRole = user.user_roles?.[0]?.role || 'attendee';
+      if (formData.role !== currentRole) {
+        await adminService.updateUserRole(user.user_id, formData.role as any);
+      }
 
       toast.success('تم تحديث بيانات المستخدم');
       onSuccess();
@@ -111,6 +127,20 @@ export const UserEditDialog = ({ open, onOpenChange, user, onSuccess }: UserEdit
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               rows={3}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="role">رتبة الحساب</Label>
+            <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+              <SelectTrigger id="role">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="attendee">باحث عن فعاليات</SelectItem>
+                <SelectItem value="provider">مقدم خدمة</SelectItem>
+                <SelectItem value="admin">مدير</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter>
