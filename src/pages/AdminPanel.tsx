@@ -28,6 +28,7 @@ import { AdminEventsTab } from '@/components/Admin/AdminEventsTab';
 import { AdminServicesTab } from '@/components/Admin/AdminServicesTab';
 import { AdminUsersTab } from '@/components/Admin/AdminUsersTab';
 import { ProviderVerificationTab } from '@/components/Admin/ProviderVerificationTab';
+import { AdminReportsTab } from '@/components/Admin/AdminReportsTab';
 import { adminService } from '@/services/adminService';
 import { activityLogService } from '@/services/activityLogService';
 import { 
@@ -414,6 +415,7 @@ const AdminPanel = () => {
           <div className="w-full overflow-x-auto">
             <TabsList className="inline-flex w-max min-w-full h-auto flex-wrap gap-2 p-2 bg-muted rounded-lg">
               <TabsTrigger value="overview" className="whitespace-nowrap">نظرة عامة</TabsTrigger>
+              <TabsTrigger value="reports" className="whitespace-nowrap">التقارير</TabsTrigger>
               <TabsTrigger value="reviews" className="whitespace-nowrap">المراجعات</TabsTrigger>
               <TabsTrigger value="provider-verification" className="whitespace-nowrap">تحقق مقدمي الخدمات</TabsTrigger>
               <TabsTrigger value="users" className="whitespace-nowrap">المستخدمون</TabsTrigger>
@@ -446,6 +448,11 @@ const AdminPanel = () => {
               }} 
               loading={statsLoading} 
             />
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports">
+            <AdminReportsTab />
           </TabsContent>
 
           {/* Reviews Tab */}

@@ -107,7 +107,7 @@ export const adminService = {
     }
   },
 
-  async updateUserRole(userId: string, role: 'attendee' | 'provider' | 'admin') {
+  async updateUserRole(userId: string, role: 'attendee' | 'provider' | 'organizer' | 'admin') {
     try {
       // Get user info first
       const { data: userProfile } = await supabase
