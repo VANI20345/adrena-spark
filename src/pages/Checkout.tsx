@@ -302,7 +302,64 @@ const CheckoutPage = () => {
     });
   };
 
-  const handlePaymentSuccess = (paymentId: string) => {
+  const handlePaymentSuccess = async (paymentId: string) => {
+    // If this is a service booking, update its status to confirmed
+    if (isServiceBooking && serviceBookingId) {
+      try {
+        const { error } = await supabase
+          .from('service_bookings')
+          .update({ 
+            status: 'confirmed',
+            payment_id: paymentId 
+          })
+          .eq('id', serviceBookingId);
+
+        if (error) {
+          console.error('Error updating service booking:', error);
+        }
+
+        // Get provider ID and send notification
+        const { data: bookingData } = await supabase
+          .from('service_bookings')
+          .select('provider_id, service_id, services(name_ar)')
+          .eq('id', serviceBookingId)
+          .single();
+
+        if (bookingData) {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: bookingData.provider_id,
+              type: 'payment_received',
+              title: 'تم استلام الدفع',
+              message: `تم استلام دفعة جديدة لخدمتك. رقم المرجع: ${paymentId}`,
+              data: {
+                service_booking_id: serviceBookingId,
+                service_id: bookingData.service_id,
+                payment_id: paymentId
+              }
+            });
+        }
+
+        toast({
+          title: "تم الدفع بنجاح",
+          description: "تم تأكيد حجز الخدمة وإرسال إشعار لمقدم الخدمة",
+        });
+
+        navigate('/tickets', {
+          state: {
+            serviceBookingId,
+            paymentId,
+            bookingType: 'service'
+          }
+        });
+        return;
+      } catch (error) {
+        console.error('Error completing service booking:', error);
+      }
+    }
+
+    // For event bookings
     navigate('/checkout/success', {
       state: {
         eventId,

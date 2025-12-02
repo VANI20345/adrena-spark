@@ -59,9 +59,10 @@ interface Follower {
 }
 
 const Profile = () => {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, userRole } = useAuth();
   const navigate = useNavigate();
   const [isUploading, setIsUploading] = useState(false);
+  const isProvider = userRole === 'provider';
 
   // Fetch profile points
   const { data: profileData } = useQuery({
@@ -345,14 +346,16 @@ const Profile = () => {
             </div>
 
             {/* Stats Section */}
-            <div className="grid grid-cols-3 gap-8 w-full max-w-md">
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Award className="h-6 w-6 text-primary" />
+            <div className={`grid ${isProvider ? 'grid-cols-2' : 'grid-cols-3'} gap-8 w-full max-w-md`}>
+              {!isProvider && (
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <Award className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="text-3xl font-bold text-primary">{stats.points}</div>
+                  <div className="text-sm text-muted-foreground mt-1">النقاط</div>
                 </div>
-                <div className="text-3xl font-bold text-primary">{stats.points}</div>
-                <div className="text-sm text-muted-foreground mt-1">النقاط</div>
-              </div>
+              )}
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Users className="h-6 w-6 text-primary" />

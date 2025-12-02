@@ -53,7 +53,22 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         throw new Error('يرجى تسجيل الدخول أولاً');
       }
 
-      // Process payment through Moyasar
+      // TEMPORARY: Simulate successful payment until payment gateway is connected
+      // TODO: Replace with actual payment processing when API is ready
+      const simulatedPaymentId = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+      
+      // Simulate payment delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Call success handler with simulated payment ID
+      onPaymentSuccess(simulatedPaymentId);
+      toast({
+        title: 'تم الدفع بنجاح',
+        description: `تم خصم ${amount} ريال من بطاقتك (وضع تجريبي)`
+      });
+
+      /* 
+      // Original payment processing code - uncomment when payment gateway is ready
       const { data, error } = await supabase.functions.invoke('process-payment', {
         body: {
           amount,
@@ -83,12 +98,12 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
       } else if (data.status === 'failed') {
         throw new Error(data.message || 'فشل في معالجة الدفع');
       } else {
-        // Payment is pending or requires additional steps
         toast({
           title: 'معالجة الدفع',
           description: 'جاري معالجة دفعتك، سيتم إشعارك بالنتيجة قريباً'
         });
       }
+      */
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'خطأ في الدفع';
       onPaymentFailure(errorMessage);
