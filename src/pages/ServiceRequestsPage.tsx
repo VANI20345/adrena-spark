@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguageContext } from '@/contexts/LanguageContext';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import Navbar from '@/components/Layout/Navbar';
@@ -59,18 +60,21 @@ interface ServiceRequest {
 const ServiceRequestsPage = () => {
   const { user, userRole } = useAuth();
   const { t, language } = useLanguageContext();
+  const [searchParams] = useSearchParams();
+  const serviceIdFilter = searchParams.get('service');
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('received');
   const [responseMessage, setResponseMessage] = useState('');
   const [negotiatedPrice, setNegotiatedPrice] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
+  const [filteredServiceName, setFilteredServiceName] = useState<string>('');
 
   useEffect(() => {
     if (user && userRole) {
       loadServiceRequests();
     }
-  }, [user, userRole, activeTab]);
+  }, [user, userRole, activeTab, serviceIdFilter]);
 
   const loadServiceRequests = async () => {
     try {
@@ -90,13 +94,30 @@ const ServiceRequestsPage = () => {
         if (activeTab === 'received') {
           query = query.eq('provider_id', user.id);
         } else {
-          // For providers, "sent" requests would be responses to organizer requests
           query = query.eq('provider_id', user.id).neq('status', 'pending');
         }
       } else if (userRole === 'attendee') {
         if (activeTab === 'sent') {
           query = query.eq('organizer_id', user.id);
         }
+      }
+
+      // Filter by specific service if provided
+      if (serviceIdFilter) {
+        query = query.eq('service_id', serviceIdFilter);
+        
+        // Get service name for display
+        const { data: serviceData } = await supabase
+          .from('services')
+          .select('name_ar, name')
+          .eq('id', serviceIdFilter)
+          .single();
+        
+        if (serviceData) {
+          setFilteredServiceName(language === 'ar' ? serviceData.name_ar : serviceData.name);
+        }
+      } else {
+        setFilteredServiceName('');
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -317,11 +338,15 @@ const ServiceRequestsPage = () => {
         <div className="space-y-6">
           {/* Header */}
           <div>
-            <h1 className="text-3xl font-bold mb-2">طلبات الخدمات</h1>
+            <h1 className="text-3xl font-bold mb-2">
+              {filteredServiceName ? `طلبات خدمة: ${filteredServiceName}` : 'طلبات الخدمات'}
+            </h1>
             <p className="text-muted-foreground">
-              {userRole === 'provider' 
-                ? 'إدارة طلبات ربط الخدمات الواردة إليك'
-                : 'تتبع طلبات ربط الخدمات التي أرسلتها'
+              {filteredServiceName 
+                ? 'عرض الطلبات الخاصة بهذه الخدمة فقط'
+                : userRole === 'provider' 
+                  ? 'إدارة طلبات ربط الخدمات الواردة إليك'
+                  : 'تتبع طلبات ربط الخدمات التي أرسلتها'
               }
             </p>
           </div>

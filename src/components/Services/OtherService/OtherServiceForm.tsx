@@ -372,11 +372,11 @@ const OtherServiceForm = () => {
                 </CardContent>
               </Card>
 
-              <div className="flex gap-4">
-                <Button type="submit" size="lg" disabled={isSubmitting} className="flex-1">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button type="submit" size="lg" disabled={isSubmitting} className="w-full sm:flex-1">
                   {isSubmitting ? "جاري الإنشاء..." : "إنشاء الخدمة"}
                 </Button>
-                <Button type="button" variant="outline" size="lg" onClick={() => navigate('/create-service')}>
+                <Button type="button" variant="outline" size="lg" onClick={() => navigate('/create-service')} className="w-full sm:w-auto">
                   إلغاء
                 </Button>
               </div>

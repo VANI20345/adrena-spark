@@ -136,7 +136,9 @@ const ServiceSection = ({
                 <Button asChild variant="outline" className="flex-1">
                   <Link to={`/service/${service.id}`}>التفاصيل</Link>
                 </Button>
-                <Button className="flex-1">احجز الآن</Button>
+                <Button asChild className="flex-1">
+                  <Link to={`/services/${service.id}/booking`}>احجز الآن</Link>
+                </Button>
               </div>
             </CardFooter>
           </Card>

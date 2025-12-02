@@ -1,9 +1,53 @@
 import { Link } from "react-router-dom";
-import { Mountain, Instagram, Video } from "lucide-react";
+import { Mountain, Instagram } from "lucide-react";
 import { XIcon } from "@/components/Layout/XIcon";
-
+import { useLanguageContext } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { language } = useLanguageContext();
+  const isArabic = language === 'ar';
+
+  const translations = {
+    ar: {
+      brand: 'هواية',
+      tagline: 'منصة الأنشطة الخارجية والمغامرات الرائدة في المملكة العربية السعودية',
+      quickLinks: 'روابط سريعة',
+      exploreGroups: 'استكشاف المجموعات',
+      services: 'الخدمات',
+      createEvent: 'أنشئ فعاليتك',
+      offerService: 'قدّم خدمتك',
+      support: 'الدعم',
+      helpCenter: 'مركز المساعدة',
+      contactUs: 'تواصل معنا',
+      safetyGuidelines: 'إرشادات السلامة',
+      legal: 'قانوني',
+      termsConditions: 'الشروط والأحكام',
+      privacyPolicy: 'سياسة الخصوصية',
+      refundPolicy: 'سياسة الاسترداد',
+      copyright: '© {year} هواية. جميع الحقوق محفوظة.',
+    },
+    en: {
+      brand: 'Hewaia',
+      tagline: 'The leading outdoor activities and adventures platform in Saudi Arabia',
+      quickLinks: 'Quick Links',
+      exploreGroups: 'Explore Groups',
+      services: 'Services',
+      createEvent: 'Create Your Event',
+      offerService: 'Offer Your Service',
+      support: 'Support',
+      helpCenter: 'Help Center',
+      contactUs: 'Contact Us',
+      safetyGuidelines: 'Safety Guidelines',
+      legal: 'Legal',
+      termsConditions: 'Terms & Conditions',
+      privacyPolicy: 'Privacy Policy',
+      refundPolicy: 'Refund Policy',
+      copyright: '© {year} Hewaia. All rights reserved.',
+    }
+  };
+
+  const t = isArabic ? translations.ar : translations.en;
+
   return (
     <footer className="bg-secondary border-t mt-auto">
       <div className="container mx-auto px-4 py-12">
@@ -14,10 +58,10 @@ const Footer = () => {
               <div className="flex items-center justify-center w-8 h-8 rounded-lg hero-gradient">
                 <Mountain className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-primary">هواية</span>
+              <span className="text-xl font-bold text-primary">{t.brand}</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              منصة الأنشطة الخارجية والمغامرات الرائدة في المملكة العربية السعودية
+              {t.tagline}
             </p>
             <div className="flex space-x-4 rtl:space-x-reverse">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
@@ -36,39 +80,39 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4">روابط سريعة</h3>
+            <h3 className="font-semibold mb-4">{t.quickLinks}</h3>
             <ul className="space-y-2">
-              <li><Link to="/discover-groups" className="text-sm text-muted-foreground hover:text-primary smooth-transition">استكشاف المجموعات</Link></li>
-              <li><Link to="/services" className="text-sm text-muted-foreground hover:text-primary smooth-transition">الخدمات</Link></li>
-              <li><Link to="/create-event" className="text-sm text-muted-foreground hover:text-primary smooth-transition">أنشئ فعاليتك</Link></li>
-              <li><Link to="/create-service" className="text-sm text-muted-foreground hover:text-primary smooth-transition">قدّم خدمتك</Link></li>
+              <li><Link to="/discover-groups" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.exploreGroups}</Link></li>
+              <li><Link to="/services" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.services}</Link></li>
+              <li><Link to="/create-event" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.createEvent}</Link></li>
+              <li><Link to="/create-service" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.offerService}</Link></li>
             </ul>
           </div>
 
           {/* Support */}
           <div>
-            <h3 className="font-semibold mb-4">الدعم</h3>
+            <h3 className="font-semibold mb-4">{t.support}</h3>
             <ul className="space-y-2">
-              <li><Link to="/help" className="text-sm text-muted-foreground hover:text-primary smooth-transition">مركز المساعدة</Link></li>
-              <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-primary smooth-transition">تواصل معنا</Link></li>
-              <li><Link to="/safety" className="text-sm text-muted-foreground hover:text-primary smooth-transition">إرشادات السلامة</Link></li>
+              <li><Link to="/help" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.helpCenter}</Link></li>
+              <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.contactUs}</Link></li>
+              <li><Link to="/safety" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.safetyGuidelines}</Link></li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
-            <h3 className="font-semibold mb-4">قانوني</h3>
+            <h3 className="font-semibold mb-4">{t.legal}</h3>
             <ul className="space-y-2">
-              <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-primary smooth-transition">الشروط والأحكام</Link></li>
-              <li><Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary smooth-transition">سياسة الخصوصية</Link></li>
-              <li><Link to="/refund" className="text-sm text-muted-foreground hover:text-primary smooth-transition">سياسة الاسترداد</Link></li>
+              <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.termsConditions}</Link></li>
+              <li><Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.privacyPolicy}</Link></li>
+              <li><Link to="/refund" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.refundPolicy}</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="border-t mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} هواية. جميع الحقوق محفوظة.
+            {t.copyright.replace('{year}', new Date().getFullYear().toString())}
           </p>
         </div>
       </div>
