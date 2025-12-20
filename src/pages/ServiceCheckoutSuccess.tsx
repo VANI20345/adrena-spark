@@ -240,7 +240,10 @@ const ServiceCheckoutSuccess = () => {
                     {isRTL ? 'المبلغ الإجمالي' : 'Total Amount'}
                   </p>
                   <p className="text-xl font-bold text-primary">
-                    {booking.total_amount?.toLocaleString()} {isRTL ? 'ر.س' : 'SAR'}
+                    {booking.total_amount === 0 
+                      ? (isRTL ? 'مجاني' : 'Free')
+                      : `${booking.total_amount?.toLocaleString()} ${isRTL ? 'ر.س' : 'SAR'}`
+                    }
                   </p>
                 </div>
               </div>
