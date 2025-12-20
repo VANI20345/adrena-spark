@@ -22,34 +22,40 @@ import {
   Share2
 } from 'lucide-react';
 
-interface BookingDetails {
+interface ServiceData {
+  name_ar: string;
+  name: string;
+  image_url: string | null;
+  duration_minutes: number | null;
+  location_ar: string | null;
+  location: string | null;
+}
+
+interface ProviderData {
+  full_name: string | null;
+  phone: string | null;
+}
+
+interface BookingData {
   id: string;
   booking_reference: string;
   service_date: string;
   total_amount: number;
   status: string;
   special_requests: string | null;
-  services: {
-    name_ar: string;
-    name: string;
-    image_url: string | null;
-    duration_minutes: number | null;
-    location_ar: string | null;
-    location: string | null;
-  };
-  profiles: {
-    full_name: string;
-    phone: string;
-  };
+  service_id: string;
+  provider_id: string;
 }
 
 const ServiceCheckoutSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { language } = useLanguageContext();
+  const { t, language } = useLanguageContext();
   const { toast } = useToast();
   const { serviceBookingId, paymentId } = location.state || {};
-  const [booking, setBooking] = useState<BookingDetails | null>(null);
+  const [booking, setBooking] = useState<BookingData | null>(null);
+  const [service, setService] = useState<ServiceData | null>(null);
+  const [provider, setProvider] = useState<ProviderData | null>(null);
   const [loading, setLoading] = useState(true);
   const isRTL = language === 'ar';
 
@@ -63,23 +69,42 @@ const ServiceCheckoutSuccess = () => {
 
   const fetchBookingDetails = async () => {
     try {
-      const { data, error } = await supabase
+      // Step 1: Fetch booking data
+      const { data: bookingData, error: bookingError } = await supabase
         .from('service_bookings')
-        .select(`
-          id,
-          booking_reference,
-          service_date,
-          total_amount,
-          status,
-          special_requests,
-          services!service_id(name_ar, name, image_url, duration_minutes, location_ar, location),
-          profiles!provider_id(full_name, phone)
-        `)
+        .select('id, booking_reference, service_date, total_amount, status, special_requests, service_id, provider_id')
         .eq('id', serviceBookingId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      setBooking(data as unknown as BookingDetails);
+      if (bookingError) throw bookingError;
+      if (!bookingData) {
+        setLoading(false);
+        return;
+      }
+      
+      setBooking(bookingData);
+
+      // Step 2: Fetch service data
+      const { data: serviceData, error: serviceError } = await supabase
+        .from('services')
+        .select('name_ar, name, image_url, duration_minutes, location_ar, location')
+        .eq('id', bookingData.service_id)
+        .maybeSingle();
+
+      if (!serviceError && serviceData) {
+        setService(serviceData);
+      }
+
+      // Step 3: Fetch provider data
+      const { data: providerData, error: providerError } = await supabase
+        .from('profiles')
+        .select('full_name, phone')
+        .eq('user_id', bookingData.provider_id)
+        .maybeSingle();
+
+      if (!providerError && providerData) {
+        setProvider(providerData);
+      }
     } catch (error) {
       console.error('Error fetching booking:', error);
     } finally {
@@ -91,8 +116,8 @@ const ServiceCheckoutSuccess = () => {
     const shareData = {
       title: isRTL ? 'حجزت خدمة!' : 'I booked a service!',
       text: isRTL 
-        ? `حجزت خدمة ${booking?.services?.name_ar}`
-        : `I booked ${booking?.services?.name}`,
+        ? `حجزت خدمة ${service?.name_ar}`
+        : `I booked ${service?.name}`,
       url: window.location.origin
     };
 
@@ -127,14 +152,14 @@ const ServiceCheckoutSuccess = () => {
 
   if (!booking) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background" dir={isRTL ? 'rtl' : 'ltr'}>
         <Navbar />
         <main className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">
-            {isRTL ? 'لم يتم العثور على الحجز' : 'Booking not found'}
+            {t('serviceBooking.notFound')}
           </h1>
           <Button asChild>
-            <Link to="/">{isRTL ? 'العودة للصفحة الرئيسية' : 'Back to Home'}</Link>
+            <Link to="/">{t('serviceBooking.backToHome')}</Link>
           </Button>
         </main>
         <Footer />
@@ -154,12 +179,10 @@ const ServiceCheckoutSuccess = () => {
               <CheckCircle className="w-12 h-12 text-green-600" />
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              {isRTL ? 'تم الحجز بنجاح!' : 'Booking Successful!'}
+              {t('serviceBooking.successTitle')}
             </h1>
             <p className="text-muted-foreground">
-              {isRTL 
-                ? 'تم تأكيد حجزك وإرسال إشعار لمقدم الخدمة'
-                : 'Your booking has been confirmed and the provider has been notified'}
+              {t('serviceBooking.successDescription')}
             </p>
           </div>
 
@@ -170,7 +193,7 @@ const ServiceCheckoutSuccess = () => {
                 <div className="flex items-center gap-3">
                   <Hash className="h-5 w-5 text-primary" />
                   <span className="text-muted-foreground">
-                    {isRTL ? 'رقم الحجز:' : 'Booking Reference:'}
+                    {t('serviceBooking.bookingReference')}:
                   </span>
                 </div>
                 <Badge variant="outline" className="text-lg font-mono px-4 py-2">
@@ -185,32 +208,32 @@ const ServiceCheckoutSuccess = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
-                {isRTL ? 'تفاصيل الخدمة' : 'Service Details'}
+                {t('serviceBooking.serviceDetails')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-4">
-                {booking.services?.image_url && (
+                {service?.image_url && (
                   <img 
-                    src={booking.services.image_url} 
-                    alt={isRTL ? booking.services.name_ar : booking.services.name}
+                    src={service.image_url} 
+                    alt={isRTL ? service.name_ar : service.name}
                     className="w-24 h-24 object-cover rounded-lg"
                   />
                 )}
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg">
-                    {isRTL ? booking.services?.name_ar : booking.services?.name}
+                    {isRTL ? service?.name_ar : service?.name}
                   </h3>
-                  {(isRTL ? booking.services?.location_ar : booking.services?.location) && (
+                  {(isRTL ? service?.location_ar : service?.location) && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                       <MapPin className="h-4 w-4" />
-                      {isRTL ? booking.services.location_ar : booking.services.location}
+                      {isRTL ? service?.location_ar : service?.location}
                     </div>
                   )}
-                  {booking.services?.duration_minutes && (
+                  {service?.duration_minutes && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                       <Clock className="h-4 w-4" />
-                      {booking.services.duration_minutes} {isRTL ? 'دقيقة' : 'minutes'}
+                      {service.duration_minutes} {isRTL ? 'دقيقة' : 'minutes'}
                     </div>
                   )}
                 </div>
@@ -221,7 +244,7 @@ const ServiceCheckoutSuccess = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">
-                    {isRTL ? 'تاريخ الخدمة' : 'Service Date'}
+                    {t('serviceBooking.serviceDate')}
                   </p>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-primary" />
@@ -237,11 +260,11 @@ const ServiceCheckoutSuccess = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">
-                    {isRTL ? 'المبلغ الإجمالي' : 'Total Amount'}
+                    {t('serviceBooking.totalAmount')}
                   </p>
                   <p className="text-xl font-bold text-primary">
                     {booking.total_amount === 0 
-                      ? (isRTL ? 'مجاني' : 'Free')
+                      ? t('serviceBooking.free')
                       : `${booking.total_amount?.toLocaleString()} ${isRTL ? 'ر.س' : 'SAR'}`
                     }
                   </p>
@@ -253,18 +276,18 @@ const ServiceCheckoutSuccess = () => {
               {/* Provider Info */}
               <div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  {isRTL ? 'مقدم الخدمة' : 'Service Provider'}
+                  {t('serviceBooking.serviceProvider')}
                 </p>
                 <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                     <User className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium">{booking.profiles?.full_name}</p>
-                    {booking.profiles?.phone && (
+                    <p className="font-medium">{provider?.full_name || '-'}</p>
+                    {provider?.phone && (
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Phone className="h-3 w-3" />
-                        {booking.profiles.phone}
+                        {provider.phone}
                       </div>
                     )}
                   </div>
@@ -276,7 +299,7 @@ const ServiceCheckoutSuccess = () => {
                   <Separator />
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      {isRTL ? 'طلبات خاصة' : 'Special Requests'}
+                      {t('serviceBooking.specialRequests')}
                     </p>
                     <p className="text-foreground">{booking.special_requests}</p>
                   </div>
@@ -290,13 +313,17 @@ const ServiceCheckoutSuccess = () => {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">
-                  {isRTL ? 'حالة الحجز' : 'Booking Status'}
+                  {t('serviceBooking.bookingStatus')}
                 </span>
                 <Badge variant="default" className="bg-green-600">
                   {booking.status === 'confirmed' 
-                    ? (isRTL ? 'مؤكد' : 'Confirmed')
+                    ? t('serviceBooking.confirmed')
                     : booking.status === 'pending' 
-                    ? (isRTL ? 'قيد الانتظار' : 'Pending') 
+                    ? t('serviceBooking.pending')
+                    : booking.status === 'cancelled'
+                    ? t('serviceBooking.cancelled')
+                    : booking.status === 'completed'
+                    ? t('serviceBooking.completed')
                     : booking.status}
                 </Badge>
               </div>
@@ -308,25 +335,23 @@ const ServiceCheckoutSuccess = () => {
             <Button asChild className="flex-1">
               <Link to="/" className="gap-2">
                 <Home className="h-4 w-4" />
-                {isRTL ? 'العودة للصفحة الرئيسية' : 'Back to Home'}
+                {t('serviceBooking.backToHome')}
               </Link>
             </Button>
             <Button variant="outline" onClick={handleShare} className="flex-1">
               <Share2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-              {isRTL ? 'مشاركة' : 'Share'}
+              {t('serviceBooking.share')}
             </Button>
             <Button variant="outline" asChild className="flex-1">
               <Link to="/services">
-                {isRTL ? 'تصفح المزيد من الخدمات' : 'Browse More Services'}
+                {t('serviceBooking.browseMore')}
               </Link>
             </Button>
           </div>
 
           {/* Info Note */}
           <p className="text-center text-sm text-muted-foreground mt-6">
-            {isRTL 
-              ? 'سيتواصل معك مقدم الخدمة قريباً لتأكيد التفاصيل'
-              : 'The service provider will contact you soon to confirm the details'}
+            {t('serviceBooking.providerContact')}
           </p>
         </div>
       </main>
