@@ -163,13 +163,18 @@ const ServiceBooking = () => {
         console.error('Notification error (non-blocking):', notificationError);
       }
 
-      // If service is free, mark as complete
+      // If service is free, redirect to success page
       if (service.price === 0) {
         toast({
           title: "تم الحجز بنجاح",
           description: "تم حجز الخدمة المجانية بنجاح",
         });
-        navigate('/attendee-dashboard');
+        navigate('/service-checkout/success', {
+          state: {
+            serviceBookingId: bookingData.id,
+            isFree: true
+          }
+        });
       } else {
         // Redirect to payment gateway with state
         toast({
