@@ -36,16 +36,14 @@ const Index = () => {
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
               <CardContent className="p-12 text-center">
                 <h2 className="text-3xl font-bold mb-4">
-                  {language === 'ar' ? 'انضم إلى هواية اليوم' : 'Join Hawaya Today'}
+                  {t('index.joinToday')}
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  {language === 'ar' 
-                    ? 'سجل الآن كمشارك واستمتع بتجارب مغامرات لا تُنسى في جميع أنحاء المملكة'
-                    : 'Sign up now as an attendee and enjoy unforgettable adventure experiences throughout the Kingdom'}
+                  {t('index.signUpDescription')}
                 </p>
                 <Button size="lg" asChild>
                   <Link to="/auth">
-                    {language === 'ar' ? 'سجل كمشارك' : 'Sign Up as Attendee'}
+                    {t('index.signUpAsAttendee')}
                   </Link>
                 </Button>
               </CardContent>
@@ -68,23 +66,21 @@ const Index = () => {
           <div className="container mx-auto px-4 py-16">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold mb-8 text-center">
-                {language === 'ar' ? 'إدارة خدماتك' : 'Manage Your Services'}
+                {t('index.manageServices')}
               </h2>
               <div className="grid md:grid-cols-2 gap-6">
                 <Card className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-8 text-center">
                     <Settings className="w-16 h-16 mx-auto mb-4 text-primary" />
                     <h3 className="text-xl font-semibold mb-3">
-                      {language === 'ar' ? 'إدارة الخدمات' : 'Manage Services'}
+                      {t('index.manageServicesButton')}
                     </h3>
                     <p className="text-muted-foreground mb-6">
-                      {language === 'ar' 
-                        ? 'عرض وتعديل خدماتك الحالية'
-                        : 'View and edit your current services'}
+                      {t('index.viewEditServices')}
                     </p>
                     <Button size="lg" variant="outline" className="w-full" asChild>
                       <Link to="/manage-services">
-                        {language === 'ar' ? 'إدارة الخدمات' : 'Manage Services'}
+                        {t('index.manageServicesButton')}
                       </Link>
                     </Button>
                   </CardContent>
@@ -94,16 +90,14 @@ const Index = () => {
                   <CardContent className="p-8 text-center">
                     <Plus className="w-16 h-16 mx-auto mb-4 text-primary" />
                     <h3 className="text-xl font-semibold mb-3">
-                      {language === 'ar' ? 'إضافة خدمة جديدة' : 'Add New Service'}
+                      {t('index.addNewService')}
                     </h3>
                     <p className="text-muted-foreground mb-6">
-                      {language === 'ar' 
-                        ? 'قدم خدمة جديدة لعملائك'
-                        : 'Offer a new service to your customers'}
+                      {t('index.offerNewService')}
                     </p>
                     <Button size="lg" className="w-full" asChild>
                       <Link to="/create-service">
-                        {language === 'ar' ? 'إضافة خدمة' : 'Add Service'}
+                        {t('index.addService')}
                       </Link>
                     </Button>
                   </CardContent>

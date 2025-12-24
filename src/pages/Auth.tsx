@@ -235,7 +235,7 @@ const Auth = () => {
                         className="rounded border-gray-300"
                       />
                       <Label htmlFor="remember" className="text-sm cursor-pointer">
-                        {language === 'ar' ? 'تذكر بياناتي' : 'Remember me'}
+                        {t('auth.rememberMe')}
                       </Label>
                     </div>
                     <Button

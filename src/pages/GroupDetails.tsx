@@ -17,7 +17,7 @@ import { useGroupDetails, useGroupMembers, usePendingJoinRequests, useInvalidate
 const GroupDetails = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const { user } = useAuth();
-  const { language } = useLanguageContext();
+  const { language, t } = useLanguageContext();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showJoinRequestsDialog, setShowJoinRequestsDialog] = useState(false);
@@ -81,16 +81,16 @@ const GroupDetails = () => {
       invalidate.invalidateMyGroups();
 
       toast({
-        title: isRTL ? 'تم بنجاح' : 'Success',
-        description: isRTL ? 'تم مغادرة المجموعة' : 'Left the group'
+        title: t('success'),
+        description: t('groups.leftSuccess')
       });
 
       navigate('/groups');
     } catch (error) {
       console.error('Error leaving group:', error);
       toast({
-        title: isRTL ? 'خطأ' : 'Error',
-        description: isRTL ? 'حدث خطأ أثناء مغادرة المجموعة' : 'Failed to leave group',
+        title: t('error'),
+        description: t('groups.leaveError'),
         variant: 'destructive'
       });
     }
