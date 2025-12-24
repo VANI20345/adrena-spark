@@ -35,6 +35,15 @@ const translations = {
       adventureAwaits: 'المغامرة في انتظارك',
       getStarted: 'ابدأ الآن',
       exploreNow: 'استكشف الآن',
+      joinToday: 'انضم إلى هواية اليوم',
+      signUpDescription: 'سجل الآن كمشارك واستمتع بتجارب مغامرات لا تُنسى في جميع أنحاء المملكة',
+      signUpAsAttendee: 'سجل كمشارك',
+      manageServices: 'إدارة خدماتك',
+      manageServicesButton: 'إدارة الخدمات',
+      viewEditServices: 'عرض وتعديل خدماتك الحالية',
+      addNewService: 'إضافة خدمة جديدة',
+      offerNewService: 'قدم خدمة جديدة لعملائك',
+      addService: 'إضافة خدمة',
     },
 
     // Explore Page
@@ -328,6 +337,7 @@ const translations = {
     // Wallet
     wallet: {
       title: 'المحفظة',
+      subtitle: 'إدارة أموالك ومعاملاتك',
       balance: 'الرصيد',
       availableBalance: 'الرصيد المتاح',
       pendingAmount: 'المبلغ المعلق',
@@ -393,6 +403,58 @@ const translations = {
       reference: 'مرجع',
       riyal: 'ريال',
       unknown: 'غير معروف',
+      // New keys for Wallet page
+      currentBalance: 'الرصيد الحالي',
+      totalBalance: 'إجمالي الرصيد',
+      availableForWithdraw: 'متاح للسحب',
+      canWithdrawNow: 'يمكن سحبه الآن',
+      totalEarnings: 'إجمالي الأرباح',
+      sinceBeginning: 'منذ البداية',
+      totalWithdrawals: 'إجمالي السحوبات',
+      withdrawn: 'تم سحبه',
+      exportTransactions: 'تصدير المعاملات',
+      quickActions: 'إجراءات سريعة',
+      quickActionsDesc: 'عمليات مالية سريعة',
+      instantTransfer: 'تحويل فوري',
+      instantTransferDesc: 'تحويل لحسابك البنكي',
+      instantTransferNote: 'هذه الميزة قادمة قريباً',
+      accountStatement: 'كشف الحساب',
+      accountStatementDesc: 'تحميل كشف حسابك',
+      profitReport: 'تقرير الأرباح',
+      profitReportDesc: 'عرض تقارير مفصلة',
+      withdrawalInfo: 'معلومات السحب',
+      withdrawalInfoItem1: 'الحد الأدنى للسحب: 100 ريال',
+      withdrawalInfoItem2: 'مدة المعالجة: 1-3 أيام عمل',
+      withdrawalInfoItem3: 'يجب الاحتفاظ برصيد 50 ريال',
+      withdrawalInfoItem4: 'لا توجد رسوم سحب',
+      financialTips: 'نصائح مالية',
+      financialTip1: 'ادخر جزءاً من أرباحك بانتظام',
+      financialTip2: 'راجع معاملاتك بشكل دوري',
+      financialTip3: 'تحقق من بيانات حسابك قبل السحب',
+      financialTip4: 'تواصل مع الدعم إذا كان لديك أسئلة',
+      withdrawDialog: {
+        title: 'سحب الأموال',
+        description: 'أدخل تفاصيل السحب',
+        amountLabel: 'المبلغ',
+        availableToWithdraw: 'متاح للسحب',
+        bank: 'البنك',
+        selectBank: 'اختر بنكاً',
+        accountNumber: 'رقم الحساب',
+        enterAccountNumber: 'أدخل رقم الحساب',
+        processingNote: 'سيتم معالجة الطلب خلال 1-3 أيام عمل',
+        processing: 'جاري المعالجة...',
+        confirmWithdraw: 'تأكيد السحب',
+      },
+      errors: {
+        fillAllFields: 'يرجى ملء جميع الحقول',
+        minimumWithdraw: 'الحد الأدنى للسحب 100 ريال',
+        exceedsBalance: 'المبلغ يتجاوز الرصيد المتاح',
+        withdrawError: 'حدث خطأ أثناء معالجة طلب السحب',
+      },
+      success: {
+        withdrawRequested: 'تم طلب سحب {amount} ريال',
+        exported: 'تم تصدير المعاملات',
+      },
     },
 
     // Terms Page
@@ -729,6 +791,13 @@ const translations = {
       earnRate: 'معدل الكسب',
       spendRate: 'معدل الإنفاق',
       conversionRate: 'معدل التحويل',
+    },
+
+    // Events Page
+    events: {
+      attendees: 'مشترك',
+      organizer: 'المنظم',
+      currency: 'ريال',
     },
 
     // My Events
@@ -1216,6 +1285,8 @@ const translations = {
       createGroup: 'إنشاء مجموعة',
       joinGroup: 'انضم للمجموعة',
       leaveGroup: 'ترك المجموعة',
+      leftSuccess: 'تم مغادرة المجموعة',
+      leaveError: 'حدث خطأ أثناء مغادرة المجموعة',
       groupDetails: 'تفاصيل المجموعة',
       groupName: 'اسم المجموعة',
       groupDescription: 'وصف المجموعة',
@@ -2474,6 +2545,30 @@ const translations = {
     logout: 'Logout',
     login: 'Login',
     signup: 'Sign Up',
+
+    // Index Page
+    index: {
+      welcomeBack: 'Welcome Back',
+      discoverEvents: 'Discover the latest events and activities',
+      featuredEvents: 'Featured Events',
+      popularCategories: 'Popular Categories',
+      upcomingEvents: 'Upcoming Events',
+      joinAdventure: 'Join the Adventure',
+      bookNow: 'Book Now',
+      learnMore: 'Learn More',
+      adventureAwaits: 'Adventure Awaits',
+      getStarted: 'Get Started',
+      exploreNow: 'Explore Now',
+      joinToday: 'Join Hewaya Today',
+      signUpDescription: 'Sign up now as an attendee and enjoy unforgettable adventure experiences throughout the Kingdom',
+      signUpAsAttendee: 'Sign Up as Attendee',
+      manageServices: 'Manage Your Services',
+      manageServicesButton: 'Manage Services',
+      viewEditServices: 'View and edit your current services',
+      addNewService: 'Add New Service',
+      offerNewService: 'Offer a new service to your customers',
+      addService: 'Add Service',
+    },
     
     // Service Booking
     serviceBooking: {
@@ -2510,6 +2605,7 @@ const translations = {
     // Wallet
     wallet: {
       title: 'Wallet',
+      subtitle: 'Manage your finances and transactions',
       balance: 'Balance',
       availableBalance: 'Available Balance',
       pendingAmount: 'Pending Amount',
@@ -2574,6 +2670,58 @@ const translations = {
       reference: 'Reference',
       riyal: 'SAR',
       unknown: 'Unknown',
+      // New keys for Wallet page
+      currentBalance: 'Current Balance',
+      totalBalance: 'Total Balance',
+      availableForWithdraw: 'Available for Withdrawal',
+      canWithdrawNow: 'Can withdraw now',
+      totalEarnings: 'Total Earnings',
+      sinceBeginning: 'Since beginning',
+      totalWithdrawals: 'Total Withdrawals',
+      withdrawn: 'Withdrawn',
+      exportTransactions: 'Export Transactions',
+      quickActions: 'Quick Actions',
+      quickActionsDesc: 'Quick financial operations',
+      instantTransfer: 'Instant Transfer',
+      instantTransferDesc: 'Transfer to bank account',
+      instantTransferNote: 'Feature coming soon',
+      accountStatement: 'Account Statement',
+      accountStatementDesc: 'Download your statement',
+      profitReport: 'Profit Report',
+      profitReportDesc: 'View detailed reports',
+      withdrawalInfo: 'Withdrawal Information',
+      withdrawalInfoItem1: 'Minimum withdrawal: 100 SAR',
+      withdrawalInfoItem2: 'Processing time: 1-3 business days',
+      withdrawalInfoItem3: 'A balance of 50 SAR must be maintained',
+      withdrawalInfoItem4: 'No withdrawal fees',
+      financialTips: 'Financial Tips',
+      financialTip1: 'Save part of your earnings regularly',
+      financialTip2: 'Review your transactions periodically',
+      financialTip3: 'Verify account details before withdrawing',
+      financialTip4: 'Contact support if you have questions',
+      withdrawDialog: {
+        title: 'Withdraw Money',
+        description: 'Enter withdrawal details',
+        amountLabel: 'Amount',
+        availableToWithdraw: 'Available for withdrawal',
+        bank: 'Bank',
+        selectBank: 'Select a bank',
+        accountNumber: 'Account Number',
+        enterAccountNumber: 'Enter account number',
+        processingNote: 'Request will be processed within 1-3 business days',
+        processing: 'Processing...',
+        confirmWithdraw: 'Confirm Withdrawal',
+      },
+      errors: {
+        fillAllFields: 'Please fill all fields',
+        minimumWithdraw: 'Minimum withdrawal is 100 SAR',
+        exceedsBalance: 'Amount exceeds available balance',
+        withdrawError: 'Error processing withdrawal request',
+      },
+      success: {
+        withdrawRequested: 'Withdrawal of {amount} SAR requested',
+        exported: 'Transactions exported',
+      },
     },
 
     // Terms Page
@@ -3925,6 +4073,20 @@ const translations = {
       accountRejected: 'Verification Request Rejected',
       accountRejectedMessage: 'We regret to inform you that your service provider verification request has been rejected. Please contact support for more information.',
       contactUs: 'Contact Us',
+      rememberMe: 'Remember me',
+    },
+
+    // Events Page
+    events: {
+      attendees: 'attendees',
+      organizer: 'Organizer',
+      currency: 'SAR',
+    },
+
+    // Groups
+    groups: {
+      leftSuccess: 'Left the group',
+      leaveError: 'Failed to leave group',
     },
 
     // Contact page

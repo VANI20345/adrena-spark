@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 export default function EventsPage() {
-  const { language } = useLanguageContext();
+  const { language, t } = useLanguageContext();
   const navigate = useNavigate();
   const isRTL = language === 'ar';
 
@@ -101,20 +101,18 @@ export default function EventsPage() {
           </div>
           <div className="flex items-center">
             <Users className="w-4 h-4 mr-2" />
-            {event.current_attendees || 0} / {event.max_attendees || '∞'} 
-            {isRTL ? ' مشترك' : ' attendees'}
+            {event.current_attendees || 0} / {event.max_attendees || '∞'} {t('events.attendees')}
           </div>
           {event.price > 0 && (
             <div className="flex items-center font-semibold text-primary">
               <DollarSign className="w-4 h-4 mr-2" />
-              {event.price} {isRTL ? 'ريال' : 'SAR'}
+              {event.price} {t('events.currency')}
             </div>
           )}
           {event.profiles && (
             <div className="flex items-center pt-2 border-t">
               <div className="text-xs">
-                {isRTL ? 'المنظم: ' : 'Organizer: '}
-                <span className="font-medium">{event.profiles.full_name}</span>
+                {t('events.organizer')}: <span className="font-medium">{event.profiles.full_name}</span>
               </div>
             </div>
           )}
