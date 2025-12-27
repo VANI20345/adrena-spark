@@ -2425,6 +2425,11 @@ const translations = {
       title: 'حجز الخدمة',
       selectDate: 'اختر تاريخ الحجز',
       selectTime: 'اختر الوقت',
+      startTime: 'وقت البداية',
+      endTime: 'وقت النهاية',
+      duration: 'المدة',
+      hourlyRate: 'السعر بالساعة',
+      discount: 'خصم',
       specialRequests: 'طلبات خاصة',
       specialRequestsPlaceholder: 'أي طلبات خاصة أو ملاحظات...',
       bookingSummary: 'ملخص الحجز',
@@ -2436,21 +2441,38 @@ const translations = {
       bookingSuccess: 'تم الحجز بنجاح',
       bookingError: 'خطأ في الحجز',
       bookingErrorDesc: 'حدث خطأ أثناء إتمام الحجز. حاول مرة أخرى.',
+
+      // Slot picker helpers
+      selectDateFirst: 'اختر التاريخ أولاً',
+      availableSlots: 'الأوقات المتاحة',
+      available: 'متاح',
+      noSlotsAvailable: 'لا توجد أوقات متاحة لهذا اليوم',
+      selectedTime: 'الوقت المختار',
+      invalidTimeRange: 'نطاق وقت غير صحيح',
+      invalidTimeRangeDesc: 'يجب أن يكون وقت النهاية بعد وقت البداية',
+
       // Login required
       loginRequired: 'يجب تسجيل الدخول',
       loginRequiredDesc: 'يجب تسجيل الدخول لحجز هذه الخدمة',
+
       // Load error
       loadError: 'حدث خطأ في تحميل بيانات الخدمة',
-      // Time slot
+
+      // Time selection required
       selectTimeRequired: 'يجب اختيار الوقت',
-      selectTimeRequiredDesc: 'يرجى اختيار موعد للحجز',
-      slotTaken: 'الموعد محجوز',
-      slotTakenDesc: 'هذا الموعد محجوز مسبقاً. اختر موعداً آخر.',
+      selectTimeRequiredDesc: 'يرجى اختيار وقت البداية والنهاية للحجز',
+
+      // Conflicts
+      slotTaken: 'الوقت غير متاح',
+      slotTakenDesc: 'هذا الوقت محجوز مسبقاً. اختر وقتاً آخر.',
+
       from: 'من',
       to: 'إلى',
       time: 'الوقت',
+
       // Free booking
       freeBookingSuccess: 'تم تأكيد حجزك المجاني بنجاح',
+
       // Payment redirect
       redirectingToPayment: 'جاري التحويل للدفع',
       redirectingToPaymentDesc: 'جاري تحويلك لصفحة الدفع...',
@@ -2459,7 +2481,9 @@ const translations = {
       pendingPayment: 'في انتظار الدفع',
       pendingConfirmation: 'في انتظار التأكيد',
       termsAgreement: 'بالمتابعة، أنت توافق على شروط وأحكام الخدمة',
+
       yourInfo: 'معلوماتك',
+
       // Success page
       successTitle: 'تم الحجز بنجاح!',
       successDescription: 'تم تأكيد حجزك وإرسال إشعار لمقدم الخدمة',
@@ -2541,6 +2565,21 @@ const translations = {
       youtube: 'يوتيوب',
     },
 
+    // Common
+    common: {
+      loading: 'جاري التحميل...',
+      actions: 'إجراءات',
+      notSpecified: 'غير محدد',
+      noData: 'لا توجد بيانات',
+      riyal: 'ريال',
+      sar: 'ر.س',
+      am: 'ص',
+      pm: 'م',
+      success: 'نجح',
+      error: 'خطأ',
+      cancel: 'إلغاء',
+    },
+
     // Common translations
     save: 'حفظ',
     cancel: 'إلغاء',
@@ -2603,6 +2642,11 @@ const translations = {
       title: 'Book Service',
       selectDate: 'Select Booking Date',
       selectTime: 'Select Time',
+      startTime: 'Start Time',
+      endTime: 'End Time',
+      duration: 'Duration',
+      hourlyRate: 'Hourly Rate',
+      discount: 'Discount',
       specialRequests: 'Special Requests',
       specialRequestsPlaceholder: 'Any special requests or notes...',
       bookingSummary: 'Booking Summary',
@@ -2614,21 +2658,38 @@ const translations = {
       bookingSuccess: 'Booking Successful',
       bookingError: 'Booking Error',
       bookingErrorDesc: 'An error occurred while completing the booking. Please try again.',
+
+      // Slot picker helpers
+      selectDateFirst: 'Select a date first',
+      availableSlots: 'Available Slots',
+      available: 'available',
+      noSlotsAvailable: 'No available time slots for this date',
+      selectedTime: 'Selected Time',
+      invalidTimeRange: 'Invalid time range',
+      invalidTimeRangeDesc: 'End time must be after start time',
+
       // Login required
       loginRequired: 'Login Required',
       loginRequiredDesc: 'You must be logged in to book this service',
+
       // Load error
       loadError: 'Error loading service data',
-      // Time slot
+
+      // Time selection required
       selectTimeRequired: 'Time Selection Required',
-      selectTimeRequiredDesc: 'Please select a time slot for your booking',
-      slotTaken: 'Slot Already Taken',
-      slotTakenDesc: 'This time slot is already booked. Please choose another.',
+      selectTimeRequiredDesc: 'Please select a start and end time for your booking',
+
+      // Conflicts
+      slotTaken: 'Time Not Available',
+      slotTakenDesc: 'This time is already fully booked. Please choose another.',
+
       from: 'from',
       to: 'to',
       time: 'Time',
+
       // Free booking
       freeBookingSuccess: 'Your free booking has been confirmed successfully',
+
       // Payment redirect
       redirectingToPayment: 'Redirecting to Payment',
       redirectingToPaymentDesc: 'Redirecting you to the payment page...',
@@ -2637,7 +2698,9 @@ const translations = {
       pendingPayment: 'Pending Payment',
       pendingConfirmation: 'Pending Confirmation',
       termsAgreement: 'By continuing, you agree to the terms and conditions',
+
       yourInfo: 'Your Information',
+
       // Success page
       successTitle: 'Booking Successful!',
       successDescription: 'Your booking has been confirmed and the provider has been notified',
@@ -4176,6 +4239,21 @@ const translations = {
       twitter: 'Twitter',
       instagram: 'Instagram',
       youtube: 'YouTube',
+    },
+
+    // Common
+    common: {
+      loading: 'Loading...',
+      actions: 'Actions',
+      notSpecified: 'Not specified',
+      noData: 'No data',
+      riyal: 'SAR',
+      sar: 'SAR',
+      am: 'AM',
+      pm: 'PM',
+      success: 'Success',
+      error: 'Error',
+      cancel: 'Cancel',
     },
 
     // Common
