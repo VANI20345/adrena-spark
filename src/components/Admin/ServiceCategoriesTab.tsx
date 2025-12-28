@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { CategoryDialog } from './CategoryDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Edit, Trash2, Plus } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { useLanguageContext } from '@/contexts/LanguageContext';
 
 export const ServiceCategoriesTab = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { language, t } = useLanguageContext();
+  const isRTL = language === 'ar';
 
   useEffect(() => {
     loadCategories();
@@ -26,14 +28,10 @@ export const ServiceCategoriesTab = () => {
       
       if (error) throw error;
       
-      // تنظيم الفئات بشكل هرمي: فئات رئيسية وفئات فرعية
       const allCategories = data || [];
-      
-      // فصل الفئات الرئيسية والفرعية
       const mainCategories = allCategories.filter(cat => !cat.parent_id);
       const subCategories = allCategories.filter(cat => cat.parent_id);
       
-      // دمج الفئات الرئيسية مع الفرعية
       const organized: any[] = [];
       mainCategories.forEach(main => {
         organized.push({ ...main, isParent: true });
@@ -44,17 +42,16 @@ export const ServiceCategoriesTab = () => {
       });
       
       setCategories(organized);
-      console.log('Loaded service categories:', organized.length);
     } catch (error) {
       console.error('Error loading categories:', error);
-      toast.error('حدث خطأ في تحميل التصنيفات');
+      toast.error(isRTL ? 'حدث خطأ في تحميل التصنيفات' : 'Error loading categories');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (categoryId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا التصنيف؟')) return;
+    if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذا التصنيف؟' : 'Are you sure you want to delete this category?')) return;
     
     try {
       const { error } = await supabase
@@ -63,35 +60,28 @@ export const ServiceCategoriesTab = () => {
         .eq('id', categoryId);
       
       if (error) throw error;
-      toast.success('تم حذف التصنيف');
+      toast.success(isRTL ? 'تم حذف التصنيف' : 'Category deleted');
       loadCategories();
     } catch (error) {
       console.error('Error deleting category:', error);
-      toast.error('حدث خطأ في الحذف');
+      toast.error(isRTL ? 'حدث خطأ في الحذف' : 'Error deleting');
     }
   };
 
-  const getParentName = (parentId: string | null) => {
-    if (!parentId) return '—';
-    const parent = categories.find(c => c.id === parentId);
-    return parent?.name_ar || '—';
-  };
-
-  // فصل الفئات الرئيسية والفرعية
   const mainCategories = categories.filter(cat => cat.isParent);
   const getSubCategories = (parentId: string) => 
     categories.filter(cat => cat.parent_id === parentId);
 
   return (
-    <div className="space-y-6">
-      {/* زر إضافة فئة رئيسية */}
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Header */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>إدارة تصنيفات الخدمات</CardTitle>
+          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={isRTL ? 'text-right' : 'text-left'}>
+              <CardTitle>{isRTL ? 'إدارة تصنيفات الخدمات' : 'Service Categories Management'}</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                قم بإضافة وإدارة الفئات الرئيسية والفرعية للخدمات
+                {isRTL ? 'قم بإضافة وإدارة الفئات الرئيسية والفرعية للخدمات' : 'Add and manage main and sub categories for services'}
               </p>
             </div>
             <CategoryDialog type="service" onSuccess={loadCategories} />
@@ -100,13 +90,13 @@ export const ServiceCategoriesTab = () => {
       </Card>
 
       {loading ? (
-        <div className="text-center py-8">جاري التحميل...</div>
+        <div className="text-center py-8">{isRTL ? 'جاري التحميل...' : 'Loading...'}</div>
       ) : (
         <div className="space-y-4">
           {mainCategories.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                لا توجد فئات. قم بإضافة فئة رئيسية للبدء.
+                {isRTL ? 'لا توجد فئات. قم بإضافة فئة رئيسية للبدء.' : 'No categories. Add a main category to start.'}
               </CardContent>
             </Card>
           ) : (
@@ -115,17 +105,17 @@ export const ServiceCategoriesTab = () => {
               return (
                 <Card key={mainCat.id} className="overflow-hidden">
                   <CardHeader className="bg-muted/50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Badge variant="default" className="text-base px-3 py-1">
-                          فئة رئيسية
+                          {isRTL ? 'فئة رئيسية' : 'Main Category'}
                         </Badge>
-                        <div>
-                          <h3 className="text-xl font-bold">{mainCat.name_ar}</h3>
-                          <p className="text-sm text-muted-foreground">{mainCat.name}</p>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                          <h3 className="text-xl font-bold">{isRTL ? mainCat.name_ar : mainCat.name}</h3>
+                          <p className="text-sm text-muted-foreground">{isRTL ? mainCat.name : mainCat.name_ar}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <code className="text-xs bg-background px-2 py-1 rounded">
                           {mainCat.icon_name || '—'}
                         </code>
@@ -146,33 +136,32 @@ export const ServiceCategoriesTab = () => {
                   </CardHeader>
                   
                   <CardContent className="pt-4">
-                    {/* الفئات الفرعية */}
                     {subCats.length > 0 ? (
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-semibold text-muted-foreground">
-                            الفئات الفرعية ({subCats.length})
+                        <div className={`flex items-center justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <h4 className={`text-sm font-semibold text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {isRTL ? `الفئات الفرعية (${subCats.length})` : `Sub Categories (${subCats.length})`}
                           </h4>
                         </div>
                         <div className="grid gap-2">
                           {subCats.map((subCat) => (
                             <div
                               key={subCat.id}
-                              className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors"
+                              className={`flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="w-1 h-8 bg-primary/30 rounded"></div>
-                                <div>
-                                  <p className="font-medium">{subCat.name_ar}</p>
-                                  <p className="text-xs text-muted-foreground">{subCat.name}</p>
+                              <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <div className={`w-1 h-8 bg-primary/30 rounded ${isRTL ? 'order-last' : ''}`}></div>
+                                <div className={isRTL ? 'text-right' : 'text-left'}>
+                                  <p className="font-medium">{isRTL ? subCat.name_ar : subCat.name}</p>
+                                  <p className="text-xs text-muted-foreground">{isRTL ? subCat.name : subCat.name_ar}</p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                 <code className="text-xs bg-muted px-2 py-1 rounded">
                                   {subCat.icon_name || '—'}
                                 </code>
                                 <Badge variant={subCat.is_active ? 'default' : 'secondary'} className="text-xs">
-                                  {subCat.is_active ? 'نشط' : 'غير نشط'}
+                                  {subCat.is_active ? (isRTL ? 'نشط' : 'Active') : (isRTL ? 'غير نشط' : 'Inactive')}
                                 </Badge>
                                 <CategoryDialog
                                   type="service"
@@ -193,7 +182,7 @@ export const ServiceCategoriesTab = () => {
                       </div>
                     ) : (
                       <div className="text-center py-6 text-muted-foreground text-sm">
-                        لا توجد فئات فرعية. قم بإضافة فئة فرعية لهذا القسم.
+                        {isRTL ? 'لا توجد فئات فرعية. قم بإضافة فئة فرعية لهذا القسم.' : 'No sub categories. Add a sub category for this section.'}
                       </div>
                     )}
                   </CardContent>

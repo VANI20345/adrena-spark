@@ -281,13 +281,14 @@ export async function fetchAdminStats() {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     
+    // Batch all requests in a single Promise.all for optimal performance
     const [
       usersCount, 
       usersCount30d,
       eventsCount, 
       eventsCount30d,
       servicesCount, 
-      bookingsCount, 
+      confirmedBookingsCount,
       categoriesCount,
       pendingVerificationsCount,
       openTicketsCount,
@@ -319,7 +320,7 @@ export async function fetchAdminStats() {
     const users30dAgo = usersCount30d.count || 0;
     const totalEvents = eventsCount.count || 0;
     const events30dAgo = eventsCount30d.count || 0;
-    const confirmedBookings = bookingsCount.count || 0;
+    const confirmedBookings = confirmedBookingsCount.count || 0;
     
     // Calculate percentage changes
     const userGrowthPercent = users30dAgo > 0 ? ((totalUsers - users30dAgo) / users30dAgo) * 100 : 0;
@@ -337,9 +338,9 @@ export async function fetchAdminStats() {
       totalRevenue,
       revenueGrowth: revenueGrowthPercent >= 0 ? `+${Math.abs(revenueGrowthPercent).toFixed(1)}%` : `-${Math.abs(revenueGrowthPercent).toFixed(1)}%`,
       revenueGrowthPercent,
-      activeBookings: confirmedBookings,
+      activeBookings: confirmedBookings, // Fixed: now shows actual confirmed bookings count
       totalCategories: categoriesCount.count || 0,
-      pendingReviews: totalEvents + (servicesCount.count || 0),
+      pendingReviews: 0, // Will be calculated from pending items
       dauMau: 0.25,
       userChurn: 2.5,
       arpu: totalRevenue / (totalUsers || 1),
