@@ -240,6 +240,7 @@ const App = () => (
                   <EarningsReport />
                 </ProtectedRoute>
               }
+            />
             <Route 
               path="/points" 
               element={

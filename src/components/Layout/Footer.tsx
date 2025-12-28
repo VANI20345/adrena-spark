@@ -1,11 +1,44 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Mountain, Instagram } from "lucide-react";
 import { XIcon } from "@/components/Layout/XIcon";
 import { useLanguageContext } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ContactSettings {
+  social_links?: { twitter?: string; instagram?: string; youtube?: string };
+}
 
 const Footer = () => {
   const { language } = useLanguageContext();
   const isArabic = language === 'ar';
+  const [contactSettings, setContactSettings] = useState<ContactSettings | null>(null);
+
+  useEffect(() => {
+    loadContactSettings();
+  }, []);
+
+  const loadContactSettings = async () => {
+    try {
+      const { data } = await supabase
+        .from('system_settings')
+        .select('key, value')
+        .eq('key', 'social_links')
+        .single();
+
+      if (data) {
+        setContactSettings({ social_links: data.value as ContactSettings['social_links'] });
+      }
+    } catch (error) {
+      console.error('Error loading contact settings:', error);
+    }
+  };
+
+  const socialLinks = contactSettings?.social_links || {
+    twitter: 'https://x.com',
+    instagram: 'https://instagram.com',
+    youtube: 'https://youtube.com'
+  };
 
   const translations = {
     ar: {
@@ -62,10 +95,10 @@ const Footer = () => {
               {t.tagline}
             </p>
             <div className="flex space-x-4 rtl:space-x-reverse">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+              <a href={socialLinks.instagram || 'https://instagram.com'} target="_blank" rel="noopener noreferrer">
                 <Instagram className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer smooth-transition" />
               </a>
-              <a href="https://x.com" target="_blank" rel="noopener noreferrer">
+              <a href={socialLinks.twitter || 'https://x.com'} target="_blank" rel="noopener noreferrer">
                 <XIcon className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer smooth-transition" />
               </a>
               <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer">
@@ -77,7 +110,7 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className={isArabic ? 'text-right' : 'text-left'}>
             <h3 className="font-semibold mb-4">{t.quickLinks}</h3>
             <ul className="space-y-2">
               <li><Link to="/groups/discover-groups" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.exploreGroups}</Link></li>
@@ -87,7 +120,7 @@ const Footer = () => {
           </div>
 
           {/* Support */}
-          <div>
+          <div className={isArabic ? 'text-right' : 'text-left'}>
             <h3 className="font-semibold mb-4">{t.support}</h3>
             <ul className="space-y-2">
               <li><Link to="/help" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.helpCenter}</Link></li>
@@ -97,7 +130,7 @@ const Footer = () => {
           </div>
 
           {/* Legal */}
-          <div>
+          <div className={isArabic ? 'text-right' : 'text-left'}>
             <h3 className="font-semibold mb-4">{t.legal}</h3>
             <ul className="space-y-2">
               <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-primary smooth-transition">{t.termsConditions}</Link></li>

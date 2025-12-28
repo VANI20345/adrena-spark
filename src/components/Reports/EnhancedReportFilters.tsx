@@ -49,15 +49,17 @@ export const EnhancedReportFilters: React.FC<EnhancedReportFiltersProps> = ({
   ];
 
   return (
-    <div className={`flex flex-wrap items-end gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+    <div className={`flex flex-wrap items-end gap-4`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Year Selector */}
-      <div className={`flex-1 min-w-[150px] ${isRTL ? 'text-right' : 'text-left'}`}>
-        <label className="text-sm font-medium mb-2 block">{t('admin.reports.year')}</label>
+      <div className={`flex-1 min-w-[150px]`}>
+        <label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : 'text-left'}`}>
+          {t('admin.reports.year')}
+        </label>
         <Select 
           value={selectedYear.toString()} 
           onValueChange={(value) => onYearChange(parseInt(value))}
         >
-          <SelectTrigger>
+          <SelectTrigger className={isRTL ? 'text-right' : 'text-left'}>
             <SelectValue placeholder={t('admin.reports.selectYear')} />
           </SelectTrigger>
           <SelectContent>
@@ -71,13 +73,15 @@ export const EnhancedReportFilters: React.FC<EnhancedReportFiltersProps> = ({
       </div>
 
       {/* Month Selector */}
-      <div className={`flex-1 min-w-[150px] ${isRTL ? 'text-right' : 'text-left'}`}>
-        <label className="text-sm font-medium mb-2 block">{t('admin.reports.month')} ({t('admin.reports.optional')})</label>
+      <div className={`flex-1 min-w-[150px]`}>
+        <label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : 'text-left'}`}>
+          {t('admin.reports.month')} ({t('admin.reports.optional')})
+        </label>
         <Select 
           value={selectedMonth?.toString() || 'all'} 
           onValueChange={(value) => onMonthChange(value === 'all' ? null : parseInt(value))}
         >
-          <SelectTrigger>
+          <SelectTrigger className={isRTL ? 'text-right' : 'text-left'}>
             <SelectValue placeholder={t('admin.reports.allMonths')} />
           </SelectTrigger>
           <SelectContent>
@@ -92,22 +96,25 @@ export const EnhancedReportFilters: React.FC<EnhancedReportFiltersProps> = ({
       </div>
 
       {/* Day Selector */}
-      <div className={`flex-1 min-w-[180px] ${isRTL ? 'text-right' : 'text-left'}`}>
-        <label className="text-sm font-medium mb-2 block">{t('admin.reports.day')} ({t('admin.reports.optional')})</label>
+      <div className={`flex-1 min-w-[180px]`}>
+        <label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : 'text-left'}`}>
+          {t('admin.reports.day')} ({t('admin.reports.optional')})
+        </label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
-                `w-full font-normal ${isRTL ? 'justify-start text-right' : 'justify-start text-left'}`,
-                !selectedDay && "text-muted-foreground"
+                `w-full font-normal justify-start`,
+                !selectedDay && "text-muted-foreground",
+                isRTL ? 'text-right' : 'text-left'
               )}
             >
               <CalendarIcon className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
               {selectedDay ? format(selectedDay, "PPP", { locale: isRTL ? ar : undefined }) : t('admin.reports.selectSpecificDay')}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0" align={isRTL ? 'end' : 'start'}>
             <Calendar
               mode="single"
               selected={selectedDay || undefined}
