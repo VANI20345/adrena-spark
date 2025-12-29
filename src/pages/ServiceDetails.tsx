@@ -387,11 +387,15 @@ const ServiceDetails = () => {
                   </div>
                   <Button 
                     variant="outline" 
-                    onClick={() => setShowTicketDialog(true)}
+                    onClick={() => {
+                      if (service?.provider_id) {
+                        navigate(`/messages?userId=${service.provider_id}`);
+                      }
+                    }}
                     className="gap-2"
                   >
-                    <GraduationCap className="w-4 h-4" />
-                    {isTrainingService ? 'استشر المدرب' : 'تواصل مع مقدم الخدمة'}
+                    <MessageCircle className="w-4 h-4" />
+                    تواصل مع مقدم الخدمة
                   </Button>
                 </div>
               </CardContent>
@@ -590,19 +594,6 @@ const ServiceDetails = () => {
                    service.status === 'cancelled' ? 'ملغية' :
                    ((service.service_type === 'training' || service.service_type === 'discount') && service.end_date && new Date(service.end_date) < new Date()) ? 'انتهت' :
                    service.current_capacity >= service.max_capacity ? 'مكتملة' : 'احجز الآن'}
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => {
-                    if (service?.provider_id) {
-                      navigate(`/messages?userId=${service.provider_id}`);
-                    }
-                  }}
-                >
-                  <MessageCircle className="w-4 h-4 ml-2" />
-                  تواصل مع مقدم الخدمة
                 </Button>
                 
                 <p className="text-xs text-center text-muted-foreground">
