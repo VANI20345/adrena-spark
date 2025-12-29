@@ -304,7 +304,7 @@ export async function fetchAdminStats() {
       supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'approved').lte('created_at', thirtyDaysAgo.toISOString()),
       supabase.from('services').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
       supabase.from('bookings').select('*', { count: 'exact', head: true }),
-      supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'confirmed'),
+      supabase.from('categories').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
       supabase.from('contact_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('bookings').select('total_amount').eq('status', 'confirmed'),
@@ -321,6 +321,7 @@ export async function fetchAdminStats() {
     const totalEvents = eventsCount.count || 0;
     const events30dAgo = eventsCount30d.count || 0;
     const totalBookings = confirmedBookingsCount.count || 0;
+    const totalCategories = categoriesCount.count || 0;
     
     // Calculate percentage changes
     const userGrowthPercent = users30dAgo > 0 ? ((totalUsers - users30dAgo) / users30dAgo) * 100 : 0;
