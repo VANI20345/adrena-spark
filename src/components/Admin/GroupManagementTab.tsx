@@ -221,10 +221,10 @@ export const GroupManagementTab = () => {
     };
     
     const labels: Record<string, string> = {
-      owner: t('admin.owner'),
-      admin: t('admin.moderator'),
-      moderator: t('admin.moderator'),
-      member: t('admin.member')
+      owner: isRTL ? 'المالك' : 'Owner',
+      admin: isRTL ? 'مشرف' : 'Admin',
+      moderator: isRTL ? 'مشرف' : 'Moderator',
+      member: isRTL ? 'عضو' : 'Member'
     };
 
     return (
@@ -242,50 +242,50 @@ export const GroupManagementTab = () => {
   return (
     <Card dir={isRTL ? 'rtl' : 'ltr'}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <Users className="w-5 h-5" />
-          {t('admin.groupManagement')}
+          {isRTL ? 'إدارة المجموعات' : 'Group Management'}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
             {loading ? (
-              <div className="text-center py-8">{t('admin.loading')}</div>
+              <div className="text-center py-8">{isRTL ? 'جاري التحميل...' : 'Loading...'}</div>
             ) : eventGroups.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                {t('admin.noData')}
+                {isRTL ? 'لا توجد مجموعات' : 'No groups found'}
               </div>
             ) : (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.name')}</TableHead>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.eventTitle')}</TableHead>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.members')}</TableHead>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.assignedAdmin')}</TableHead>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.status')}</TableHead>
-                      <TableHead className={isRTL ? 'text-left' : 'text-right'}>{t('admin.action')}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'اسم المجموعة' : 'Group Name'}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'الفعالية' : 'Event'}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'الأعضاء' : 'Members'}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'المشرف' : 'Admin'}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'الحالة' : 'Status'}</TableHead>
+                      <TableHead className={isRTL ? 'text-left' : 'text-right'}>{isRTL ? 'الإجراءات' : 'Actions'}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {eventGroups.map((group) => (
                       <TableRow key={group.id}>
-                        <TableCell className="font-medium">{group.group_name}</TableCell>
-                        <TableCell>{getEventTitle(group)}</TableCell>
-                        <TableCell>
+                        <TableCell className={`font-medium ${isRTL ? 'text-right' : 'text-left'}`}>{group.group_name}</TableCell>
+                        <TableCell className={isRTL ? 'text-right' : 'text-left'}>{getEventTitle(group)}</TableCell>
+                        <TableCell className={isRTL ? 'text-right' : 'text-left'}>
                           <Badge variant="secondary">
                             {group.current_members} / {group.max_members}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={isRTL ? 'text-right' : 'text-left'}>
                           {group.admin_profiles?.full_name || '—'}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={isRTL ? 'text-right' : 'text-left'}>
                           {group.archived_at ? (
-                            <Badge variant="secondary">{t('admin.archived')}</Badge>
+                            <Badge variant="secondary">{isRTL ? 'مؤرشف' : 'Archived'}</Badge>
                           ) : (
-                            <Badge variant="default">{t('admin.pending') === 'Pending' ? 'Active' : 'نشط'}</Badge>
+                            <Badge variant="default">{isRTL ? 'نشط' : 'Active'}</Badge>
                           )}
                         </TableCell>
                         <TableCell>
@@ -294,6 +294,7 @@ export const GroupManagementTab = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => handleViewMembers(group)}
+                              title={isRTL ? 'عرض الأعضاء' : 'View Members'}
                             >
                               <Users className="w-4 h-4" />
                             </Button>
@@ -302,6 +303,7 @@ export const GroupManagementTab = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleArchiveGroup(group.id)}
+                                title={isRTL ? 'أرشفة' : 'Archive'}
                               >
                                 <Archive className="w-4 h-4" />
                               </Button>
@@ -310,6 +312,7 @@ export const GroupManagementTab = () => {
                               size="sm"
                               variant="destructive"
                               onClick={() => handleDeleteGroup(group.id)}
+                              title={isRTL ? 'حذف' : 'Delete'}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -323,13 +326,12 @@ export const GroupManagementTab = () => {
             )}
         </div>
 
-        {/* Members Dialog */}
         <Dialog open={showMembersDialog} onOpenChange={setShowMembersDialog}>
           <DialogContent className="max-w-3xl" dir={isRTL ? 'rtl' : 'ltr'}>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Users className="w-5 h-5" />
-                {t('admin.viewMembers')}: {selectedGroup?.group_name}
+                {isRTL ? 'أعضاء المجموعة' : 'Group Members'}: {selectedGroup?.group_name}
               </DialogTitle>
             </DialogHeader>
             
@@ -337,7 +339,7 @@ export const GroupManagementTab = () => {
               <div className="relative">
                 <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                 <Input
-                  placeholder={t('admin.searchMember')}
+                  placeholder={isRTL ? 'بحث عن عضو...' : 'Search member...'}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={isRTL ? 'pr-10' : 'pl-10'}
@@ -348,28 +350,28 @@ export const GroupManagementTab = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.name')}</TableHead>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.memberRole')}</TableHead>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.joinedAt')}</TableHead>
-                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t('admin.memberStatus')}</TableHead>
-                      <TableHead className={isRTL ? 'text-left' : 'text-right'}>{t('admin.action')}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'الاسم' : 'Name'}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'الدور' : 'Role'}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'تاريخ الانضمام' : 'Joined At'}</TableHead>
+                      <TableHead className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'الحالة' : 'Status'}</TableHead>
+                      <TableHead className={isRTL ? 'text-left' : 'text-right'}>{isRTL ? 'الإجراءات' : 'Actions'}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredMembers.map((member) => (
                       <TableRow key={member.id}>
-                        <TableCell className="font-medium">
-                          {member.profiles?.full_name || (language === 'ar' ? 'مستخدم' : 'User')}
+                        <TableCell className={`font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                          {member.profiles?.full_name || (isRTL ? 'مستخدم' : 'User')}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={isRTL ? 'text-right' : 'text-left'}>
                           {getRoleBadge(member.role)}
                         </TableCell>
-                        <TableCell>
-                          {new Date(member.joined_at).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}
+                        <TableCell className={isRTL ? 'text-right' : 'text-left'}>
+                          {new Date(member.joined_at).toLocaleDateString(isRTL ? 'ar-SA' : 'en-US')}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={isRTL ? 'text-right' : 'text-left'}>
                           {member.is_muted && (
-                            <Badge variant="destructive">{t('admin.muted')}</Badge>
+                            <Badge variant="destructive">{isRTL ? 'مكتوم' : 'Muted'}</Badge>
                           )}
                         </TableCell>
                         <TableCell>
@@ -380,6 +382,7 @@ export const GroupManagementTab = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleToggleMute(member.id, member.is_muted)}
+                                  title={member.is_muted ? (isRTL ? 'إلغاء الكتم' : 'Unmute') : (isRTL ? 'كتم' : 'Mute')}
                                 >
                                   {member.is_muted ? (
                                     <Volume2 className="w-4 h-4" />
@@ -391,6 +394,7 @@ export const GroupManagementTab = () => {
                                   size="sm"
                                   variant="destructive"
                                   onClick={() => handleRemoveMember(member.id, member.user_id)}
+                                  title={isRTL ? 'إزالة العضو' : 'Remove Member'}
                                 >
                                   <UserMinus className="w-4 h-4" />
                                 </Button>
@@ -399,7 +403,7 @@ export const GroupManagementTab = () => {
                             {(member.role === 'admin' || member.role === 'owner') && (
                               <Badge variant="secondary">
                                 <Shield className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                {language === 'ar' ? 'محمي' : 'Protected'}
+                                {isRTL ? 'محمي' : 'Protected'}
                               </Badge>
                             )}
                           </div>
