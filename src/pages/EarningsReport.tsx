@@ -228,15 +228,15 @@ const EarningsReport = () => {
                 {isRTL ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
               </Button>
               <div>
-                <h1 className="text-3xl font-bold">{t('wallet.earningsReport') || 'Earnings Report'}</h1>
+                <h1 className="text-3xl font-bold">{t('wallet.earningsReport')}</h1>
                 <p className="text-muted-foreground">
-                  {t('wallet.earningsReportDesc') || 'View your earnings and expenses over time'}
+                  {t('wallet.earningsReportDesc')}
                 </p>
               </div>
             </div>
             <Button variant="outline" className="gap-2">
               <Download className="h-4 w-4" />
-              {t('wallet.export') || 'Export'}
+              {t('wallet.export')}
             </Button>
           </div>
 
@@ -246,9 +246,9 @@ const EarningsReport = () => {
               <div className="flex flex-wrap gap-4 items-center">
                 <Tabs value={period} onValueChange={(v) => setPeriod(v as typeof period)}>
                   <TabsList>
-                    <TabsTrigger value="week">{t('wallet.week') || 'Week'}</TabsTrigger>
-                    <TabsTrigger value="month">{t('wallet.month') || 'Month'}</TabsTrigger>
-                    <TabsTrigger value="year">{t('wallet.year') || 'Year'}</TabsTrigger>
+                    <TabsTrigger value="week">{t('wallet.week')}</TabsTrigger>
+                    <TabsTrigger value="month">{t('wallet.month')}</TabsTrigger>
+                    <TabsTrigger value="year">{t('wallet.year')}</TabsTrigger>
                   </TabsList>
                 </Tabs>
 
@@ -303,37 +303,37 @@ const EarningsReport = () => {
           <div className="grid gap-6 md:grid-cols-3">
             <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t('wallet.totalIncome') || 'Total Income'}</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('wallet.totalIncome')}</CardTitle>
                 <TrendingUp className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  +{totals.income.toLocaleString()} {t('wallet.riyal') || 'SAR'}
+                  +{totals.income.toLocaleString()} {t('wallet.riyal')}
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-red-500/10 to-red-500/5 border-red-500/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t('wallet.totalExpenses') || 'Total Expenses'}</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('wallet.totalExpenses')}</CardTitle>
                 <TrendingDown className="h-4 w-4 text-red-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">
-                  -{totals.expenses.toLocaleString()} {t('wallet.riyal') || 'SAR'}
+                  -{totals.expenses.toLocaleString()} {t('wallet.riyal')}
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t('wallet.netBalance') || 'Net Balance'}</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('wallet.netBalance')}</CardTitle>
                 <Wallet className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
                 <div className={`text-2xl font-bold ${totals.income - totals.expenses >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {totals.income - totals.expenses >= 0 ? '+' : ''}
-                  {(totals.income - totals.expenses).toLocaleString()} {t('wallet.riyal') || 'SAR'}
+                  {(totals.income - totals.expenses).toLocaleString()} {t('wallet.riyal')}
                 </div>
               </CardContent>
             </Card>
@@ -344,10 +344,10 @@ const EarningsReport = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                {t('wallet.earningsOverTime') || 'Earnings Over Time'}
+                {t('wallet.earningsOverTime')}
               </CardTitle>
               <CardDescription>
-                {period === 'week' && (t('wallet.last7Days') || 'Last 7 days')}
+                {period === 'week' && t('wallet.last7Days')}
                 {period === 'month' && months.find(m => m.value === selectedMonth)?.label + ' ' + selectedYear}
                 {period === 'year' && selectedYear}
               </CardDescription>
@@ -387,7 +387,7 @@ const EarningsReport = () => {
                     <Area
                       type="monotone"
                       dataKey="income"
-                      name={t('wallet.income') || 'Income'}
+                      name={t('wallet.income')}
                       stroke="#22c55e"
                       fill="#22c55e"
                       fillOpacity={0.3}
@@ -395,7 +395,7 @@ const EarningsReport = () => {
                     <Area
                       type="monotone"
                       dataKey="expenses"
-                      name={t('wallet.expenses') || 'Expenses'}
+                      name={t('wallet.expenses')}
                       stroke="#ef4444"
                       fill="#ef4444"
                       fillOpacity={0.3}
@@ -411,7 +411,7 @@ const EarningsReport = () => {
             {/* Net Balance Line Chart */}
             <Card>
               <CardHeader>
-                <CardTitle>{t('wallet.netBalanceTrend') || 'Net Balance Trend'}</CardTitle>
+                <CardTitle>{t('wallet.netBalanceTrend')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[250px]">
@@ -451,7 +451,7 @@ const EarningsReport = () => {
             {/* Transaction Type Breakdown */}
             <Card>
               <CardHeader>
-                <CardTitle>{t('wallet.transactionBreakdown') || 'Transaction Breakdown'}</CardTitle>
+                <CardTitle>{t('wallet.transactionBreakdown')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[250px]">

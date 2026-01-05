@@ -19,11 +19,16 @@ interface WalletChartsProps {
 const WalletCharts = ({ transactions }: WalletChartsProps) => {
   const { t, isRTL, language } = useLanguageContext();
 
+  // Ensure transactions is always an array (null safety)
+  const safeTransactions = Array.isArray(transactions) ? transactions : [];
+
   // Group transactions by month for area chart
   const monthlyData = React.useMemo(() => {
+    if (!safeTransactions || safeTransactions.length === 0) return [];
+    
     const grouped: Record<string, { income: number; expenses: number }> = {};
     
-    transactions.forEach(tx => {
+    safeTransactions.forEach(tx => {
       if (tx.status !== 'completed') return;
       
       const date = new Date(tx.created_at);
@@ -48,13 +53,20 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
         [t('wallet.income') || 'Income']: data.income,
         [t('wallet.expenses') || 'Expenses']: data.expenses,
       }));
-  }, [transactions, language, t]);
+  }, [safeTransactions, language, t]);
 
   // Calculate totals for pie chart
   const pieData = React.useMemo(() => {
+    if (!safeTransactions || safeTransactions.length === 0) {
+      return [
+        { name: t('wallet.income') || 'Income', value: 0, color: '#22c55e' },
+        { name: t('wallet.expenses') || 'Expenses', value: 0, color: '#ef4444' },
+      ];
+    }
+    
     const totals = { income: 0, expenses: 0 };
     
-    transactions.forEach(tx => {
+    safeTransactions.forEach(tx => {
       if (tx.status !== 'completed') return;
       
       if (['earning', 'refund', 'bonus'].includes(tx.type)) {
@@ -68,13 +80,15 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
       { name: t('wallet.income') || 'Income', value: totals.income, color: '#22c55e' },
       { name: t('wallet.expenses') || 'Expenses', value: totals.expenses, color: '#ef4444' },
     ];
-  }, [transactions, t]);
+  }, [safeTransactions, t]);
 
   // Calculate transaction type breakdown
   const typeBreakdown = React.useMemo(() => {
+    if (!safeTransactions || safeTransactions.length === 0) return [];
+    
     const breakdown: Record<string, number> = {};
     
-    transactions.forEach(tx => {
+    safeTransactions.forEach(tx => {
       if (tx.status !== 'completed') return;
       breakdown[tx.type] = (breakdown[tx.type] || 0) + Math.abs(tx.amount);
     });
@@ -93,9 +107,9 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
       value,
       color: colors[type as keyof typeof colors] || '#6b7280',
     }));
-  }, [transactions, t]);
+  }, [safeTransactions, t]);
 
-  if (transactions.length === 0) {
+  if (safeTransactions.length === 0) {
     return null;
   }
 

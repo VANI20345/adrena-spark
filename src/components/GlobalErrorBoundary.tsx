@@ -128,7 +128,23 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   errorId, 
   resetError 
 }) => {
-  const { t } = useLanguageContext();
+  const { t, language } = useLanguageContext();
+  
+  // Check if user is admin from localStorage (since we can't use hooks for auth in error boundary)
+  const isAdmin = React.useMemo(() => {
+    try {
+      const userRole = localStorage.getItem('userRole');
+      return userRole === 'admin';
+    } catch {
+      return false;
+    }
+  }, []);
+
+  // Check if in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  // Only show technical details to admins or in development
+  const showTechnicalDetails = isDevelopment || isAdmin;
   
   const copyErrorDetails = () => {
     const errorDetails = {
@@ -147,7 +163,6 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
     const body = encodeURIComponent(`
 تفاصيل الخطأ:
 - معرف الخطأ: ${errorId}
-- الرسالة: ${error.message}
 - الوقت: ${new Date().toLocaleString('ar-SA')}
 - الصفحة: ${window.location.href}
 
@@ -165,26 +180,32 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
             <AlertTriangle className="w-8 h-8 text-destructive" />
           </div>
-          <CardTitle className="text-2xl">{t('errors.unexpected')}</CardTitle>
+          <CardTitle className="text-2xl">
+            {language === 'ar' ? 'حدث خطأ غير متوقع' : 'Something went wrong'}
+          </CardTitle>
           <CardDescription className="text-base">
-            {t('errors.unexpectedDescription')}
+            {language === 'ar' 
+              ? 'نعتذر عن هذا الخطأ. يرجى المحاولة مرة أخرى أو العودة للصفحة الرئيسية.'
+              : 'We apologize for this error. Please try again or return to the home page.'}
           </CardDescription>
-          <div className="text-sm text-muted-foreground mt-2">
-            {t('errors.errorId')}: {errorId}
-          </div>
+          {showTechnicalDetails && (
+            <div className="text-sm text-muted-foreground mt-2">
+              {language === 'ar' ? 'معرف الخطأ' : 'Error ID'}: {errorId}
+            </div>
+          )}
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Error Details in Development */}
-          {process.env.NODE_ENV === 'development' && (
+          {/* Error Details - Only for admins or development */}
+          {showTechnicalDetails && (
             <div className="bg-muted p-4 rounded-lg">
               <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                 <Bug className="w-4 h-4" />
-                {t('errors.developmentDetails')}
+                {language === 'ar' ? 'تفاصيل تقنية (للمطورين)' : 'Technical Details (for developers)'}
               </h4>
               <div className="space-y-2">
                 <div className="text-xs">
-                  <strong>خطأ:</strong> {error.message}
+                  <strong>{language === 'ar' ? 'خطأ' : 'Error'}:</strong> {error.message}
                 </div>
                 {error.stack && (
                   <pre className="text-xs text-muted-foreground overflow-auto max-h-32 bg-background p-2 rounded">
@@ -204,7 +225,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Button onClick={resetError} className="w-full">
               <RefreshCw className="w-4 h-4 mr-2" />
-              {t('errors.retry')}
+              {language === 'ar' ? 'حاول مرة أخرى' : 'Try Again'}
             </Button>
             
             <Button 
@@ -213,16 +234,18 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
               className="w-full"
             >
               <Home className="w-4 h-4 mr-2" />
-              {t('errors.backToHome')}
+              {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
             </Button>
             
-            <Button 
-              variant="outline" 
-              onClick={copyErrorDetails}
-              className="w-full"
-            >
-              {t('errors.copyDetails')}
-            </Button>
+            {showTechnicalDetails && (
+              <Button 
+                variant="outline" 
+                onClick={copyErrorDetails}
+                className="w-full"
+              >
+                {language === 'ar' ? 'نسخ التفاصيل' : 'Copy Details'}
+              </Button>
+            )}
             
             <Button 
               variant="outline" 
@@ -230,16 +253,20 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
               className="w-full"
             >
               <Bug className="w-4 h-4 mr-2" />
-              {t('errors.reportBug')}
+              {language === 'ar' ? 'الإبلاغ عن مشكلة' : 'Report Issue'}
             </Button>
           </div>
 
           {/* Help Information */}
           <div className="text-center text-sm text-muted-foreground space-y-2">
-            <p>{t('errors.persistentError')}</p>
+            <p>
+              {language === 'ar' 
+                ? 'إذا استمرت المشكلة، يرجى التواصل معنا'
+                : 'If the problem persists, please contact us'}
+            </p>
             <div className="flex flex-col gap-1">
               <span>📧 support@hawaya.com</span>
-              <span>📱 واتساب: +966 50 123 4567</span>
+              <span>📱 {language === 'ar' ? 'واتساب' : 'WhatsApp'}: +966 50 123 4567</span>
             </div>
           </div>
         </CardContent>
