@@ -457,6 +457,20 @@ const translations = {
         withdrawRequested: 'تم طلب سحب {amount} ريال',
         exported: 'تم تصدير المعاملات',
       },
+      // Earnings Report translations
+      earningsReport: 'تقرير الأرباح',
+      earningsReportDesc: 'عرض أرباحك ومصروفاتك على مدار الوقت',
+      earningsOverTime: 'الأرباح عبر الزمن',
+      netBalanceTrend: 'اتجاه صافي الرصيد',
+      transactionBreakdown: 'تفصيل المعاملات',
+      week: 'أسبوع',
+      month: 'شهر',
+      year: 'سنة',
+      last7Days: 'آخر 7 أيام',
+      incomeVsExpenses: 'الدخل مقابل المصروفات',
+      monthlyTrend: 'الاتجاه الشهري',
+      noDataForPeriod: 'لا توجد بيانات لهذه الفترة',
+      expenses: 'المصروفات',
     },
 
     // Terms Page
@@ -2846,6 +2860,20 @@ const translations = {
         withdrawRequested: 'Withdrawal of {amount} SAR requested',
         exported: 'Transactions exported',
       },
+      // Earnings Report translations
+      earningsReport: 'Earnings Report',
+      earningsReportDesc: 'View your earnings and expenses over time',
+      earningsOverTime: 'Earnings Over Time',
+      netBalanceTrend: 'Net Balance Trend',
+      transactionBreakdown: 'Transaction Breakdown',
+      week: 'Week',
+      month: 'Month',
+      year: 'Year',
+      last7Days: 'Last 7 days',
+      incomeVsExpenses: 'Income vs Expenses',
+      monthlyTrend: 'Monthly Trend',
+      noDataForPeriod: 'No data for this period',
+      expenses: 'Expenses',
     },
 
     // Terms Page

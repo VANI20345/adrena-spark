@@ -32,36 +32,43 @@ interface NavIconButtonProps {
   label: string;
   isActive?: boolean;
   badge?: number;
+  showLabel?: boolean; // New prop to control label visibility
 }
 
-const NavIconButton = ({ to, icon, label, isActive, badge }: NavIconButtonProps) => (
+// Updated NavIconButton to optionally show labels on large screens
+const NavIconButton = ({ to, icon, label, isActive, badge, showLabel = false }: NavIconButtonProps) => (
   <TooltipProvider delayDuration={100}>
     <Tooltip>
       <TooltipTrigger asChild>
         <Link to={to} className="relative">
           <Button
             variant="ghost"
-            size="icon"
+            size={showLabel ? "default" : "icon"}
             className={cn(
-              "relative h-10 w-10 rounded-full transition-all duration-200",
+              "relative transition-all duration-200",
+              showLabel ? "px-3 h-10 gap-2" : "h-10 w-10 rounded-full",
               isActive 
                 ? "bg-primary/10 text-primary hover:bg-primary/15" 
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             )}
           >
             {icon}
+            {/* Show label on large screens when showLabel is true */}
+            {showLabel && (
+              <span className="hidden lg:inline text-sm font-medium">{label}</span>
+            )}
             {badge && badge > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
                 {badge > 99 ? '99+' : badge}
               </span>
             )}
-            {isActive && (
+            {isActive && !showLabel && (
               <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
             )}
           </Button>
         </Link>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="text-xs">
+      <TooltipContent side="bottom" className="text-xs lg:hidden">
         {label}
       </TooltipContent>
     </Tooltip>
@@ -236,6 +243,7 @@ const Navbar = () => {
                 icon={item.icon}
                 label={item.label}
                 isActive={isActive(item.to)}
+                showLabel={true} // Show labels on large screens
               />
             ))}
             {/* Discover Search Dropdown - only for logged-in attendee users */}

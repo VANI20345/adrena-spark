@@ -23,6 +23,7 @@ import { ServiceCategoriesTab } from '@/components/Admin/ServiceCategoriesTab';
 import { EventCategoriesTab } from '@/components/Admin/EventCategoriesTab';
 import { GroupManagementTab } from '@/components/Admin/GroupManagementTab';
 import { ContactSettingsTab } from '@/components/Admin/ContactSettingsTab';
+import CommissionSettingsTab from '@/components/Admin/CommissionSettingsTab';
 import { UnifiedTicketsTab } from '@/components/Admin/UnifiedTicketsTab';
 import { AdminOverviewTab } from '@/components/Admin/AdminOverviewTab';
 import { AdminEventsTab } from '@/components/Admin/AdminEventsTab';
@@ -431,6 +432,7 @@ const AdminPanel = () => {
               <TabsTrigger value="tickets" className="whitespace-nowrap">{language === 'ar' ? 'التذاكر والبلاغات' : 'Tickets & Reports'}</TabsTrigger>
               <TabsTrigger value="system" className="whitespace-nowrap">{language === 'ar' ? 'النظام' : 'System'}</TabsTrigger>
               <TabsTrigger value="contact-settings" className="whitespace-nowrap">{language === 'ar' ? 'إعدادات التواصل' : 'Contact Settings'}</TabsTrigger>
+              <TabsTrigger value="commission-settings" className="whitespace-nowrap">{language === 'ar' ? 'إعدادات العمولة' : 'Commission Settings'}</TabsTrigger>
               <TabsTrigger value="notifications" className="whitespace-nowrap">{language === 'ar' ? 'الإشعارات' : 'Notifications'}</TabsTrigger>
               <TabsTrigger value="activity" className="whitespace-nowrap">{language === 'ar' ? 'سجل النشاطات' : 'Activity Logs'}</TabsTrigger>
             </TabsList>
@@ -634,6 +636,11 @@ const AdminPanel = () => {
           {/* Contact Settings Tab */}
           <TabsContent value="contact-settings">
             <ContactSettingsTab />
+          </TabsContent>
+
+          {/* Commission Settings Tab */}
+          <TabsContent value="commission-settings">
+            <CommissionSettingsTab isRTL={isRTL} />
           </TabsContent>
 
           {/* Notifications Tab */}

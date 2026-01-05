@@ -263,30 +263,30 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
             </div>
 
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className={`w-48 ${isRTL ? 'text-right' : 'text-left'}`}>
+              <SelectTrigger className={`w-48 ${isRTL ? 'text-right [&>span]:text-right' : 'text-left'}`}>
                 <SelectValue placeholder={t('wallet.transactionType')} />
               </SelectTrigger>
-              <SelectContent className={isRTL ? 'text-right' : 'text-left'}>
-                <SelectItem value="all">{t('wallet.allTypes')}</SelectItem>
-                <SelectItem value="earning">{t('wallet.earning')}</SelectItem>
-                <SelectItem value="payment">{t('wallet.payment')}</SelectItem>
-                <SelectItem value="withdraw">{t('wallet.withdraw')}</SelectItem>
-                <SelectItem value="refund">{t('wallet.refund')}</SelectItem>
-                <SelectItem value="commission">{t('wallet.commission')}</SelectItem>
-                <SelectItem value="bonus">{t('wallet.bonus')}</SelectItem>
+              <SelectContent align={isRTL ? 'end' : 'start'}>
+                <SelectItem value="all" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.allTypes')}</SelectItem>
+                <SelectItem value="earning" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.earning')}</SelectItem>
+                <SelectItem value="payment" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.payment')}</SelectItem>
+                <SelectItem value="withdraw" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.withdraw')}</SelectItem>
+                <SelectItem value="refund" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.refund')}</SelectItem>
+                <SelectItem value="commission" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.commission')}</SelectItem>
+                <SelectItem value="bonus" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.bonus')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className={`w-48 ${isRTL ? 'text-right' : 'text-left'}`}>
+              <SelectTrigger className={`w-48 ${isRTL ? 'text-right [&>span]:text-right' : 'text-left'}`}>
                 <SelectValue placeholder={t('wallet.status')} />
               </SelectTrigger>
-              <SelectContent className={isRTL ? 'text-right' : 'text-left'}>
-                <SelectItem value="all">{t('wallet.allStatuses')}</SelectItem>
-                <SelectItem value="completed">{t('wallet.completed')}</SelectItem>
-                <SelectItem value="pending">{t('wallet.processing')}</SelectItem>
-                <SelectItem value="failed">{t('wallet.failed')}</SelectItem>
-                <SelectItem value="cancelled">{t('wallet.cancelled')}</SelectItem>
+              <SelectContent align={isRTL ? 'end' : 'start'}>
+                <SelectItem value="all" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.allStatuses')}</SelectItem>
+                <SelectItem value="completed" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.completed')}</SelectItem>
+                <SelectItem value="pending" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.processing')}</SelectItem>
+                <SelectItem value="failed" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.failed')}</SelectItem>
+                <SelectItem value="cancelled" className={isRTL ? 'text-right' : 'text-left'}>{t('wallet.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
