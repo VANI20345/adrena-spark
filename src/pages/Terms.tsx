@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { FileText, Calendar, Users, CreditCard, Shield, AlertCircle, Loader2 } from "lucide-react";
+import { FileText, Calendar, Users, CreditCard, Shield, AlertCircle, Loader2, Percent, Tag } from "lucide-react";
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { useLanguageContext } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useCommissionRates } from "@/hooks/useCommissionRates";
 
 interface ContactSettings {
   contact_phone: { primary: string; secondary: string };
@@ -18,6 +20,32 @@ const Terms = () => {
   const currentYear = new Date().getFullYear();
   const [loading, setLoading] = useState(true);
   const [contactSettings, setContactSettings] = useState<ContactSettings | null>(null);
+  const { rates: commissionRates, loading: commissionLoading } = useCommissionRates();
+
+  const translations = {
+    ar: {
+      commissionTitle: 'نسب العمولة',
+      commissionDescription: 'تفرض المنصة نسب عمولة على المعاملات المالية وفقاً للتالي:',
+      eventsCommission: 'عمولة الفعاليات',
+      servicesCommission: 'عمولة الخدمات',
+      trainingCommission: 'عمولة التدريب',
+      discountExemption: 'إعفاء الخصومات',
+      discountExemptionNote: 'جميع الخدمات المخفضة معفاة تماماً من العمولة',
+      commissionNote: 'ملاحظة: يتم خصم العمولة من مبلغ الخدمة أو الفعالية وتُحول الأرباح الصافية لمقدم الخدمة أو المنظم.',
+    },
+    en: {
+      commissionTitle: 'Commission Rates',
+      commissionDescription: 'The platform charges commission on financial transactions as follows:',
+      eventsCommission: 'Events Commission',
+      servicesCommission: 'Services Commission',
+      trainingCommission: 'Training Commission',
+      discountExemption: 'Discount Exemption',
+      discountExemptionNote: 'All discounted services are fully exempt from commission',
+      commissionNote: 'Note: Commission is deducted from the service or event amount, and net earnings are transferred to the provider or organizer.',
+    }
+  };
+
+  const localT = translations[language];
 
   useEffect(() => {
     loadContactSettings();
@@ -57,7 +85,7 @@ const Terms = () => {
   const sectionIcons = [Users, Calendar, CreditCard, Shield, FileText, AlertCircle];
   const sectionKeys = ['acceptance', 'bookings', 'payment', 'liability', 'intellectual', 'conduct'] as const;
 
-  if (loading) {
+  if (loading || commissionLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
@@ -97,6 +125,65 @@ const Terms = () => {
             <CardContent>
               <p className={`text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`}>
                 {t('terms.introText')}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Commission Rates Section - Dynamic from Admin Settings */}
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
+              <CardTitle className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+                <Percent className="w-6 h-6 text-primary flex-shrink-0" />
+                <span>{localT.commissionTitle}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className={`text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`}>
+                {localT.commissionDescription}
+              </p>
+
+              {/* Commission Rates Display */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className={`p-4 bg-background rounded-lg border ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+                    <Calendar className="w-5 h-5 text-primary" />
+                    <span className="font-medium">{localT.eventsCommission}</span>
+                  </div>
+                  <div className="text-3xl font-bold text-primary">{commissionRates.events}%</div>
+                </div>
+
+                <div className={`p-4 bg-background rounded-lg border ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+                    <CreditCard className="w-5 h-5 text-primary" />
+                    <span className="font-medium">{localT.servicesCommission}</span>
+                  </div>
+                  <div className="text-3xl font-bold text-primary">{commissionRates.services}%</div>
+                </div>
+
+                <div className={`p-4 bg-background rounded-lg border ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+                    <Users className="w-5 h-5 text-primary" />
+                    <span className="font-medium">{localT.trainingCommission}</span>
+                  </div>
+                  <div className="text-3xl font-bold text-primary">{commissionRates.training}%</div>
+                </div>
+              </div>
+
+              {/* Discount Exemption Notice */}
+              <div className={`flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <Tag className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className={isRTL ? 'text-right' : 'text-left'}>
+                  <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 mb-2">
+                    {localT.discountExemption}
+                  </Badge>
+                  <p className="text-sm text-green-700 dark:text-green-400">
+                    {localT.discountExemptionNote}
+                  </p>
+                </div>
+              </div>
+
+              <p className={`text-sm text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`}>
+                {localT.commissionNote}
               </p>
             </CardContent>
           </Card>

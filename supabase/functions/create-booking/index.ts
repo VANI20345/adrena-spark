@@ -14,6 +14,46 @@ interface BookingRequest {
   calculated_vat?: number;
 }
 
+interface CommissionRates {
+  events: number;
+  services: number;
+  training: number;
+}
+
+async function getCommissionRates(supabaseClient: any): Promise<CommissionRates> {
+  const defaultRates = { events: 10, services: 10, training: 10 };
+  
+  try {
+    const { data, error } = await supabaseClient
+      .from('system_settings')
+      .select('key, value')
+      .in('key', ['commission_events', 'commission_services', 'commission_training']);
+
+    if (error) return defaultRates;
+
+    const rates = { ...defaultRates };
+    
+    if (data) {
+      data.forEach((item: any) => {
+        const value = typeof item.value === 'object' && item.value !== null
+          ? item.value.percentage
+          : item.value;
+        
+        const percentage = Number(value) || defaultRates[item.key.replace('commission_', '') as keyof CommissionRates];
+        
+        if (item.key === 'commission_events') rates.events = percentage;
+        if (item.key === 'commission_services') rates.services = percentage;
+        if (item.key === 'commission_training') rates.training = percentage;
+      });
+    }
+
+    return rates;
+  } catch (err) {
+    console.error('Error fetching commission rates:', err);
+    return defaultRates;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -51,6 +91,10 @@ serve(async (req) => {
       throw new Error('Not enough tickets available');
     }
 
+    // Get commission rate from admin settings
+    const commissionRates = await getCommissionRates(supabaseClient);
+    const eventCommissionRate = commissionRates.events;
+
     // Calculate pricing - prices are VAT-inclusive
     const ticketPrice = event.price || 0;
     const subtotal = ticketPrice * quantity; // This is the final price (VAT included)
@@ -84,6 +128,10 @@ serve(async (req) => {
     if (calculated_vat !== undefined && calculated_vat > 0) {
       vatAmount = calculated_vat;
     }
+
+    // Calculate platform commission based on admin-defined rate
+    const platformCommission = (totalAmount * eventCommissionRate) / 100;
+    const organizerEarnings = totalAmount - platformCommission;
 
     // Increment event attendees immediately when booking is created
     await supabaseClient.rpc('increment_event_attendees', {
@@ -123,7 +171,13 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify(booking), {
+    // Return booking with commission info for transparency
+    return new Response(JSON.stringify({
+      ...booking,
+      commission_rate: eventCommissionRate,
+      platform_commission: platformCommission,
+      organizer_earnings: organizerEarnings,
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
