@@ -15,6 +15,46 @@ interface BookingRequest {
   quantity?: number; // Number of people booking
 }
 
+interface CommissionRates {
+  events: number;
+  services: number;
+  training: number;
+}
+
+async function getCommissionRates(supabaseClient: any): Promise<CommissionRates> {
+  const defaultRates = { events: 10, services: 10, training: 10 };
+  
+  try {
+    const { data, error } = await supabaseClient
+      .from('system_settings')
+      .select('key, value')
+      .in('key', ['commission_events', 'commission_services', 'commission_training']);
+
+    if (error) return defaultRates;
+
+    const rates = { ...defaultRates };
+    
+    if (data) {
+      data.forEach((item: any) => {
+        const value = typeof item.value === 'object' && item.value !== null
+          ? item.value.percentage
+          : item.value;
+        
+        const percentage = Number(value) || defaultRates[item.key.replace('commission_', '') as keyof CommissionRates];
+        
+        if (item.key === 'commission_events') rates.events = percentage;
+        if (item.key === 'commission_services') rates.services = percentage;
+        if (item.key === 'commission_training') rates.training = percentage;
+      });
+    }
+
+    return rates;
+  } catch (err) {
+    console.error('Error fetching commission rates:', err);
+    return defaultRates;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -70,6 +110,20 @@ serve(async (req) => {
       );
     }
 
+    // Get commission rates from admin settings
+    const commissionRates = await getCommissionRates(supabaseClient);
+    
+    // Determine service type and commission rate
+    // Training services use training commission, others use services commission
+    const isTrainingService = service.service_type === 'training';
+    const isDiscountedService = service.discount_percentage && service.discount_percentage > 0;
+    
+    // IMPORTANT: Discounted services are ALWAYS exempt from commission
+    let applicableCommissionRate = 0;
+    if (!isDiscountedService) {
+      applicableCommissionRate = isTrainingService ? commissionRates.training : commissionRates.services;
+    }
+
     // Calculate total amount based on service pricing
     let totalAmount = 0;
     if (service.price > 0) {
@@ -91,10 +145,17 @@ serve(async (req) => {
           : service.price;
         totalAmount = hourlyRate * (durationMinutes / 60) * quantity;
       } else {
-        // Fixed pricing
-        totalAmount = service.price * quantity;
+        // Fixed pricing with discount if applicable
+        const effectivePrice = service.discount_percentage
+          ? service.price * (1 - service.discount_percentage / 100)
+          : service.price;
+        totalAmount = effectivePrice * quantity;
       }
     }
+
+    // Calculate platform commission (0% for discounted services)
+    const platformCommission = (totalAmount * applicableCommissionRate) / 100;
+    const providerEarnings = totalAmount - platformCommission;
 
     // Validate capacity if time-based booking
     if (service.availability_type && start_time && end_time) {
@@ -170,7 +231,7 @@ serve(async (req) => {
       throw bookingError;
     }
 
-    // Send notification to provider
+    // Send notification to provider with commission details
     await supabaseClient.from('notifications').insert({
       user_id: service.provider_id,
       type: 'service_booking',
@@ -182,6 +243,11 @@ serve(async (req) => {
         user_id: user.id,
         booking_date: service_date,
         quantity,
+        total_amount: totalAmount,
+        commission_rate: applicableCommissionRate,
+        platform_commission: platformCommission,
+        provider_earnings: providerEarnings,
+        is_discounted: isDiscountedService,
       }
     });
 
@@ -189,7 +255,11 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         booking,
-        requiresPayment: totalAmount > 0
+        requiresPayment: totalAmount > 0,
+        commission_rate: applicableCommissionRate,
+        platform_commission: platformCommission,
+        provider_earnings: providerEarnings,
+        is_discounted: isDiscountedService,
       }),
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
