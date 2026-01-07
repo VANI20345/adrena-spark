@@ -495,7 +495,7 @@ const EarningsReport = () => {
           {/* Bar Chart Comparison */}
           <Card>
             <CardHeader>
-              <CardTitle>{t('wallet.dailyComparison') || 'Daily Comparison'}</CardTitle>
+              <CardTitle>{t('wallet.dailyComparison')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
@@ -512,7 +512,7 @@ const EarningsReport = () => {
                       orientation={isRTL ? 'right' : 'left'}
                     />
                     <Tooltip 
-                      content={({ active, payload, label }) => {
+                      content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
                             <div className="bg-card border rounded-lg p-3 shadow-lg">
@@ -529,8 +529,8 @@ const EarningsReport = () => {
                       }}
                     />
                     <Legend />
-                    <Bar dataKey="income" name={t('wallet.income') || 'Income'} fill="#22c55e" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="expenses" name={t('wallet.expenses') || 'Expenses'} fill="#ef4444" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="income" name={t('wallet.income')} fill="#22c55e" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="expenses" name={t('wallet.expenses')} fill="#ef4444" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

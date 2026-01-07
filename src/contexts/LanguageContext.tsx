@@ -471,6 +471,8 @@ const translations = {
       monthlyTrend: 'الاتجاه الشهري',
       noDataForPeriod: 'لا توجد بيانات لهذه الفترة',
       expenses: 'المصروفات',
+      dailyComparison: 'المقارنة اليومية',
+      periodComparison: 'مقارنة الفترة',
     },
 
     // Terms Page
@@ -2874,6 +2876,8 @@ const translations = {
       monthlyTrend: 'Monthly Trend',
       noDataForPeriod: 'No data for this period',
       expenses: 'Expenses',
+      dailyComparison: 'Daily Comparison',
+      periodComparison: 'Period Comparison',
     },
 
     // Terms Page
