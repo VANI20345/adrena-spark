@@ -133,6 +133,84 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_performance_stats: {
+        Row: {
+          admin_id: string
+          created_at: string | null
+          events_approved: number | null
+          events_rejected: number | null
+          id: string
+          period_end: string
+          period_start: string
+          providers_approved: number | null
+          providers_rejected: number | null
+          reports_handled: number | null
+          services_approved: number | null
+          services_rejected: number | null
+          tickets_resolved: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string | null
+          events_approved?: number | null
+          events_rejected?: number | null
+          id?: string
+          period_end: string
+          period_start: string
+          providers_approved?: number | null
+          providers_rejected?: number | null
+          reports_handled?: number | null
+          services_approved?: number | null
+          services_rejected?: number | null
+          tickets_resolved?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string | null
+          events_approved?: number | null
+          events_rejected?: number | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          providers_approved?: number | null
+          providers_rejected?: number | null
+          reports_handled?: number | null
+          services_approved?: number | null
+          services_rejected?: number | null
+          tickets_resolved?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      admin_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          permission_key: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          permission_key: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          permission_key?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           badge_type: string
@@ -868,6 +946,54 @@ export type Database = {
             referencedColumns: ["category_id"]
           },
         ]
+      }
+      financial_transaction_logs: {
+        Row: {
+          amount: number
+          commission_amount: number | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          net_amount: number | null
+          payer_id: string | null
+          receiver_id: string | null
+          reference_id: string | null
+          reference_type: string | null
+          status: string | null
+          transaction_type: string
+          vat_amount: number | null
+        }
+        Insert: {
+          amount: number
+          commission_amount?: number | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          net_amount?: number | null
+          payer_id?: string | null
+          receiver_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          transaction_type: string
+          vat_amount?: number | null
+        }
+        Update: {
+          amount?: number
+          commission_amount?: number | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          net_amount?: number | null
+          payer_id?: string | null
+          receiver_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          transaction_type?: string
+          vat_amount?: number | null
+        }
+        Relationships: []
       }
       follow_requests: {
         Row: {
@@ -2804,6 +2930,39 @@ export type Database = {
         }
         Relationships: []
       }
+      super_admin_activity_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          super_admin_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          super_admin_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          super_admin_id?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           created_at: string
@@ -4146,6 +4305,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: string
       }
+      has_permission: {
+        Args: { _permission_key: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4166,6 +4329,7 @@ export type Database = {
         Args: { p_chat_id: string; p_user_id: string }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_user_suspended: { Args: { target_user_id: string }; Returns: boolean }
       log_system_event: {
         Args: { p_details?: Json; p_level: string; p_message: string }
@@ -4182,7 +4346,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "attendee" | "organizer" | "provider" | "admin"
+      app_role: "attendee" | "organizer" | "provider" | "admin" | "super_admin"
       friend_request_status: "pending" | "accepted" | "rejected" | "cancelled"
       friendship_status: "pending" | "accepted" | "blocked"
       profile_visibility: "public" | "friends_only" | "private"
@@ -4313,7 +4477,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["attendee", "organizer", "provider", "admin"],
+      app_role: ["attendee", "organizer", "provider", "admin", "super_admin"],
       friend_request_status: ["pending", "accepted", "rejected", "cancelled"],
       friendship_status: ["pending", "accepted", "blocked"],
       profile_visibility: ["public", "friends_only", "private"],

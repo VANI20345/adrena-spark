@@ -23,7 +23,7 @@ import { useLanguageContext } from '@/contexts/LanguageContext';
 
 interface TransactionHistoryProps {
   userId: string;
-  userRole?: 'attendee' | 'provider' | 'admin';
+  userRole?: 'attendee' | 'provider' | 'admin' | 'super_admin';
 }
 
 const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {

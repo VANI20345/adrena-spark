@@ -114,7 +114,7 @@ export const EventCategoriesTab = () => {
                         <Badge variant="secondary">{category.event_count || 0}</Badge>
                       </TableCell>
                       <TableCell>
-                        <div className={`flex gap-2 ${isRTL ? 'justify-start' : 'justify-end'}`}>
+                        <div className={`flex gap-2 ${isRTL ? 'justify-end flex-row-reverse' : 'justify-start'}`}>
                           <CategoryDialog
                             type="interest"
                             category={category}
