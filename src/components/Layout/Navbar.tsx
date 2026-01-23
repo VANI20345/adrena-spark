@@ -97,6 +97,7 @@ const Navbar = () => {
       case 'attendee': return t('authentication.attendee');
       case 'provider': return t('authentication.provider');
       case 'admin': return t('authentication.admin');
+      case 'super_admin': return language === 'ar' ? 'مشرف أعلى' : 'Super Admin';
       default: return '';
     }
   };
@@ -195,6 +196,30 @@ const Navbar = () => {
             to: '/admin', 
             icon: <ShieldCheck className="h-5 w-5" />, 
             label: language === 'ar' ? 'لوحة الإدارة' : 'Admin' 
+          },
+        ];
+      case 'super_admin':
+        return [
+          ...baseIcons,
+          { 
+            to: '/events', 
+            icon: <Calendar className="h-5 w-5" />, 
+            label: language === 'ar' ? 'الفعاليات' : 'Events' 
+          },
+          { 
+            to: '/groups', 
+            icon: <Users className="h-5 w-5" />, 
+            label: language === 'ar' ? 'القروبات' : 'Groups' 
+          },
+          { 
+            to: '/services', 
+            icon: <Briefcase className="h-5 w-5" />, 
+            label: language === 'ar' ? 'الخدمات' : 'Services' 
+          },
+          { 
+            to: '/super-admin', 
+            icon: <ShieldCheck className="h-5 w-5" />, 
+            label: language === 'ar' ? 'لوحة المشرف الأعلى' : 'Super Admin' 
           },
         ];
       default:
@@ -335,7 +360,7 @@ const Navbar = () => {
                       </Link>
                     </DropdownMenuItem>
                     
-                    {userRole !== 'admin' && (
+                    {userRole !== 'admin' && userRole !== 'super_admin' && (
                       <DropdownMenuItem asChild>
                         <Link to={`/${userRole}-dashboard`} className="flex items-center gap-2">
                           <LayoutDashboard className="h-4 w-4" />
@@ -393,6 +418,15 @@ const Navbar = () => {
                         <Link to="/admin" className="flex items-center gap-2">
                           <ShieldCheck className="h-4 w-4" />
                           {language === 'ar' ? 'لوحة الإدارة' : 'Admin Panel'}
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {userRole === 'super_admin' && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/super-admin" className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4" />
+                          {language === 'ar' ? 'لوحة المشرف الأعلى' : 'Super Admin Panel'}
                         </Link>
                       </DropdownMenuItem>
                     )}

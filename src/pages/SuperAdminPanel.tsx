@@ -137,11 +137,11 @@ const SuperAdminPanel = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background" dir={isRTL ? 'rtl' : 'ltr'}>
       <Navbar />
-      <main className={`flex-1 container mx-auto px-4 py-8`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <main className="flex-1 container mx-auto px-4 py-8">
         <div className={`mb-8 ${isRTL ? 'text-right' : 'text-left'}`}>
-          <div className="flex items-center gap-3 mb-2">
+          <div className={`flex items-center gap-3 mb-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
             <div className="p-2 bg-primary/10 rounded-lg">
               <Shield className="h-6 w-6 text-primary" />
             </div>
@@ -321,8 +321,8 @@ const SuperAdminPanel = () => {
                   <Card>
                     <CardContent className="pt-6 text-center">
                       <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                      <p className="text-2xl font-bold">{Math.round((stats?.totalUsers || 0) * 0.7)}</p>
-                      <p className="text-sm text-muted-foreground">{isRTL ? 'مستخدمون نشطون' : 'Active Users'}</p>
+                      <p className="text-2xl font-bold">{stats?.totalEvents || 0}</p>
+                      <p className="text-sm text-muted-foreground">{isRTL ? 'إجمالي الفعاليات' : 'Total Events'}</p>
                     </CardContent>
                   </Card>
                   <Card>
