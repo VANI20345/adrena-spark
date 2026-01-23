@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +18,7 @@ import {
   Wallet,
   PiggyBank
 } from 'lucide-react';
-import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { format, subDays, startOfMonth } from 'date-fns';
 
 const VAT_RATE = 0.15; // 15% VAT
 
@@ -47,24 +47,30 @@ export const FinancialDashboardTab = () => {
       }
 
       // Get bookings for the period
-      const { data: bookings } = await supabase
+      const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
         .select('id, total_amount, vat_amount, status, created_at')
         .gte('created_at', startDate.toISOString())
         .eq('status', 'confirmed');
 
+      if (bookingsError) console.error('Error fetching bookings:', bookingsError);
+
       // Get service bookings
-      const { data: serviceBookings } = await supabase
+      const { data: serviceBookings, error: serviceError } = await supabase
         .from('service_bookings')
         .select('id, total_amount, status, created_at')
         .gte('created_at', startDate.toISOString())
         .eq('status', 'confirmed');
 
+      if (serviceError) console.error('Error fetching service bookings:', serviceError);
+
       // Get wallet transactions
-      const { data: walletTransactions } = await supabase
+      const { data: walletTransactions, error: walletError } = await supabase
         .from('wallet_transactions')
         .select('*')
         .gte('created_at', startDate.toISOString());
+
+      if (walletError) console.error('Error fetching wallet transactions:', walletError);
 
       // Calculate totals
       const eventRevenue = bookings?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0;
@@ -127,14 +133,16 @@ export const FinancialDashboardTab = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="pt-6">
-              <div className="h-24 bg-muted rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="pt-6">
+                <div className="h-24 bg-muted rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -175,12 +183,20 @@ export const FinancialDashboardTab = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Header */}
+      <div className={isRTL ? 'text-right' : 'text-left'}>
+        <h2 className="text-2xl font-bold">{isRTL ? 'لوحة المالية' : 'Financial Dashboard'}</h2>
+        <p className="text-muted-foreground">
+          {isRTL ? 'نظرة شاملة على الأداء المالي للمنصة' : 'Comprehensive overview of platform financial performance'}
+        </p>
+      </div>
+
       {/* Period Selector & Export */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
+      <div className={`flex flex-col sm:flex-row justify-between gap-4 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-full sm:w-48">
-            <Calendar className="h-4 w-4 mr-2" />
+          <SelectTrigger className={`w-full sm:w-48 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -189,8 +205,8 @@ export const FinancialDashboardTab = () => {
             <SelectItem value="year">{isRTL ? 'هذا العام' : 'This Year'}</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={exportFinancialReport} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
+        <Button onClick={exportFinancialReport} variant="outline" className={isRTL ? 'flex-row-reverse' : ''}>
+          <Download className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
           {isRTL ? 'تصدير التقرير' : 'Export Report'}
         </Button>
       </div>
@@ -200,8 +216,8 @@ export const FinancialDashboardTab = () => {
         {stats.map((stat, index) => (
           <Card key={index}>
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
+              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={isRTL ? 'text-right' : 'text-left'}>
                   <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                   <p className="text-2xl font-bold mt-1">{stat.value}</p>
                   <p className="text-xs text-muted-foreground mt-1">{stat.subtext}</p>
@@ -218,7 +234,7 @@ export const FinancialDashboardTab = () => {
       {/* Revenue Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader>
+          <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
             <CardTitle>{isRTL ? 'تفصيل الإيرادات' : 'Revenue Breakdown'}</CardTitle>
             <CardDescription>
               {isRTL ? 'إيرادات الفعاليات والخدمات' : 'Events vs Services revenue'}
@@ -226,15 +242,15 @@ export const FinancialDashboardTab = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div className="flex items-center gap-3">
+              <div className={`flex items-center justify-between p-4 bg-muted rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="w-3 h-3 bg-primary rounded-full"></div>
                   <span>{isRTL ? 'إيرادات الفعاليات' : 'Event Revenue'}</span>
                 </div>
                 <span className="font-bold">{formatCurrency(financialData?.eventRevenue || 0)}</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div className="flex items-center gap-3">
+              <div className={`flex items-center justify-between p-4 bg-muted rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="w-3 h-3 bg-secondary rounded-full"></div>
                   <span>{isRTL ? 'إيرادات الخدمات' : 'Service Revenue'}</span>
                 </div>
@@ -245,7 +261,7 @@ export const FinancialDashboardTab = () => {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
             <CardTitle>{isRTL ? 'إحصائيات المحفظة' : 'Wallet Statistics'}</CardTitle>
             <CardDescription>
               {isRTL ? 'عمليات الإيداع والسحب' : 'Deposits and withdrawals'}
@@ -253,15 +269,15 @@ export const FinancialDashboardTab = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div className="flex items-center gap-3">
+              <div className={`flex items-center justify-between p-4 bg-muted rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <TrendingUp className="h-5 w-5 text-green-600" />
                   <span>{isRTL ? 'إجمالي الإيداعات' : 'Total Deposits'}</span>
                 </div>
                 <span className="font-bold text-green-600">{formatCurrency(financialData?.totalTopups || 0)}</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div className="flex items-center gap-3">
+              <div className={`flex items-center justify-between p-4 bg-muted rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <TrendingDown className="h-5 w-5 text-red-600" />
                   <span>{isRTL ? 'إجمالي السحوبات' : 'Total Withdrawals'}</span>
                 </div>
@@ -274,8 +290,8 @@ export const FinancialDashboardTab = () => {
 
       {/* Transaction Log */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
+          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Wallet className="h-5 w-5" />
             {isRTL ? 'سجل المعاملات' : 'Transaction Log'}
           </CardTitle>
@@ -295,17 +311,17 @@ export const FinancialDashboardTab = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {financialData?.recentTransactions?.length === 0 ? (
+                {!financialData?.recentTransactions || financialData.recentTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                       {isRTL ? 'لا توجد معاملات' : 'No transactions found'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  financialData?.recentTransactions?.map((tx: any) => (
+                  financialData.recentTransactions.map((tx: any) => (
                     <TableRow key={tx.id}>
                       <TableCell className="font-mono text-xs">{tx.id.slice(0, 8)}...</TableCell>
-                      <TableCell className="font-bold">{formatCurrency(tx.total_amount)}</TableCell>
+                      <TableCell className="font-bold">{formatCurrency(tx.total_amount || 0)}</TableCell>
                       <TableCell>
                         <Badge variant={tx.status === 'confirmed' ? 'default' : 'secondary'}>
                           {tx.status === 'confirmed' 

@@ -139,7 +139,7 @@ const SuperAdminPanel = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background" dir={isRTL ? 'rtl' : 'ltr'}>
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className={`mb-8 ${isRTL ? 'text-right' : 'text-left'}`}>
           <div className={`flex items-center gap-3 mb-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -154,14 +154,14 @@ const SuperAdminPanel = () => {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
           <div className="w-full overflow-x-auto">
-            <TabsList className="inline-flex w-max min-w-full h-auto flex-wrap gap-2 p-2 bg-muted rounded-lg">
+            <TabsList className={`inline-flex w-max min-w-full h-auto flex-wrap gap-2 p-2 bg-muted rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
               {tabs.map((tab) => (
                 <TabsTrigger 
                   key={tab.id} 
                   value={tab.id} 
-                  className="whitespace-nowrap flex items-center gap-2"
+                  className={`whitespace-nowrap flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
                   <tab.icon className="h-4 w-4" />
                   {isRTL ? tab.labelAr : tab.labelEn}
@@ -224,10 +224,10 @@ const SuperAdminPanel = () => {
 
           {/* System Tab - Super Admin exclusive */}
           <TabsContent value="system" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" dir={isRTL ? 'rtl' : 'ltr'}>
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <Database className="h-5 w-5" />
                     {isRTL ? 'إدارة النظام' : 'System Management'}
                   </CardTitle>
@@ -235,7 +235,7 @@ const SuperAdminPanel = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
-                    className="w-full" 
+                    className={`w-full ${isRTL ? 'flex-row-reverse' : ''}`}
                     variant={maintenanceMode ? "destructive" : "default"}
                     onClick={handleMaintenanceMode}
                   >
@@ -245,19 +245,19 @@ const SuperAdminPanel = () => {
                       : (isRTL ? 'تفعيل وضع الصيانة' : 'Enable Maintenance Mode')}
                   </Button>
 
-                  <Button className="w-full" onClick={handleDatabaseBackup}>
+                  <Button className={`w-full ${isRTL ? 'flex-row-reverse' : ''}`} onClick={handleDatabaseBackup}>
                     <Database className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {isRTL ? 'إنشاء نسخة احتياطية' : 'Create Backup'}
                   </Button>
 
-                  <Button className="w-full" variant="outline" onClick={handleClearCache}>
+                  <Button className={`w-full ${isRTL ? 'flex-row-reverse' : ''}`} variant="outline" onClick={handleClearCache}>
                     <AlertCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {isRTL ? 'مسح ذاكرة التخزين المؤقت' : 'Clear Cache'}
                   </Button>
 
                   <Alert>
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
+                    <AlertDescription className={isRTL ? 'text-right' : 'text-left'}>
                       {isRTL ? 'سيتم حفظ النسخة الاحتياطية في مجلد documents/backups' : 'Backup will be saved in documents/backups folder'}
                     </AlertDescription>
                   </Alert>
@@ -265,16 +265,16 @@ const SuperAdminPanel = () => {
               </Card>
 
               <Card>
-                <CardHeader>
+                <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
                   <CardTitle>{isRTL ? 'حالة النظام' : 'System Status'}</CardTitle>
                   <CardDescription>{isRTL ? 'مراقبة أداء النظام' : 'Monitor system performance'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <span className="text-sm">{isRTL ? 'قاعدة البيانات' : 'Database'}</span>
                     <span className="text-sm font-medium text-green-600">{isRTL ? 'متصلة' : 'Connected'}</span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <span className="text-sm">{isRTL ? 'وضع الصيانة' : 'Maintenance Mode'}</span>
                     <span className={`text-sm font-medium ${maintenanceMode ? 'text-red-600' : 'text-green-600'}`}>
                       {maintenanceMode 
@@ -282,7 +282,7 @@ const SuperAdminPanel = () => {
                         : (isRTL ? 'معطل' : 'Disabled')}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <span className="text-sm">{isRTL ? 'ذاكرة التخزين المؤقت' : 'Cache'}</span>
                     <span className="text-sm font-medium text-blue-600">{isRTL ? 'نشطة' : 'Active'}</span>
                   </div>
@@ -294,23 +294,23 @@ const SuperAdminPanel = () => {
           {/* Notifications Tab - Super Admin exclusive */}
           <TabsContent value="notifications" className="space-y-6">
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
+              <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <Bell className="h-5 w-5" />
                       {isRTL ? 'إرسال الإشعارات' : 'Send Notifications'}
                     </CardTitle>
                     <CardDescription>{isRTL ? 'إرسال إشعارات للمستخدمين' : 'Send notifications to users'}</CardDescription>
                   </div>
-                  <Button onClick={() => setNotificationDialogOpen(true)}>
+                  <Button onClick={() => setNotificationDialogOpen(true)} className={isRTL ? 'flex-row-reverse' : ''}>
                     <Bell className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {isRTL ? 'إشعار جديد' : 'New Notification'}
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
                   <Card>
                     <CardContent className="pt-6 text-center">
                       <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
