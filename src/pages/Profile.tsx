@@ -68,10 +68,12 @@ interface Follower {
 
 const Profile = () => {
   const { user, profile, loading, userRole } = useAuth();
+  const { language, isRTL } = useLanguageContext();
   const navigate = useNavigate();
   const [isUploading, setIsUploading] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const isProvider = userRole === 'provider';
+  const isAdminOrSuperAdmin = userRole === 'admin' || userRole === 'super_admin';
   
   // Gamification hooks
   const { data: userBadges } = useUserBadges(user?.id);
@@ -350,13 +352,32 @@ const Profile = () => {
               {profile?.full_name || 'اسم المستخدم'}
             </h1>
 
-            {/* Badge & Shield */}
+            {/* Badge & Role */}
             <div className="flex items-center justify-center gap-2 mb-6">
               {referralInfo?.is_shield_member && <ShieldBadge size="md" />}
-              <Trophy className="h-5 w-5 text-yellow-500" />
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-4 py-1">
-                عضو نشط
-              </Badge>
+              {userRole === 'super_admin' && (
+                <Badge className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1">
+                  {language === 'ar' ? 'مشرف أعلى' : 'Super Admin'}
+                </Badge>
+              )}
+              {userRole === 'admin' && (
+                <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1">
+                  {language === 'ar' ? 'مشرف' : 'Admin'}
+                </Badge>
+              )}
+              {userRole === 'provider' && (
+                <Badge className="bg-green-600 hover:bg-green-700 text-white px-4 py-1">
+                  {language === 'ar' ? 'مقدم خدمة' : 'Provider'}
+                </Badge>
+              )}
+              {userRole === 'attendee' && (
+                <>
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-4 py-1">
+                    {language === 'ar' ? 'عضو نشط' : 'Active Member'}
+                  </Badge>
+                </>
+              )}
             </div>
 
             {/* Stats Section */}
