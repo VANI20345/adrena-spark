@@ -16,79 +16,76 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-export const SuperAdminOverviewTab = () => {
+type SuperAdminTabId =
+  | 'event-activation'
+  | 'role-management'
+  | 'financials'
+  | 'admin-performance';
+
+interface SuperAdminOverviewTabProps {
+  onSelectTab?: (tabId: SuperAdminTabId) => void;
+}
+
+export const SuperAdminOverviewTab: React.FC<SuperAdminOverviewTabProps> = ({ onSelectTab }) => {
   const { isRTL, language } = useLanguageContext();
 
   const { data: stats, isLoading } = useSupabaseQuery({
     queryKey: ['super-admin-overview-stats'],
     queryFn: async () => {
-      // Get CURRENT active admins (have logged activity in last 24 hours)
-      const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data: activeAdminLogs } = await supabase
-        .from('admin_activity_logs')
-        .select('admin_id')
-        .gte('created_at', last24Hours);
-      
-      const activeAdminIds = new Set(activeAdminLogs?.map(l => l.admin_id) || []);
-      
-      // Get admin roles to filter active ones
-      const { data: adminRoles } = await supabase
-        .from('user_roles')
-        .select('user_id, role')
-        .in('role', ['admin', 'super_admin']);
-      
-      const activeAdminCount = adminRoles?.filter(r => r.role === 'admin' && activeAdminIds.has(r.user_id)).length || 0;
-      const activeSuperAdminCount = adminRoles?.filter(r => r.role === 'super_admin' && activeAdminIds.has(r.user_id)).length || 0;
+      const now = new Date();
+      const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+      const lastHour = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+      const startOfToday = new Date(now);
+      startOfToday.setHours(0, 0, 0, 0);
+      const startOfTodayISO = startOfToday.toISOString();
 
-      // Get pending events count (current pending)
-      const { count: pendingEvents, error: pendingError } = await supabase
-        .from('events')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
+      const pendingEventStatuses = ['pending'];
+      const cancelledEventStatuses = ['cancelled', 'canceled', 'rejected'];
+      const revenueBookingStatuses = ['pending', 'confirmed', 'completed'];
 
-      if (pendingError) console.error('Error fetching pending events:', pendingError);
+      const [
+        activeAdminLogsRes,
+        adminRolesRes,
+        pendingEventsRes,
+        cancelledEventsRes,
+        bookingsRes,
+        todayActivitiesRes,
+        recentActivityLogsRes,
+      ] = await Promise.all([
+        supabase.from('admin_activity_logs').select('admin_id').gte('created_at', last24Hours),
+        supabase.from('user_roles').select('user_id, role').in('role', ['admin', 'super_admin']),
+        supabase.from('events').select('*', { count: 'exact', head: true }).in('status', pendingEventStatuses),
+        supabase.from('events').select('*', { count: 'exact', head: true }).in('status', cancelledEventStatuses),
+        supabase.from('bookings').select('total_amount, status').in('status', revenueBookingStatuses),
+        supabase.from('admin_activity_logs').select('*', { count: 'exact', head: true }).gte('created_at', startOfTodayISO),
+        supabase.from('activity_logs').select('actor_id').gte('created_at', lastHour),
+      ]);
 
-      // Get suspended events count (current suspended)
-      const { count: suspendedEvents } = await supabase
-        .from('events')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'cancelled');
+      if (activeAdminLogsRes.error) console.error('Error fetching admin activity logs:', activeAdminLogsRes.error);
+      if (adminRolesRes.error) console.error('Error fetching admin roles:', adminRolesRes.error);
+      if (pendingEventsRes.error) console.error('Error fetching pending events:', pendingEventsRes.error);
+      if (cancelledEventsRes.error) console.error('Error fetching cancelled events:', cancelledEventsRes.error);
+      if (bookingsRes.error) console.error('Error fetching bookings:', bookingsRes.error);
+      if (todayActivitiesRes.error) console.error('Error fetching today activities:', todayActivitiesRes.error);
+      if (recentActivityLogsRes.error) console.error('Error fetching recent activity logs:', recentActivityLogsRes.error);
 
-      // Get total revenue from confirmed bookings (all time)
-      const { data: bookings, error: bookingsError } = await supabase
-        .from('bookings')
-        .select('total_amount')
-        .eq('status', 'confirmed');
+      const activeAdminIds = new Set((activeAdminLogsRes.data || []).map((l) => l.admin_id));
+      const adminRoles = adminRolesRes.data || [];
 
-      if (bookingsError) console.error('Error fetching bookings:', bookingsError);
-      
-      const totalRevenue = bookings?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0;
+      const activeAdminCount = adminRoles.filter((r) => r.role === 'admin' && activeAdminIds.has(r.user_id)).length;
+      const activeSuperAdminCount = adminRoles.filter((r) => r.role === 'super_admin' && activeAdminIds.has(r.user_id)).length;
 
-      // Get today's activity count
-      const today = new Date().toISOString().split('T')[0];
-      const { count: todayActivities, error: activitiesError } = await supabase
-        .from('admin_activity_logs')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', today);
-
-      if (activitiesError) console.error('Error fetching activities:', activitiesError);
-
-      // Get active users online (users with activity in last hour)
-      const lastHour = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const { data: recentActivityLogs } = await supabase
-        .from('activity_logs')
-        .select('actor_id')
-        .gte('created_at', lastHour);
-      
-      const activeUsersNow = new Set(recentActivityLogs?.map(l => l.actor_id) || []).size;
+      const totalRevenue = (bookingsRes.data || []).reduce((sum, b) => sum + (b.total_amount || 0), 0);
+      const todayActivities = todayActivitiesRes.count || 0;
+      const activeUsersNow = new Set((recentActivityLogsRes.data || []).map((l) => l.actor_id)).size;
 
       return {
         activeAdminCount,
         activeSuperAdminCount,
-        pendingEvents: pendingEvents || 0,
-        suspendedEvents: suspendedEvents || 0,
+        pendingEvents: pendingEventsRes.count || 0,
+        suspendedEvents: cancelledEventsRes.count || 0,
         totalRevenue,
-        todayActivities: todayActivities || 0,
+        todayActivities,
         activeUsersNow,
       };
     },
@@ -154,6 +151,10 @@ export const SuperAdminOverviewTab = () => {
   };
 
   const t = translations[language];
+
+  const handleQuickAction = (tabId: SuperAdminTabId) => {
+    onSelectTab?.(tabId);
+  };
 
   const statCards = [
     {
@@ -309,19 +310,35 @@ export const SuperAdminOverviewTab = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <button className={`p-4 border rounded-lg hover:bg-muted transition-colors ${isRTL ? 'text-right' : 'text-center'}`}>
+              <button
+                type="button"
+                onClick={() => handleQuickAction('event-activation')}
+                className={`p-4 border rounded-lg hover:bg-muted transition-colors ${isRTL ? 'text-right' : 'text-center'}`}
+              >
                 <Calendar className={`h-6 w-6 text-primary ${isRTL ? '' : 'mx-auto'} mb-2`} />
                 <span className="text-sm">{t.reviewEvents}</span>
               </button>
-              <button className={`p-4 border rounded-lg hover:bg-muted transition-colors ${isRTL ? 'text-right' : 'text-center'}`}>
+              <button
+                type="button"
+                onClick={() => handleQuickAction('role-management')}
+                className={`p-4 border rounded-lg hover:bg-muted transition-colors ${isRTL ? 'text-right' : 'text-center'}`}
+              >
                 <Shield className={`h-6 w-6 text-primary ${isRTL ? '' : 'mx-auto'} mb-2`} />
                 <span className="text-sm">{t.manageRoles}</span>
               </button>
-              <button className={`p-4 border rounded-lg hover:bg-muted transition-colors ${isRTL ? 'text-right' : 'text-center'}`}>
+              <button
+                type="button"
+                onClick={() => handleQuickAction('financials')}
+                className={`p-4 border rounded-lg hover:bg-muted transition-colors ${isRTL ? 'text-right' : 'text-center'}`}
+              >
                 <DollarSign className={`h-6 w-6 text-primary ${isRTL ? '' : 'mx-auto'} mb-2`} />
                 <span className="text-sm">{t.financialReports}</span>
               </button>
-              <button className={`p-4 border rounded-lg hover:bg-muted transition-colors ${isRTL ? 'text-right' : 'text-center'}`}>
+              <button
+                type="button"
+                onClick={() => handleQuickAction('admin-performance')}
+                className={`p-4 border rounded-lg hover:bg-muted transition-colors ${isRTL ? 'text-right' : 'text-center'}`}
+              >
                 <Users className={`h-6 w-6 text-primary ${isRTL ? '' : 'mx-auto'} mb-2`} />
                 <span className="text-sm">{t.adminPerformance}</span>
               </button>

@@ -172,7 +172,7 @@ const SuperAdminPanel = () => {
           </div>
 
           <TabsContent value="overview">
-            <SuperAdminOverviewTab />
+            <SuperAdminOverviewTab onSelectTab={setActiveTab} />
           </TabsContent>
 
           <TabsContent value="reports">
