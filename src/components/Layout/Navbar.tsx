@@ -143,14 +143,14 @@ const Navbar = () => {
             label: language === 'ar' ? 'فعالياتي' : 'My Events' 
           },
           { 
+            to: '/my-services', 
+            icon: <Briefcase className="h-5 w-5" />, 
+            label: language === 'ar' ? 'خدماتي' : 'My Services' 
+          },
+          { 
             to: '/groups', 
             icon: <Users className="h-5 w-5" />, 
             label: language === 'ar' ? 'القروبات' : 'Groups' 
-          },
-          { 
-            to: '/services', 
-            icon: <Briefcase className="h-5 w-5" />, 
-            label: language === 'ar' ? 'الخدمات' : 'Services' 
           },
           // Discover is handled separately with DiscoverSearchDropdown
         ];

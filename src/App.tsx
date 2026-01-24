@@ -263,6 +263,14 @@ const App = () => (
               } 
             />
             <Route 
+              path="/my-services" 
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="attendee">
+                  <MyServicesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/manage-events" 
               element={
                 <ProtectedRoute requireAuth={true} requiredRole={['attendee', 'admin']}>
