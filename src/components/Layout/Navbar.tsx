@@ -152,6 +152,11 @@ const Navbar = () => {
             icon: <Users className="h-5 w-5" />, 
             label: language === 'ar' ? 'القروبات' : 'Groups' 
           },
+          { 
+            to: '/services', 
+            icon: <Briefcase className="h-5 w-5" />, 
+            label: language === 'ar' ? 'الخدمات' : 'Services' 
+          },
           // Discover is handled separately with DiscoverSearchDropdown
         ];
       case 'provider':
@@ -249,9 +254,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav
+      dir={isRTL ? 'rtl' : 'ltr'}
+      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <div className="container mx-auto px-4">
-        <div className="flex h-14 items-center justify-between">
+        <div className={cn('flex h-14 items-center justify-between', isRTL && 'flex-row-reverse')}>
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <img src={adrenaLogo} alt="هواية Logo" className="w-10 h-10 object-contain" />
@@ -261,7 +269,7 @@ const Navbar = () => {
           </Link>
 
           {/* Center Navigation - Desktop */}
-          <div className="hidden md:flex items-center justify-center gap-1">
+          <div className={cn('hidden md:flex items-center justify-center gap-1', isRTL && 'flex-row-reverse')}>
             {mainNavIcons.map((item) => (
               <NavIconButton
                 key={item.to}
@@ -279,7 +287,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Actions - Desktop */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className={cn('hidden md:flex items-center gap-1', isRTL && 'flex-row-reverse')}>
             {/* Language Toggle */}
             <TooltipProvider delayDuration={100}>
               <Tooltip>

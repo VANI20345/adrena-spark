@@ -55,21 +55,34 @@ export const StaffDashboardTab = () => {
       const groupOwners = groupLeaders?.filter(gl => gl.role === 'owner').length || 0;
       const groupAdmins = groupLeaders?.filter(gl => gl.role === 'admin').length || 0;
 
-      // Get active admins (LAST 30 DAYS)
-      const { data: recentActivity } = await supabase
-        .from('admin_activity_logs')
-        .select('admin_id')
-        .gte('created_at', thirtyDaysAgo);
+      // Active admins (based on last_activity, not admin_activity_logs)
+      const { data: adminAndSuperRoles, error: adminRolesError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['admin', 'super_admin']);
 
-      const activeAdminsThisMonth = new Set(recentActivity?.map(a => a.admin_id) || []).size;
+      if (adminRolesError) console.error('Error fetching admin roles:', adminRolesError);
+      const adminUserIds = (adminAndSuperRoles || []).map((r) => r.user_id);
 
-      // Get currently active admins (LAST 24 HOURS)
-      const { data: currentActivity } = await supabase
-        .from('admin_activity_logs')
-        .select('admin_id')
-        .gte('created_at', last24Hours);
+      const [activeAdminsThisMonthRes, activeAdminsNowRes] = await Promise.all([
+        adminUserIds.length
+          ? supabase
+              .from('profiles')
+              .select('*', { count: 'exact', head: true })
+              .in('user_id', adminUserIds)
+              .gte('last_activity', thirtyDaysAgo)
+          : Promise.resolve({ count: 0 } as any),
+        adminUserIds.length
+          ? supabase
+              .from('profiles')
+              .select('*', { count: 'exact', head: true })
+              .in('user_id', adminUserIds)
+              .gte('last_activity', last24Hours)
+          : Promise.resolve({ count: 0 } as any),
+      ]);
 
-      const activeAdminsNow = new Set(currentActivity?.map(a => a.admin_id) || []).size;
+      const activeAdminsThisMonth = activeAdminsThisMonthRes.count || 0;
+      const activeAdminsNow = activeAdminsNowRes.count || 0;
 
       // Get new users this month
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -360,7 +373,7 @@ export const StaffDashboardTab = () => {
                   <p className="text-xs text-muted-foreground">{t.activeAdminsNowDesc}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
