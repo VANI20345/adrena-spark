@@ -43,41 +43,59 @@ export const SuperAdminOverviewTab: React.FC<SuperAdminOverviewTabProps> = ({ on
       const cancelledEventStatuses = ['cancelled', 'canceled', 'rejected'];
       const revenueBookingStatuses = ['pending', 'confirmed', 'completed'];
 
+      const adminRolesRes = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('role', ['admin', 'super_admin']);
+
+      if (adminRolesRes.error) console.error('Error fetching admin roles:', adminRolesRes.error);
+
+      const adminIds = (adminRolesRes.data || []).filter((r) => r.role === 'admin').map((r) => r.user_id);
+      const superAdminIds = (adminRolesRes.data || []).filter((r) => r.role === 'super_admin').map((r) => r.user_id);
+
+      const countProfilesActive = async (ids: string[], sinceISO: string) => {
+        if (!ids.length) return { count: 0 as number | null, error: null as any };
+        return supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .in('user_id', ids)
+          .gte('last_activity', sinceISO);
+      };
+
       const [
-        activeAdminLogsRes,
-        adminRolesRes,
+        activeAdminsRes,
+        activeSuperAdminsRes,
         pendingEventsRes,
         cancelledEventsRes,
         bookingsRes,
-        todayActivitiesRes,
-        recentActivityLogsRes,
+        adminActionsTodayRes,
+        userActionsTodayRes,
+        activeUsersNowRes,
       ] = await Promise.all([
-        supabase.from('admin_activity_logs').select('admin_id').gte('created_at', last24Hours),
-        supabase.from('user_roles').select('user_id, role').in('role', ['admin', 'super_admin']),
+        countProfilesActive(adminIds, last24Hours),
+        countProfilesActive(superAdminIds, last24Hours),
         supabase.from('events').select('*', { count: 'exact', head: true }).in('status', pendingEventStatuses),
         supabase.from('events').select('*', { count: 'exact', head: true }).in('status', cancelledEventStatuses),
-        supabase.from('bookings').select('total_amount, status').in('status', revenueBookingStatuses),
+        supabase.from('bookings').select('total_amount').in('status', revenueBookingStatuses),
         supabase.from('admin_activity_logs').select('*', { count: 'exact', head: true }).gte('created_at', startOfTodayISO),
-        supabase.from('activity_logs').select('actor_id').gte('created_at', lastHour),
+        supabase.from('activity_logs').select('*', { count: 'exact', head: true }).gte('created_at', startOfTodayISO),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_activity', lastHour),
       ]);
 
-      if (activeAdminLogsRes.error) console.error('Error fetching admin activity logs:', activeAdminLogsRes.error);
-      if (adminRolesRes.error) console.error('Error fetching admin roles:', adminRolesRes.error);
+      if (activeAdminsRes.error) console.error('Error fetching active admins:', activeAdminsRes.error);
+      if (activeSuperAdminsRes.error) console.error('Error fetching active super admins:', activeSuperAdminsRes.error);
       if (pendingEventsRes.error) console.error('Error fetching pending events:', pendingEventsRes.error);
       if (cancelledEventsRes.error) console.error('Error fetching cancelled events:', cancelledEventsRes.error);
       if (bookingsRes.error) console.error('Error fetching bookings:', bookingsRes.error);
-      if (todayActivitiesRes.error) console.error('Error fetching today activities:', todayActivitiesRes.error);
-      if (recentActivityLogsRes.error) console.error('Error fetching recent activity logs:', recentActivityLogsRes.error);
+      if (adminActionsTodayRes.error) console.error('Error fetching admin actions today:', adminActionsTodayRes.error);
+      if (userActionsTodayRes.error) console.error('Error fetching user actions today:', userActionsTodayRes.error);
+      if (activeUsersNowRes.error) console.error('Error fetching active users now:', activeUsersNowRes.error);
 
-      const activeAdminIds = new Set((activeAdminLogsRes.data || []).map((l) => l.admin_id));
-      const adminRoles = adminRolesRes.data || [];
-
-      const activeAdminCount = adminRoles.filter((r) => r.role === 'admin' && activeAdminIds.has(r.user_id)).length;
-      const activeSuperAdminCount = adminRoles.filter((r) => r.role === 'super_admin' && activeAdminIds.has(r.user_id)).length;
-
+      const activeAdminCount = activeAdminsRes.count || 0;
+      const activeSuperAdminCount = activeSuperAdminsRes.count || 0;
       const totalRevenue = (bookingsRes.data || []).reduce((sum, b) => sum + (b.total_amount || 0), 0);
-      const todayActivities = todayActivitiesRes.count || 0;
-      const activeUsersNow = new Set((recentActivityLogsRes.data || []).map((l) => l.actor_id)).size;
+      const todayActivities = (adminActionsTodayRes.count || 0) + (userActionsTodayRes.count || 0);
+      const activeUsersNow = activeUsersNowRes.count || 0;
 
       return {
         activeAdminCount,
