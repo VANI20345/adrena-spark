@@ -97,7 +97,7 @@ const Footer = () => {
 
   const renderSocialIcons = () => {
     const icons = [];
-    const iconClass = "w-5 h-5 text-white/60 hover:text-[hsl(var(--brand-lime))] cursor-pointer smooth-transition";
+    const iconClass = "w-5 h-5 text-muted-foreground hover:text-foreground cursor-pointer smooth-transition";
 
     if (socialSettings?.instagram?.visible === true) {
       icons.push(
@@ -148,19 +148,19 @@ const Footer = () => {
 
   return (
     <footer className="bg-secondary border-t border-border/10 mt-auto shrink-0">
-      {/* Top brand accent line */}
-      <div className="h-0.5 w-full bg-gradient-to-r from-brand-lime via-brand-orange to-brand-purple" />
+      {/* Top solid accent line */}
+      <div className="h-0.5 w-full bg-brand-lime" />
       <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Description */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[hsl(var(--brand-lime))]">
-                <Mountain className="w-5 h-5 text-[hsl(var(--brand-lime-foreground))]" />
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-lime">
+                <Mountain className="w-5 h-5 text-brand-lime-foreground" />
               </div>
-              <span className="text-xl font-bold text-[hsl(var(--brand-lime))]">{t.brand}</span>
+              <span className="text-xl font-bold text-brand-lime">{t.brand}</span>
             </div>
-            <p className="text-sm text-white/60">
+            <p className="text-sm text-secondary-foreground/60">
               {t.tagline}
             </p>
             {socialIcons.length > 0 && (
@@ -172,37 +172,37 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div className={isArabic ? 'text-right' : 'text-left'}>
-            <h3 className="font-semibold mb-4 text-[hsl(var(--brand-lime))]">{t.quickLinks}</h3>
+            <h3 className="font-semibold mb-4 text-secondary-foreground">{t.quickLinks}</h3>
             <ul className="space-y-2">
-              <li><Link to="/groups/discover-groups" className="text-sm text-white/60 hover:text-[hsl(var(--brand-lime))] smooth-transition">{t.exploreGroups}</Link></li>
-              <li><Link to="/services" className="text-sm text-white/60 hover:text-[hsl(var(--brand-lime))] smooth-transition">{t.services}</Link></li>
-              <li><Link to="/create-service" className="text-sm text-white/60 hover:text-[hsl(var(--brand-lime))] smooth-transition">{t.offerService}</Link></li>
+              <li><Link to="/groups/discover-groups" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.exploreGroups}</Link></li>
+              <li><Link to="/services" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.services}</Link></li>
+              <li><Link to="/create-service" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.offerService}</Link></li>
             </ul>
           </div>
 
           {/* Support */}
           <div className={isArabic ? 'text-right' : 'text-left'}>
-            <h3 className="font-semibold mb-4 text-[hsl(var(--brand-orange))]">{t.support}</h3>
+            <h3 className="font-semibold mb-4 text-secondary-foreground">{t.support}</h3>
             <ul className="space-y-2">
-              <li><Link to="/help" className="text-sm text-white/60 hover:text-[hsl(var(--brand-orange))] smooth-transition">{t.helpCenter}</Link></li>
-              <li><Link to="/contact" className="text-sm text-white/60 hover:text-[hsl(var(--brand-orange))] smooth-transition">{t.contactUs}</Link></li>
-              <li><Link to="/safety" className="text-sm text-white/60 hover:text-[hsl(var(--brand-orange))] smooth-transition">{t.safetyGuidelines}</Link></li>
+              <li><Link to="/help" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.helpCenter}</Link></li>
+              <li><Link to="/contact" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.contactUs}</Link></li>
+              <li><Link to="/safety" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.safetyGuidelines}</Link></li>
             </ul>
           </div>
 
           {/* Legal */}
           <div className={isArabic ? 'text-right' : 'text-left'}>
-            <h3 className="font-semibold mb-4 text-[hsl(var(--brand-teal))]">{t.legal}</h3>
+            <h3 className="font-semibold mb-4 text-secondary-foreground">{t.legal}</h3>
             <ul className="space-y-2">
-              <li><Link to="/terms" className="text-sm text-white/60 hover:text-[hsl(var(--brand-teal))] smooth-transition">{t.termsConditions}</Link></li>
-              <li><Link to="/privacy" className="text-sm text-white/60 hover:text-[hsl(var(--brand-teal))] smooth-transition">{t.privacyPolicy}</Link></li>
-              <li><Link to="/refund" className="text-sm text-white/60 hover:text-[hsl(var(--brand-teal))] smooth-transition">{t.refundPolicy}</Link></li>
+              <li><Link to="/terms" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.termsConditions}</Link></li>
+              <li><Link to="/privacy" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.privacyPolicy}</Link></li>
+              <li><Link to="/refund" className="text-sm text-secondary-foreground/60 hover:text-brand-lime smooth-transition">{t.refundPolicy}</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-8 pt-8 text-center">
-          <p className="text-sm text-white/60">
+        <div className="border-t border-secondary-foreground/10 mt-8 pt-8 text-center">
+          <p className="text-sm text-secondary-foreground/60">
             {t.copyright.replace('{year}', new Date().getFullYear().toString())}
           </p>
         </div>
