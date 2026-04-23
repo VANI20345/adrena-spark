@@ -234,17 +234,18 @@ const ServiceDetails = () => {
                 entityType="service" 
                 entityId={id!} 
                 entityName={service.name_ar || service.name}
+                className="bg-background hover:bg-destructive/10 text-destructive hover:text-destructive shadow-sm border border-border"
               />
             )}
             <Button 
               size="icon" 
               variant="secondary" 
-              className="bg-white/90 hover:bg-white"
+              className="bg-background hover:bg-background text-foreground shadow-sm border border-border"
               onClick={() => setIsBookmarked(!isBookmarked)}
             >
-              <Heart className={`w-5 h-5 ${isBookmarked ? 'fill-red-500 text-red-500' : ''}`} />
+              <Heart className={`w-5 h-5 ${isBookmarked ? 'fill-destructive text-destructive' : ''}`} />
             </Button>
-            <Button size="icon" variant="secondary" className="bg-white/90 hover:bg-white">
+            <Button size="icon" variant="secondary" className="bg-background hover:bg-background text-foreground shadow-sm border border-border">
               <Share2 className="w-5 h-5" />
             </Button>
           </div>
