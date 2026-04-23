@@ -132,7 +132,7 @@ export const ReportEntityDialog = ({
           <div className="space-y-2">
             <Label htmlFor="reason">{isRTL ? 'سبب الإبلاغ' : 'Reason for Report'}</Label>
             <Select value={reason} onValueChange={setReason}>
-              <SelectTrigger>
+              <SelectTrigger className={isRTL ? 'flex-row-reverse text-right' : ''}>
                 <SelectValue placeholder={isRTL ? 'اختر السبب' : 'Select a reason'} />
               </SelectTrigger>
               <SelectContent>

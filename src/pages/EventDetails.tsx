@@ -278,18 +278,18 @@ const EventDetails = () => {
                 entityId={id!} 
                 entityName={isRTL ? event.title_ar : event.title}
                 variant="icon"
-                className="bg-white/90 hover:bg-destructive/10 text-destructive hover:text-destructive"
+                className="bg-background hover:bg-destructive/10 text-destructive hover:text-destructive shadow-sm border border-border"
               />
             )}
             <Button 
               size="icon" 
               variant="secondary" 
-              className="bg-white/90 hover:bg-white shadow-sm"
+              className="bg-background hover:bg-background text-foreground shadow-sm border border-border"
               onClick={handleBookmark}
             >
-              <Heart className={`w-5 h-5 ${isBookmarked ? 'fill-red-500 text-red-500' : ''}`} />
+              <Heart className={`w-5 h-5 ${isBookmarked ? 'fill-destructive text-destructive' : ''}`} />
             </Button>
-            <Button size="icon" variant="secondary" className="bg-white/90 hover:bg-white shadow-sm" onClick={handleShare}>
+            <Button size="icon" variant="secondary" className="bg-background hover:bg-background text-foreground shadow-sm border border-border" onClick={handleShare}>
               <Share2 className="w-5 h-5" />
             </Button>
           </div>
