@@ -62,6 +62,10 @@ export default function EventsPage() {
     }
   });
 
+  const upcomingEvents = Array.isArray(upcomingEventsData) ? upcomingEventsData : [];
+  const pastEvents = Array.isArray(pastEventsData) ? pastEventsData : [];
+  const allEvents = Array.isArray(allEventsData) ? allEventsData : [];
+
   const renderEventCard = (event: any) => (
     <Card 
       key={event.id}
