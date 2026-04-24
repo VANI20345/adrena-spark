@@ -373,12 +373,15 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
 
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {getStatusBadge(transaction.status)}
-                    <span className={`font-bold text-lg ${
-                      transaction.amount >= 0 ? 'text-success' : 'text-destructive'
-                    }`}>
-                      {transaction.amount >= 0 ? '+' : ''}
-                      {transaction.amount.toLocaleString()} {t('wallet.riyal')}
-                    </span>
+                    {(() => {
+                      const isIncome = ['credit', 'earning', 'refund', 'bonus'].includes(transaction.type);
+                      const sign = isIncome ? '+' : '-';
+                      return (
+                        <span className={`font-bold text-lg ${isIncome ? 'text-success' : 'text-destructive'}`}>
+                          {sign}{Math.abs(transaction.amount).toLocaleString()} {t('wallet.riyal')}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
               ))
