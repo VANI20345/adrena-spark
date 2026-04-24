@@ -520,7 +520,7 @@ const WalletPage = () => {
           >
             <Card className="border-0 shadow-lg">
               <CardContent className="p-6">
-                <div className={`flex items-center gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center gap-3 mb-6 ${isRTL ? 'flex-row-reverse justify-end text-right' : ''}`}>
                   <BarChart3 className="h-5 w-5 text-primary" />
                   <h3 className="text-lg font-semibold">
                     {isRTL ? 'نظرة عامة على الأرباح' : 'Earnings Overview'}

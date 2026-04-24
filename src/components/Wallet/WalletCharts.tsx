@@ -121,30 +121,28 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
       {/* Monthly Trend Chart */}
       <Card className="border-0 shadow-sm">
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <CardTitle className={`flex items-center gap-2 text-base ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <CardTitle className={`flex items-center gap-2 text-base ${isRTL ? 'flex-row-reverse justify-end text-right' : ''}`}>
             <TrendingUp className="h-5 w-5 text-emerald-600" />
-            {language === 'ar' ? 'الأرباح والسحب الشهري' : 'Monthly Earnings & Withdrawals'}
+            <span>{language === 'ar' ? 'الأرباح والسحب الشهري' : 'Monthly Earnings & Withdrawals'}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[280px]">
+          <div className="h-[280px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart 
                 data={emptyMonthlyData}
-                margin={{ top: 10, right: isRTL ? 10 : 30, left: isRTL ? 30 : 10, bottom: 10 }}
+                margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
               >
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted/40" />
                 <XAxis 
                   dataKey="month" 
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                   tickMargin={10}
-                  reversed={isRTL}
                   axisLine={{ stroke: 'hsl(var(--border))' }}
                 />
                 <YAxis 
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                   tickMargin={10}
-                  orientation={isRTL ? 'right' : 'left'}
                   axisLine={{ stroke: 'hsl(var(--border))' }}
                   tickFormatter={(value) => value >= 1000 ? `${(value/1000).toFixed(0)}k` : value}
                   width={50}
@@ -155,11 +153,12 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
                     direction: isRTL ? 'rtl' : 'ltr',
+                    textAlign: isRTL ? 'right' : 'left',
                   }}
                   formatter={(value: number) => [`${value.toLocaleString()} ${language === 'ar' ? 'ريال' : 'SAR'}`, '']}
                 />
                 <Legend 
-                  wrapperStyle={{ paddingTop: '10px' }}
+                  wrapperStyle={{ paddingTop: '10px', direction: isRTL ? 'rtl' : 'ltr' }}
                   iconType="circle"
                 />
                 <Area
@@ -189,13 +188,13 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
       {/* Earnings vs Withdrawals Pie Chart */}
       <Card className="border-0 shadow-sm">
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <CardTitle className={`flex items-center gap-2 text-base ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <CardTitle className={`flex items-center gap-2 text-base ${isRTL ? 'flex-row-reverse justify-end text-right' : ''}`}>
             <Wallet className="h-5 w-5 text-primary" />
-            {language === 'ar' ? 'نسبة الأرباح والسحب' : 'Earnings vs Withdrawals Ratio'}
+            <span>{language === 'ar' ? 'نسبة الأرباح والسحب' : 'Earnings vs Withdrawals Ratio'}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[280px]">
+          <div className="h-[280px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -218,11 +217,12 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
                     direction: isRTL ? 'rtl' : 'ltr',
+                    textAlign: isRTL ? 'right' : 'left',
                   }}
                 />
                 <Legend 
                   iconType="circle"
-                  wrapperStyle={{ paddingTop: '10px' }}
+                  wrapperStyle={{ paddingTop: '10px', direction: isRTL ? 'rtl' : 'ltr' }}
                 />
               </PieChart>
             </ResponsiveContainer>
