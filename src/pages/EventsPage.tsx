@@ -18,7 +18,7 @@ export default function EventsPage() {
   const navigate = useNavigate();
   const isRTL = language === 'ar';
 
-  const { data: upcomingEvents = [] } = useSupabaseQuery({
+  const { data: upcomingEventsData } = useSupabaseQuery({
     queryKey: ['upcoming-events'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,7 +33,7 @@ export default function EventsPage() {
     }
   });
 
-  const { data: pastEvents = [] } = useSupabaseQuery({
+  const { data: pastEventsData } = useSupabaseQuery({
     queryKey: ['past-events'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -48,7 +48,7 @@ export default function EventsPage() {
     }
   });
 
-  const { data: allEvents = [] } = useSupabaseQuery({
+  const { data: allEventsData } = useSupabaseQuery({
     queryKey: ['all-events'],
     queryFn: async () => {
       const { data, error } = await supabase
