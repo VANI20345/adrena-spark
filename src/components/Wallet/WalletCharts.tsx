@@ -30,21 +30,21 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
     
     safeTransactions.forEach(tx => {
       if (tx.status !== 'completed') return;
-      
+
       const date = new Date(tx.created_at);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
+
       if (!grouped[monthKey]) {
         grouped[monthKey] = { earnings: 0, withdrawals: 0 };
       }
-      
-      // Earnings: positive amounts (credit, earning, refund, bonus)
-      if (['credit', 'earning', 'refund', 'bonus'].includes(tx.type) || tx.amount > 0 && !['debit', 'withdraw', 'payment', 'commission'].includes(tx.type)) {
-        grouped[monthKey].earnings += Math.abs(tx.amount);
-      } 
-      // Withdrawals: withdrawal/debit transactions
-      else if (['withdraw', 'debit', 'payment', 'commission'].includes(tx.type)) {
+
+      const isWithdrawalType = ['withdraw', 'debit', 'payment', 'commission'].includes(tx.type);
+      // Classify by amount sign first (covers DB rows where withdrawals are negative `credit`),
+      // then fall back to type-based classification.
+      if (tx.amount < 0 || isWithdrawalType) {
         grouped[monthKey].withdrawals += Math.abs(tx.amount);
+      } else {
+        grouped[monthKey].earnings += Math.abs(tx.amount);
       }
     });
 
@@ -77,11 +77,12 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
     
     safeTransactions.forEach(tx => {
       if (tx.status !== 'completed') return;
-      
-      if (['credit', 'earning', 'refund', 'bonus'].includes(tx.type)) {
-        totals.earnings += Math.abs(tx.amount);
-      } else if (['withdraw', 'debit', 'payment', 'commission'].includes(tx.type)) {
+
+      const isWithdrawalType = ['withdraw', 'debit', 'payment', 'commission'].includes(tx.type);
+      if (tx.amount < 0 || isWithdrawalType) {
         totals.withdrawals += Math.abs(tx.amount);
+      } else {
+        totals.earnings += Math.abs(tx.amount);
       }
     });
 
