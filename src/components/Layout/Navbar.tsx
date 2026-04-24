@@ -338,7 +338,7 @@ const Navbar = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className={cn("w-56", isRTL && "text-right")}>
                     <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
+                      <div className={cn("flex flex-col space-y-1", isRTL && "items-end text-right")}>
                         <p className="text-sm font-medium leading-none">
                           {profile?.full_name || (language === 'ar' ? 'المستخدم' : 'User')}
                         </p>
@@ -351,7 +351,7 @@ const Navbar = () => {
                     <DropdownMenuSeparator />
                     
                     <DropdownMenuItem asChild>
-                      <Link to="/profile" className="flex items-center gap-2">
+                      <Link to="/profile" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                         <User className="h-4 w-4" />
                         {language === 'ar' ? 'الملف الشخصي' : 'Profile'}
                       </Link>
@@ -359,7 +359,7 @@ const Navbar = () => {
                     
                     {userRole !== 'admin' && userRole !== 'super_admin' && (
                       <DropdownMenuItem asChild>
-                        <Link to={`/${userRole}-dashboard`} className="flex items-center gap-2">
+                        <Link to={`/${userRole}-dashboard`} className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                           <LayoutDashboard className="h-4 w-4" />
                           {language === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
                         </Link>
@@ -369,31 +369,31 @@ const Navbar = () => {
                     {userRole === 'attendee' && (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link to="/my-events" className="flex items-center gap-2">
+                          <Link to="/my-events" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                             <Calendar className="h-4 w-4" />
                             {language === 'ar' ? 'فعالياتي' : 'My Events'}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link to="/tickets" className="flex items-center gap-2">
+                          <Link to="/tickets" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                             <Ticket className="h-4 w-4" />
                             {language === 'ar' ? 'تذاكري' : 'My Tickets'}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link to="/points" className="flex items-center gap-2">
+                          <Link to="/points" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                             <Star className="h-4 w-4" />
                             {language === 'ar' ? 'النقاط' : 'Points'}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link to="/achievements" className="flex items-center gap-2">
+                          <Link to="/achievements" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                             <Trophy className="h-4 w-4" />
                             {language === 'ar' ? 'الإنجازات' : 'Achievements'}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link to="/referral" className="flex items-center gap-2">
+                          <Link to="/referral" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                             <Gift className="h-4 w-4" />
                             {language === 'ar' ? 'دعوة أصدقاء' : 'Invite Friends'}
                           </Link>
@@ -403,7 +403,7 @@ const Navbar = () => {
                     
                     {userRole === 'provider' && (
                       <DropdownMenuItem asChild>
-                        <Link to="/manage-services" className="flex items-center gap-2">
+                        <Link to="/manage-services" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                           <Briefcase className="h-4 w-4" />
                           {language === 'ar' ? 'إدارة الخدمات' : 'Manage Services'}
                         </Link>
@@ -412,7 +412,7 @@ const Navbar = () => {
                     
                     {userRole === 'admin' && (
                       <DropdownMenuItem asChild>
-                        <Link to="/admin" className="flex items-center gap-2">
+                        <Link to="/admin" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                           <ShieldCheck className="h-4 w-4" />
                           {language === 'ar' ? 'لوحة الإدارة' : 'Admin Panel'}
                         </Link>
@@ -421,7 +421,7 @@ const Navbar = () => {
                     
                     {userRole === 'super_admin' && (
                       <DropdownMenuItem asChild>
-                        <Link to="/super-admin" className="flex items-center gap-2">
+                        <Link to="/super-admin" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                           <ShieldCheck className="h-4 w-4" />
                           {language === 'ar' ? 'لوحة المشرف الأعلى' : 'Super Admin Panel'}
                         </Link>
@@ -429,14 +429,14 @@ const Navbar = () => {
                     )}
                     
                     <DropdownMenuItem asChild>
-                      <Link to="/wallet" className="flex items-center gap-2">
+                      <Link to="/wallet" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                         <Wallet className="h-4 w-4" />
                         {language === 'ar' ? 'المحفظة' : 'Wallet'}
                       </Link>
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem asChild>
-                      <Link to="/settings" className="flex items-center gap-2">
+                      <Link to="/settings" className={cn("flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
                         <Settings className="h-4 w-4" />
                         {language === 'ar' ? 'الإعدادات' : 'Settings'}
                       </Link>
@@ -444,8 +444,8 @@ const Navbar = () => {
                     
                     <DropdownMenuSeparator />
                     
-                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
-                      <LogOut className="h-4 w-4 ltr:mr-2 rtl:ml-2" />
+                    <DropdownMenuItem onClick={handleSignOut} className={cn("text-destructive focus:text-destructive flex items-center gap-2", isRTL && "flex-row-reverse text-right")}>
+                      <LogOut className="h-4 w-4" />
                       {language === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
