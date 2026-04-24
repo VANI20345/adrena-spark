@@ -336,7 +336,7 @@ const Navbar = () => {
                       )}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className={cn("w-56", isRTL && "text-right")}>
+                  <DropdownMenuContent align={isRTL ? "start" : "end"} dir={isRTL ? "rtl" : "ltr"} className={cn("w-56", isRTL && "text-right")}>
                     <DropdownMenuLabel className="font-normal">
                       <div className={cn("flex flex-col space-y-1", isRTL && "items-end text-right")}>
                         <p className="text-sm font-medium leading-none">
