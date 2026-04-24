@@ -38,12 +38,12 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
         grouped[monthKey] = { earnings: 0, withdrawals: 0 };
       }
       
-      // Earnings are positive amounts (earning, refund, bonus)
-      if (['earning', 'refund', 'bonus'].includes(tx.type)) {
+      // Earnings: positive amounts (credit, earning, refund, bonus)
+      if (['credit', 'earning', 'refund', 'bonus'].includes(tx.type) || tx.amount > 0 && !['debit', 'withdraw', 'payment', 'commission'].includes(tx.type)) {
         grouped[monthKey].earnings += Math.abs(tx.amount);
       } 
-      // Withdrawals are withdrawal transactions only
-      else if (tx.type === 'withdraw') {
+      // Withdrawals: withdrawal/debit transactions
+      else if (['withdraw', 'debit', 'payment', 'commission'].includes(tx.type)) {
         grouped[monthKey].withdrawals += Math.abs(tx.amount);
       }
     });
@@ -78,9 +78,9 @@ const WalletCharts = ({ transactions }: WalletChartsProps) => {
     safeTransactions.forEach(tx => {
       if (tx.status !== 'completed') return;
       
-      if (['earning', 'refund', 'bonus'].includes(tx.type)) {
+      if (['credit', 'earning', 'refund', 'bonus'].includes(tx.type)) {
         totals.earnings += Math.abs(tx.amount);
-      } else if (tx.type === 'withdraw') {
+      } else if (['withdraw', 'debit', 'payment', 'commission'].includes(tx.type)) {
         totals.withdrawals += Math.abs(tx.amount);
       }
     });

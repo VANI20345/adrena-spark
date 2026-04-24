@@ -72,6 +72,7 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
+      case 'credit':
       case 'earning':
       case 'refund':
       case 'bonus':
@@ -80,6 +81,7 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
       case 'commission':
         return <ArrowUpRight className="h-5 w-5 text-warning" />;
       case 'withdraw':
+      case 'debit':
         return <CreditCard className="h-5 w-5 text-info" />;
       default:
         return <Wallet className="h-5 w-5 text-muted-foreground" />;
@@ -89,11 +91,13 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
   // Get gradient background for transaction type
   const getTransactionStyle = (type: string) => {
     switch (type) {
+      case 'credit':
       case 'earning':
       case 'refund':
       case 'bonus':
         return 'bg-success/5 border-success/20';
       case 'withdraw':
+      case 'debit':
         return 'bg-destructive/5 border-destructive/20';
       case 'payment':
       case 'commission':
@@ -120,9 +124,11 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
 
   const getTypeLabel = (type: string) => {
     switch (type) {
+      case 'credit':
       case 'earning': return t('wallet.earning');
       case 'payment': return t('wallet.payment');
-      case 'withdraw': return t('wallet.withdraw');
+      case 'withdraw':
+      case 'debit': return t('wallet.withdraw');
       case 'refund': return t('wallet.refund');
       case 'commission': return t('wallet.commission');
       case 'bonus': return t('wallet.bonus');
@@ -133,11 +139,11 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
   const calculateTotals = () => {
     const safeTransactions = filteredTransactions || [];
     const totalIncome = safeTransactions
-      .filter(t => ['earning', 'refund', 'bonus'].includes(t.type) && t.status === 'completed')
+      .filter(t => ['credit', 'earning', 'refund', 'bonus'].includes(t.type) && t.status === 'completed')
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
     const totalExpenses = safeTransactions
-      .filter(t => ['payment', 'withdraw', 'commission'].includes(t.type) && t.status === 'completed')
+      .filter(t => ['payment', 'withdraw', 'debit', 'commission'].includes(t.type) && t.status === 'completed')
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
     return { totalIncome, totalExpenses };
