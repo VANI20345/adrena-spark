@@ -136,16 +136,21 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
     }
   };
 
+  const isIncomeTx = (t: { type: string; amount: number }) => {
+    const withdrawalTypes = ['payment', 'withdraw', 'debit', 'commission'];
+    if (withdrawalTypes.includes(t.type)) return false;
+    return t.amount >= 0;
+  };
+
   const calculateTotals = () => {
     const safeTransactions = filteredTransactions || [];
-    const totalIncome = safeTransactions
-      .filter(t => ['credit', 'earning', 'refund', 'bonus'].includes(t.type) && t.status === 'completed')
+    const completed = safeTransactions.filter(t => t.status === 'completed');
+    const totalIncome = completed
+      .filter(isIncomeTx)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-    const totalExpenses = safeTransactions
-      .filter(t => ['payment', 'withdraw', 'debit', 'commission'].includes(t.type) && t.status === 'completed')
+    const totalExpenses = completed
+      .filter(t => !isIncomeTx(t))
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
     return { totalIncome, totalExpenses };
   };
 
@@ -374,7 +379,7 @@ const TransactionHistory = ({ userId, userRole }: TransactionHistoryProps) => {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {getStatusBadge(transaction.status)}
                     {(() => {
-                      const isIncome = ['credit', 'earning', 'refund', 'bonus'].includes(transaction.type);
+                      const isIncome = isIncomeTx(transaction);
                       const sign = isIncome ? '+' : '-';
                       return (
                         <span className={`font-bold text-lg ${isIncome ? 'text-success' : 'text-destructive'}`}>
