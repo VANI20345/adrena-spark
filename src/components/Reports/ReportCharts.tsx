@@ -67,7 +67,7 @@ export const ReportCharts: React.FC<ReportChartsProps> = ({
       {/* Revenue Line Chart */}
       <Card>
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <CardTitle className={`flex items-center gap-2 text-lg ${isRTL ? 'justify-end' : 'justify-start'}`}>
+          <CardTitle className="flex items-center justify-start gap-2 text-lg">
             <DollarSign className="h-5 w-5 text-success" />
             {t('admin.reports.revenueOverTime')}
           </CardTitle>
@@ -116,7 +116,7 @@ export const ReportCharts: React.FC<ReportChartsProps> = ({
       {/* Bookings Bar Chart */}
       <Card>
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <CardTitle className={`flex items-center gap-2 text-lg ${isRTL ? 'justify-end' : 'justify-start'}`}>
+          <CardTitle className="flex items-center justify-start gap-2 text-lg">
             <TrendingUp className="h-5 w-5 text-primary" />
             {t('admin.reports.bookingsCount')}
           </CardTitle>
