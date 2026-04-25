@@ -3,62 +3,44 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useLanguageContext } from '@/contexts/LanguageContext';
 import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
-import { useTotalUsersCount } from '@/hooks/useTotalUsersCount';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Shield, Briefcase, Calendar, Crown, UserCheck, PieChart } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+type StaffStatsRpcRow = {
+  admins: number;
+  super_admins: number;
+  service_providers: number;
+  event_organizers: number;
+  group_leaders: number;
+  total_users: number;
+  admins_percentage: number;
+  users_percentage: number;
+};
+
 export const StaffDashboardTab = () => {
   const { language, isRTL } = useLanguageContext();
-  const { data: sharedTotalUsers = 0 } = useTotalUsersCount();
 
   const { data: staffStats, isLoading } = useOptimizedQuery(
-    ['super-admin-staff-stats-v3', sharedTotalUsers],
+    ['super-admin-staff-stats-backend-v1'],
     async () => {
-      const [rolesResult, profilesResult, groupsResult, eventsResult] = await Promise.all([
-        supabase
-          .from('user_roles')
-          .select('user_id, role'),
-        supabase
-          .from('profiles')
-          .select('user_id'),
-        supabase
-          .from('groups')
-          .select('created_by')
-          .not('created_by', 'is', null),
-        supabase
-          .from('events')
-          .select('organizer_id')
-          .not('organizer_id', 'is', null),
-      ]);
+      const { data, error } = await (supabase as any)
+        .rpc('get_staff_dashboard_stats')
+        .maybeSingle();
 
-      const profileIds = new Set((profilesResult.data || []).map(p => p.user_id));
-      const validRoles = (rolesResult.data || []).filter(r => profileIds.has(r.user_id));
+      if (error) throw error;
 
-      const admins = validRoles.filter(r => r.role === 'admin').length;
-      const superAdmins = validRoles.filter(r => r.role === 'super_admin').length;
-      const providers = validRoles.filter(r => r.role === 'provider').length;
-      const totalUsers = profileIds.size || sharedTotalUsers || 0;
-
-      const groupCreatorIds = new Set((groupsResult.data || []).map(g => g.created_by).filter(Boolean));
-      const eventCreatorIds = new Set((eventsResult.data || []).map(e => e.organizer_id).filter(Boolean));
-
-      const eventOrganizers = [...eventCreatorIds].filter(id => profileIds.has(id)).length;
-      const groupLeaders = [...groupCreatorIds].filter(id => profileIds.has(id)).length;
-
-      const adminsTotal = admins + superAdmins;
-      const adminsPercentage = totalUsers > 0 ? ((adminsTotal / totalUsers) * 100).toFixed(1) : '0';
-      const usersPercentage = totalUsers > 0 ? (100 - parseFloat(adminsPercentage)).toFixed(1) : '0';
+      const stats = (data || {}) as Partial<StaffStatsRpcRow>;
 
       return {
-        admins,
-        superAdmins,
-        serviceProviders: providers,
-        eventOrganizers,
-        groupLeaders,
-        totalUsers,
-        adminsPercentage,
-        usersPercentage,
+        admins: Number(stats.admins || 0),
+        superAdmins: Number(stats.super_admins || 0),
+        serviceProviders: Number(stats.service_providers || 0),
+        eventOrganizers: Number(stats.event_organizers || 0),
+        groupLeaders: Number(stats.group_leaders || 0),
+        totalUsers: Number(stats.total_users || 0),
+        adminsPercentage: Number(stats.admins_percentage || 0).toFixed(1),
+        usersPercentage: Number(stats.users_percentage || 0).toFixed(1),
       };
     }
   );
