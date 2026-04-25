@@ -293,26 +293,26 @@ export const SuperAdminOverviewTab = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
-              <div className={`flex items-center gap-4 p-4 bg-muted rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full shrink-0">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
-                <span className="font-medium">{t.systemStatus}</span>
-                <span className="font-bold text-green-600 ms-auto">{t.active}</span>
+                <span className={`font-medium flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t.systemStatus}</span>
+                <span className="font-bold text-green-600 shrink-0 text-left">{t.active}</span>
               </div>
-              <div className={`flex items-center gap-4 p-4 bg-muted rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full shrink-0">
                   <Users className="h-5 w-5 text-blue-600" />
                 </div>
-                <span className="font-medium">{t.totalUsers}</span>
-                <span className="font-bold text-2xl ms-auto">{sharedTotalUsers}</span>
+                <span className={`font-medium flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t.totalUsers}</span>
+                <span className="font-bold text-2xl shrink-0 text-left">{sharedTotalUsers}</span>
               </div>
-              <div className={`flex items-center gap-4 p-4 bg-muted rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
                 <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full shrink-0">
                   <Clock className="h-5 w-5 text-purple-600" />
                 </div>
-                <span className="font-medium">{t.lastUpdate}</span>
-                <span className="text-muted-foreground text-sm ms-auto">
+                <span className={`font-medium flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t.lastUpdate}</span>
+                <span className="text-muted-foreground text-sm shrink-0 text-left">
                   {new Date().toLocaleString(isRTL ? 'ar-SA' : 'en-US')}
                 </span>
               </div>
