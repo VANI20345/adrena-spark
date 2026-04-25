@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguageContext } from '@/contexts/LanguageContext';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
 import { SuperAdminOverviewTab } from '@/components/SuperAdmin/SuperAdminOverviewTab';
@@ -52,7 +52,6 @@ import { activityLogService } from '@/services/activityLogService';
 const SuperAdminPanel = () => {
   const { userRole, loading: authLoading } = useAuth();
   const { language, t, isRTL } = useLanguageContext();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
   const { data: sharedTotalUsers = 0 } = useTotalUsersCount();
@@ -155,7 +154,7 @@ const SuperAdminPanel = () => {
     <div className="super-admin-panel min-h-screen flex flex-col bg-background" dir={isRTL ? 'rtl' : 'ltr'}>
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-8" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className={`mb-8 flex items-start justify-between gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="mb-8">
           <div className={isRTL ? 'text-right' : 'text-left'}>
             <div className={`flex items-center gap-3 mb-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -169,15 +168,6 @@ const SuperAdminPanel = () => {
               {isRTL ? 'إدارة شاملة للنظام والصلاحيات والمالية - منصة Hiwaya' : 'Comprehensive system, role, and financial management - Hiwaya platform'}
             </p>
           </div>
-          <Button 
-            variant="default"
-            size="lg"
-            className={`shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}
-            onClick={() => navigate('/admin')}
-          >
-            <LayoutDashboard className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {isRTL ? 'لوحة تحكم الأدمن' : 'Admin Dashboard'}
-          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
