@@ -67,8 +67,8 @@ export const ReportCharts: React.FC<ReportChartsProps> = ({
       {/* Revenue Line Chart */}
       <Card>
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <CardTitle className={`flex items-center gap-2 text-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <DollarSign className="h-5 w-5 text-green-600" />
+          <CardTitle className={`flex items-center gap-2 text-lg ${isRTL ? 'justify-end' : 'justify-start'}`}>
+            <DollarSign className="h-5 w-5 text-success" />
             {t('admin.reports.revenueOverTime')}
           </CardTitle>
           <CardDescription>{t('admin.reports.revenueEvolution')}</CardDescription>
@@ -116,8 +116,8 @@ export const ReportCharts: React.FC<ReportChartsProps> = ({
       {/* Bookings Bar Chart */}
       <Card>
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <CardTitle className={`flex items-center gap-2 text-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <TrendingUp className="h-5 w-5 text-blue-600" />
+          <CardTitle className={`flex items-center gap-2 text-lg ${isRTL ? 'justify-end' : 'justify-start'}`}>
+            <TrendingUp className="h-5 w-5 text-primary" />
             {t('admin.reports.bookingsCount')}
           </CardTitle>
           <CardDescription>{t('admin.reports.bookingsStats')}</CardDescription>
@@ -162,8 +162,8 @@ export const ReportCharts: React.FC<ReportChartsProps> = ({
       {categoriesData && categoriesData.length > 0 && (
         <Card className="md:col-span-2">
           <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-            <CardTitle className={`flex items-center gap-2 text-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <Users className="h-5 w-5 text-purple-600" />
+            <CardTitle className={`flex items-center gap-2 text-lg ${isRTL ? 'justify-end' : 'justify-start'}`}>
+              <Users className="h-5 w-5 text-primary" />
               {t('admin.reports.categoryDistribution')}
             </CardTitle>
             <CardDescription>{t('admin.reports.categoryBookingsDistribution')}</CardDescription>
