@@ -4485,6 +4485,19 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_staff_dashboard_stats: {
+        Args: never
+        Returns: {
+          admins: number
+          admins_percentage: number
+          event_organizers: number
+          group_leaders: number
+          service_providers: number
+          super_admins: number
+          total_users: number
+          users_percentage: number
+        }[]
+      }
       get_suspended_users: {
         Args: never
         Returns: {
