@@ -182,7 +182,7 @@ const AdminReportsTab = () => {
   return (
     <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className={`flex items-center justify-between gap-4 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="flex items-center justify-between gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className={isRTL ? 'text-right' : 'text-left'}>
           <h2 className="text-2xl font-bold">{t('admin.reports.title')}</h2>
           <p className="text-muted-foreground">{t('admin.reports.subtitle')}</p>
@@ -215,9 +215,8 @@ const AdminReportsTab = () => {
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
-          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <CardTitle className="text-sm font-medium">{t('admin.reports.newUsers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t('admin.reports.newUsers')}</CardTitle>
           </CardHeader>
           <CardContent className={isRTL ? 'text-right' : 'text-left'}>
             <div className="text-2xl font-bold">{summary.totalUsers}</div>
@@ -226,9 +225,8 @@ const AdminReportsTab = () => {
         </Card>
 
         <Card>
-          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <CardTitle className="text-sm font-medium">{t('admin.reports.newEvents')}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t('admin.reports.newEvents')}</CardTitle>
           </CardHeader>
           <CardContent className={isRTL ? 'text-right' : 'text-left'}>
             <div className="text-2xl font-bold">{summary.totalEvents}</div>
@@ -237,9 +235,8 @@ const AdminReportsTab = () => {
         </Card>
 
         <Card>
-          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <CardTitle className="text-sm font-medium">{t('admin.reports.newServices')}</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t('admin.reports.newServices')}</CardTitle>
           </CardHeader>
           <CardContent className={isRTL ? 'text-right' : 'text-left'}>
             <div className="text-2xl font-bold">{summary.totalServices}</div>
