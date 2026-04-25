@@ -281,9 +281,9 @@ export const EventActivationTab = () => {
     <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       <Card>
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <div className={`flex items-start justify-between gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className="flex items-start justify-between gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <CardTitle className="flex items-center justify-start gap-2">
                 <Calendar className="h-5 w-5" />
                 {isRTL ? 'تفعيل الفعاليات' : 'Event Activation'}
               </CardTitle>
@@ -291,8 +291,10 @@ export const EventActivationTab = () => {
                 {isRTL ? 'مراجعة وتفعيل الفعاليات المقدمة من أصحاب الأعمال' : 'Review and activate events submitted by business owners'}
               </CardDescription>
             </div>
-            <Badge variant="secondary" className={`text-lg px-4 py-2 ${isRTL ? 'self-start' : ''}`}>
-              {pendingEvents.length} {isRTL ? 'فعالية معلقة' : 'pending'}
+            <Badge variant="secondary" className="shrink-0 gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-sm">
+              <Clock className="h-4 w-4" />
+              <span className="font-bold tabular-nums">{pendingEvents.length}</span>
+              <span>{isRTL ? 'فعالية معلقة' : 'pending events'}</span>
             </Badge>
           </div>
         </CardHeader>
