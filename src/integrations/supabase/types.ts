@@ -4724,6 +4724,8 @@ export type Database = {
         | "refunded"
         | "cancelled"
         | "under_review"
+        | "ready_for_release"
+        | "dispute_hold"
       profile_visibility: "public" | "friends_only" | "private"
     }
     CompositeTypes: {
@@ -4867,6 +4869,8 @@ export const Constants = {
         "refunded",
         "cancelled",
         "under_review",
+        "ready_for_release",
+        "dispute_hold",
       ],
       profile_visibility: ["public", "friends_only", "private"],
     },

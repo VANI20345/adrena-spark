@@ -1,174 +1,258 @@
 
-# خطة بناء النظام المالي المتكامل (Hawaya Financial Cycle)
+# خطة إعادة بناء النظام المالي — 8 مراحل صارمة
 
-## النموذج المعتمد
+## القواعد الذهبية الحاكمة (Non-negotiable)
 
+1. **لا يدخل أي ريال إلى أي محفظة إلا عبر `payment_holds`.**
+2. **الـ 30% المحجوز لا يُحرَّر تلقائياً أبداً.** الـ 72 ساعة شرط يسمح فقط بظهور زر "Release" للأدمن.
+3. **أي refund pending أو ticket مفتوح يُجمِّد التحرير حتى ولو مرت 72 ساعة.**
+4. **مصدر حسابي واحد فقط** (`_shared/financial.ts`) — يحظر تكرار `calculateBreakdown`.
+5. **Idempotency في كل عملية دفع** + Transactions + Locks لمنع race conditions.
+
+---
+
+## مخطط الدفق النهائي
+
+```text
+دفع ناجح ─▶ payment-webhook ─▶ create_payment_hold_with_split
+                                      │
+                          ┌───────────┴───────────┐
+                          ▼                       ▼
+              user_wallets:                payment_holds:
+              balance      += 70%          status      = held
+              held_balance += 30%          hold_until  = event_end + 72h
+
+[بعد 72س + لا نزاع] cron ─▶ status = ready_for_release
+                            + إشعار الأدمن (بدون أي تحويل)
+
+[نزاع/refund pending] trigger ─▶ status = dispute_hold
+                                  (يجمّد كل شيء)
+
+[الأدمن يضغط Release يدوياً]
+   └▶ release_payment_hold (admin only)
+      ├─ شرط: status = ready_for_release
+      ├─ شرط: لا نزاع مفتوح
+      ├─ wallet: balance += 30%, held_balance -= 30%
+      ├─ hold.status = released
+      └─ إشعار المزود
 ```
-دفع ناجح → Hold (provider_earnings)
-              ↓
-        70% → wallet (متاح)
-        30% → held (محجوز)
-              ↓
-   انتهاء 72س بعد الفعالية + لا نزاع → "جاهز للإفراج"
-              ↓
-        أدمن يضغط إفراج → 30% → wallet + Logs + Invoice
-              ↓
-   سحب: فقط من الرصيد المتاح (لا من المحجوز)
+
+---
+
+# 🟦 المرحلة 1 — التنظيف والأساسات والمحرك الحسابي (تبدأ الآن)
+
+### 1.1 تنظيف بيانات فاسدة
+- حذف جميع `service_bookings` و `bookings` بـ `total_amount = 0` مع تبعياتها (tickets, notifications, wallet_transactions, payment_holds, payments)
+- إعادة بناء `user_wallets.balance` و `held_balance` و `total_earned` من الصفر بناءً على `wallet_transactions` الصحيحة
+
+### 1.2 قيود قاعدة البيانات (Schema Migration)
+- `ALTER bookings ADD CHECK (total_amount > 0)`
+- `ALTER service_bookings ADD CHECK (total_amount > 0)`
+- `ALTER user_wallets ADD CHECK (balance >= 0 AND held_balance >= 0)`
+- `UNIQUE INDEX payment_holds(source_id)` — منع تكرار الهولد
+- إضافة قيم `'ready_for_release'` و `'dispute_hold'` لـ `payment_hold_status` enum
+- إضافة `profiles.vat_number TEXT`
+- إضافة `payment_holds.released_by uuid` و `released_at timestamptz` (إن لم تكن موجودة)
+
+### 1.3 بذر `system_settings` (insert tool)
+| key | value |
+|---|---|
+| `commission_events` | `{"percentage": 10}` |
+| `commission_services` | `{"percentage": 10}` |
+| `commission_training` | `{"percentage": 10}` |
+| `payment_hold_hours` | `72` |
+| `wallet_split_immediate_percent` | `70` |
+| `platform_vat_number` | `""` |
+| `refund_policy` | `{"early_days":7,"early_pct":100,"medium_days":3,"medium_pct":50,"late_pct":0}` |
+
+### 1.4 محرك حسابي مشترك واحد
+- إنشاء `supabase/functions/_shared/financial.ts`:
+```text
+calculateBreakdown(totalAmount, commissionRate):
+  vat                = totalAmount * 15 / 115
+  netAmount          = totalAmount - vat
+  platformCommission = netAmount * commissionRate / 100
+  commissionVat      = platformCommission * 0.15
+  providerEarnings   = netAmount - platformCommission
+```
+- مزامنة `src/utils/financialCalculations.ts` على نفس المعادلة
+- حذف كل نسخ `calculateFinancialBreakdown` المكررة من المشروع
+- Type-safe: ترجع `{ total, vat, netAmount, platformCommission, commissionVat, providerEarnings }`
+
+**مخرجات المرحلة 1:** قاعدة بيانات نظيفة + قيود تمنع تكرار الأخطاء + إعدادات مكتملة + مصدر حسابي واحد.
+
+---
+
+# 🟦 المرحلة 2 — توحيد مسار الدفع (Webhook موحّد)
+
+### 2.1 إعادة كتابة `process-payment/index.ts`
+- يقتصر على: تحقق المستخدم + استدعاء Moyasar + إرجاع الاستجابة
+- **حذف** `processSuccessfulPayment` و `creditProviderWallet` بالكامل
+- لا يلمس wallet ولا holds ولا bookings.status مطلقاً
+
+### 2.2 إعادة كتابة `payment-webhook/index.ts` — مسار موحّد لـ 3DS وغير 3DS
+```text
+1. verifyPaymentWithProvider (Moyasar)
+2. مطابقة المبلغ مع payments.amount
+3. Idempotency: lock booking row, إذا booking.status='confirmed' → return ok
+4. UPDATE payments.status='completed', booking.status='confirmed'
+5. RPC: create_payment_hold_with_split   ← يكرد 70% فقط
+6. RPC: generate_booking_invoices         ← فاتورة عميل + فاتورة عمولة
+7. INSERT wallet_transactions(type='payment', amount=-total) للمستخدم
+8. INSERT financial_transaction_logs(transaction_type='booking_payment')
+9. tickets + loyalty + notifications
 ```
 
-- **التقسيم 70/30** على `provider_earnings` (صافي أرباح الليدر، بعد خصم العمولة).
-- عمولة المنصة + VAT تذهب كاملة للمنصة فوراً، لا تدخل دورة الحجز.
-- **مدة الحجز:** 72 ساعة بعد `event_end_at` (للفعاليات/الخدمات بتاريخ نهاية)، أو 72 ساعة بعد الدفع للخدمات المفتوحة.
-- **النزاع:** أي `refund` بحالة pending أو `support_ticket` مفتوح مرتبط بالحجز يفعّل `complaint_extension=true` تلقائياً عبر triggers.
-- **الإفراج يدوي بالكامل** من السوبر أدمن.
-- **جميع الحسابات في الـ backend** (edge functions / RPCs)، لا حسابات في الفرونت.
+### 2.3 تحصين `create_payment_hold_with_split`
+- التأكد أنها `SECURITY DEFINER` + `search_path=public`
+- التأكد أن split محسوب من `provider_earnings` فقط (NET بعد العمولة)
+- منع التكرار عبر `UNIQUE(source_id)` (موجود في 1.2)
 
 ---
 
-## 1) تعديلات قاعدة البيانات (Migration)
+# 🟦 المرحلة 3 — Cron للترقية فقط (لا تحرير تلقائي)
 
-### 1.1 توسيع `payment_holds`
-أعمدة جديدة تدعم تقسيم 70/30:
-- `available_amount numeric` — مبلغ الـ 70% الذي تم تحريره فوراً للمحفظة (للسجل فقط).
-- `held_amount numeric` — مبلغ الـ 30% المحجوز فعلياً.
-- `status` يضاف إليها enum value: `under_review` (نزاع نشط).
+### 3.1 Edge function: `mark-holds-ready-for-review`
+```text
+لكل hold:
+  status = 'held'
+  AND complaint_extension = false
+  AND hold_until <= now()
+  AND NOT EXISTS (refunds WHERE booking_id = hold.source_id AND status IN ('pending','processing'))
+  AND NOT EXISTS (support_tickets WHERE booking_id = hold.source_id AND status = 'open')
+→ UPDATE status = 'ready_for_release'
+→ INSERT notifications لكل admin/super_admin (نوع: 'hold_ready_for_review')
+→ INSERT financial_transaction_logs (hold_ready_for_review)
+```
+- **لا تحويل أموال إطلاقاً.**
 
-### 1.2 توسيع `user_wallets`
-- `held_balance numeric default 0` — مجموع الـ 30% المحجوز عبر كل الحجوزات (للعرض فقط، المصدر الحقيقي = `payment_holds`).
+### 3.2 جدولة pg_cron (insert tool — كل ساعة)
 
-### 1.3 توسيع `system_settings`
-- `platform_vat_number text` — رقم ضريبة المنصة لـ ZATCA.
-- `payment_hold_hours integer default 72` — مدة الحجز قابلة للتعديل.
-- `wallet_split_immediate_percent integer default 70`.
-
-### 1.4 توسيع `profiles`
-- `vat_number text nullable` — رقم ضريبة الليدر (اختياري).
-
-### 1.5 ربط الفواتير بالعميل
-- `platform_invoices.invoice_audience text` — `'customer'` أو `'provider'`.
-- `platform_invoices.customer_id uuid` — للعميل.
-- `platform_invoices.customer_name text`.
-
-### 1.6 Triggers جديدة للنزاعات
-- `trg_refund_flags_hold` على `refunds` (AFTER INSERT/UPDATE): إذا `status='pending'` ومرتبط بحجز له `payment_hold` → تفعيل `complaint_extension=true`, `status='under_review'`, `complaint_reason='refund_request'`.
-- `trg_support_ticket_flags_hold` على `support_tickets` (AFTER INSERT/UPDATE): نفس المنطق إذا الـ ticket مرتبط ببحجز.
-- `trg_dispute_resolved_unflags_hold` (AFTER UPDATE على refunds/tickets): إذا أُغلقت كل النزاعات على نفس الحجز → `complaint_extension=false`, status يعود `held`.
-
-### 1.7 RPCs جديدة (كلها SECURITY DEFINER)
-- **`create_payment_hold_with_split(p_booking_id, p_booking_type)`** — تستدعى من webhook/verify-payment داخل المعاملة. تنشئ الـ hold، تضيف 70% للمحفظة، تسجل `wallet_transactions` (type='earning')، تسجل في `financial_transaction_logs`.
-- **`release_payment_hold(p_hold_id, p_notes)`** — تُحدّث (لا تستبدل المنطق الحالي). تضيف المنطق الكامل: تحويل `held_amount` للمحفظة، إنشاء `wallet_transactions` (type='release')، تسجيل في `financial_transaction_logs`.
-- **`generate_booking_invoices(p_booking_id, p_booking_type)`** — تنشئ فاتورتين (customer + provider) في `platform_invoices`.
-- **`get_provider_available_balance(p_user_id)`** — للسحب: ترجع فقط الرصيد القابل للسحب (يستثني `held_balance`).
-- **`get_financial_dashboard_stats()`** — موحدة لإحصائيات لوحة السوبر أدمن: إجمالي المدفوعات، أرباح المنصة، أرباح الليدرز، المحجوز، المتاح.
-
-### 1.8 RLS
-- `platform_invoices`: SELECT للعميل (customer_id) ولليدر (provider_id) وللسوبر أدمن.
-- باقي الجداول: السوبر أدمن فقط للعرض الكامل، الليدر لسجلاته.
+### 3.3 Triggers على `refunds` و `support_tickets`
+- فتح refund/ticket على حجز ⇒ UPDATE hold: `status='dispute_hold', complaint_extension=true`
+- إغلاق آخر نزاع ⇒ إعادة الحالة إلى `held` أو `ready_for_release` حسب `hold_until`
+- إشعار الأدمن في الحالتين
 
 ---
 
-## 2) تعديلات Edge Functions
+# 🟦 المرحلة 4 — التحرير اليدوي (Admin/SuperAdmin) + لوحة Holds
 
-### 2.1 `payment-webhook` و `verify-payment`
-استبدال منطق التتبع المتفرّق بـ:
-1. تحديث الحجز إلى `confirmed`.
-2. استدعاء **RPC واحد** `create_payment_hold_with_split` (يقوم بكل شيء داخل معاملة).
-3. إنشاء فاتورتين عبر `generate_booking_invoices`.
-4. إرسال إشعارات (4 إشعارات):
-   - للعميل: "تم الدفع بنجاح"
-   - للّيدر: "تم شراء تذكرة جديدة" + التفاصيل.
-   - للأدمنز والسوبر أدمنز: "عملية دفع جديدة" + اسم الفعالية + اسم الليدر + المبلغ.
+### 4.1 RPC `release_payment_hold` (مُعاد كتابتها)
+- محصورة على `is_admin OR is_super_admin`
+- ترفض إن `status != 'ready_for_release'`
+- ترفض إن `complaint_extension = true`
+- فحص ثانٍ: لا يوجد refund pending أو ticket open على الحجز
+- عند النجاح:
+  - UPDATE hold: `status='released', released_at=now(), released_by=auth.uid()`
+  - UPDATE wallet: `balance += held_amount, held_balance -= held_amount`
+  - INSERT wallet_transactions (type='release')
+  - INSERT financial_transaction_logs (hold_released)
+  - إشعار المزود
 
-حذف الحسابات اليدوية الحالية في الـ webhook (commission/vat). كل الحسابات تتم في الـ RPC.
+### 4.2 لوحة `PaymentHoldsTab` (Admin + SuperAdmin)
+أعمدة: المزود | الحجز | المبلغ المحجوز | نهاية الفعالية | تاريخ الاستحقاق | الحالة | الإجراء
 
-### 2.2 `process-withdrawal`
-استبدال فحص الرصيد:
-- بدلاً من `wallet.balance - 50`، استدعاء `get_provider_available_balance(userId)`.
-- إضافة فحص: لا يمكن سحب أي مبلغ إذا كان جزء منه ضمن `held_amount`.
-
-### 2.3 إدارة النزاعات
-لا حاجة لـ edge function جديدة - الـ triggers تتولى ذلك تلقائياً.
-
-### 2.4 إشعار "جاهز للإفراج" (اختياري - cron)
-cron job يومي يبحث عن holds جاهزة منذ ≥24 ساعة بدون إفراج، ويرسل إشعار للسوبر أدمن.
-
----
-
-## 3) تعديلات الواجهة (Super Admin Financial Dashboard)
-
-### 3.1 `FinancialDashboardTab.tsx`
-- استبدال البطاقات الإحصائية الحالية بـ `get_financial_dashboard_stats()`:
-  - إجمالي المدفوعات
-  - إجمالي أرباح المنصة (عمولة + VAT)
-  - إجمالي أرباح الليدرز
-  - **الأموال المحجوزة** (مجموع `held_amount`)
-  - **الأموال المتاحة** (مجموع `available_amount` المحرّر)
-
-### 3.2 `PaymentHoldsSection.tsx` (تحديث شامل)
-- عرض `held_amount` و `available_amount` بشكل منفصل في الجدول.
-- شارة جديدة `under_review` (لون أحمر داكن) للنزاعات النشطة.
-- زر "إفراج" معطّل إذا `complaint_extension=true` مع رسالة "نزاع مفتوح".
-- إضافة فلتر بالحالة: held / ready / under_review / released.
-- إضافة Pagination (20 سجل/صفحة).
-
-### 3.3 قسم جديد: `FinancialAuditLogSection.tsx`
-- يعرض `financial_transaction_logs` مع:
-  - فلترة حسب النوع (booking_payment, wallet_credit, hold_release, withdrawal, refund).
-  - فلترة بالتاريخ.
-  - Pagination.
-  - تصدير CSV.
-
-### 3.4 الواجهة للّيدر (`Wallet.tsx`)
-- عرض الرصيد المتاح (للسحب) منفصل عن الرصيد المحجوز.
-- بطاقة "أموالك المحجوزة" مع شرح: "ستُحرّر بعد X ساعة من انتهاء الفعالية".
-- قائمة الفواتير الخاصة به (provider invoices).
-
-### 3.5 الواجهة للعميل (`Profile.tsx` أو صفحة جديدة)
-- زر "فواتيري" يعرض كل `platform_invoices` بـ `customer_id = user.id`.
-
-### 3.6 حذف أي حسابات مالية في الفرونت
-- مراجعة `useFinancialCalculations.ts` — يبقى للعرض فقط (تحويل عملات/تنسيق)، لا للحسابات الجوهرية.
-- إزالة أي حسابات يدوية في `Checkout.tsx` و `ServiceBooking.tsx` — استدعاء RPC لجلب الـ breakdown.
-
----
-
-## 4) نظام الإشعارات الكامل
-
-أنواع جديدة في `notifications.type`:
-
-| Trigger | المستلم | النوع |
+| الحالة | اللون | زر Release |
 |---|---|---|
-| دفع ناجح | العميل | `payment_success` |
-| دفع ناجح | الليدر | `new_booking_received` |
-| دفع ناجح | كل أدمن/سوبر أدمن | `admin_new_payment` |
-| فتح نزاع (refund/ticket) | السوبر أدمن + الليدر | `payment_dispute_opened` |
-| إفراج عن hold | الليدر | `funds_released` |
-| رفض الإفراج (لاحقاً) | الليدر | `release_rejected` |
-| تنفيذ سحب | الليدر | `withdrawal_processed` |
-| hold جاهز للإفراج | السوبر أدمن | `hold_ready_for_release` |
+| `held` (لم تمر 72س) | رمادي | **disabled** + tooltip "متاح بعد {hold_until}" |
+| `ready_for_release` | أخضر | **enabled** |
+| `dispute_hold` | أحمر | **disabled** + tooltip "يوجد نزاع/استرداد مفتوح" |
+| `released` / `refunded` | شفاف | مخفي |
+
+### 4.3 إشعار `hold_ready_for_review` يظهر في bell الأدمن مع رابط مباشر
 
 ---
 
-## 5) ترتيب التنفيذ
+# 🟦 المرحلة 5 — نظام الاسترداد (Refund Flow)
 
-1. **Migration** (الجداول + الـ enums + RPCs + Triggers + RLS).
-2. تحديث `payment-webhook` و `verify-payment` لاستخدام الـ RPC الموحّد.
-3. تحديث `process-withdrawal` لاستخدام `get_provider_available_balance`.
-4. تحديث `PaymentHoldsSection` و `FinancialDashboardTab`.
-5. إضافة `FinancialAuditLogSection`.
-6. تحديث صفحة `Wallet` للّيدر (رصيد متاح / محجوز / فواتير).
-7. إضافة عرض فواتير العميل في `Profile`.
-8. إضافة cron job لإشعار "جاهز للإفراج" (اختياري).
+### 5.1 Edge function: `process-refund` + RPC `process_booking_refund`
+- المستخدم يطلب إلغاء `booking_id`
+- حساب نسبة الاسترداد من `refund_policy` حسب الفرق الزمني
+- INSERT refund(status='pending')
+- Trigger يضع hold: `dispute_hold` + `complaint_extension=true`
+- UPDATE booking.status='cancellation_requested'
+- إشعار الأدمن
+
+### 5.2 RPC `approve_refund` (admin only)
+- UPDATE refund.status='completed', booking.status='cancelled'
+- خصم نسبي من wallet المزود (من available + held حسب الحاجة)
+- UPDATE hold.status='refunded' (أو خصم جزئي)
+- INSERT wallet_transactions (type='refund', +) للمستخدم
+- استدعاء بوابة الدفع لاسترداد فعلي (Moyasar refund API)
+- إشعارات + financial_transaction_logs
+
+### 5.3 واجهات
+- زر "إلغاء واسترداد" في `MyEvents.tsx` و `MyServices.tsx`
+- لوحة Admin: `RefundRequestsTab` (قبول/رفض)
+- صفحة User: سجل الاستردادات
 
 ---
 
-## نقاط تقنية مهمة
+# 🟦 المرحلة 6 — السحوبات (Withdrawals)
 
-- جميع العمليات المالية الحرجة (إنشاء hold + خصم/إضافة محفظة + لوغ) **في RPC واحد** لضمان الـ atomicity.
-- الـ triggers على refunds/tickets تستخدم `SECURITY DEFINER` للوصول لـ `payment_holds`.
-- لا يتم حذف أي بيانات مالية - الإفراج = تحديث status فقط.
-- جميع المبالغ بـ `numeric` (لا `float`) لتجنب أخطاء التقريب.
-- التواريخ بـ `timestamp with time zone`.
-- بعد التنفيذ: `useFinancialCalculations` يبقى لعرض breakdown قبل الدفع فقط (بدون كتابة).
+### 6.1 إصلاح `process-withdrawal`
+- لا يخصم من `balance` فوراً
+- ينقل المبلغ من `balance` إلى `held_balance` كـ "قيد السحب"
+- INSERT wallet_transactions (type='withdraw', status='pending')
 
-هل تريد المتابعة بهذه الخطة؟
+### 6.2 لوحة `WithdrawalApprovalsTab` (Admin)
+- جدول pending: المزود | المبلغ | البنك | IBAN | التاريخ
+- زرّان: "تم التحويل" / "رفض"
+
+### 6.3 RPCs
+- `approve_withdrawal`: `held_balance -= amount, total_withdrawn += amount, status='completed'` + log + notify
+- `reject_withdrawal`: `held_balance -= amount, balance += amount, status='rejected'` + log + notify
+
+---
+
+# 🟦 المرحلة 7 — الفواتير (ZATCA-Ready) + Logging موحّد
+
+### 7.1 RPC `generate_booking_invoices`
+يصدر صفّين في `platform_invoices`:
+1. **فاتورة عميل** (`invoice_type='customer'`): total + VAT مستخرج + رقم ضريبي للمنصة
+2. **فاتورة عمولة للمزود** (`invoice_type='commission'`): commission + commission_vat + vat_number المزود
+
+### 7.2 صفحة "فواتيري" في `/wallet`
+- المستخدم: فواتيره
+- المزود: فواتير العمولات
+- زر طباعة/PDF (مرحلة 8)
+
+### 7.3 توحيد `financial_transaction_logs`
+أنواع موحّدة فقط: `booking_payment`, `hold_created`, `hold_ready_for_review`, `hold_released`, `dispute_opened`, `dispute_closed`, `refund_requested`, `refund_approved`, `withdrawal_requested`, `withdrawal_completed`, `withdrawal_rejected`. كل RPC يكتب log واحد فقط.
+
+---
+
+# 🟦 المرحلة 8 — الواجهات النهائية + RLS Audit + PDF
+
+### 8.1 `Wallet.tsx` (المزود) — ثلاث بطاقات منفصلة
+- **متاح** = `balance` (قابل للسحب)
+- **محجوز** = `held_balance` (في انتظار قرار الأدمن)
+- **قيد السحب** = مجموع `wallet_transactions` pending withdraw
+
+تحت "محجوز": قائمة `payment_holds` بنصوص واضحة:
+- "سيكون قابلاً للمراجعة في {hold_until}"
+- "جاهز للمراجعة من الأدمن"
+- "يوجد نزاع — معلّق"
+
+### 8.2 SuperAdmin Panel — تبويبات جديدة
+- هولدز الدفع، طلبات السحب، طلبات الاسترداد
+
+### 8.3 `FinancialDashboardTab` موحّد
+- مصدر بيانات وحيد (`get_financial_dashboard_stats`)
+- إضافة عدّادات: `ready_for_release`، `dispute_hold`
+
+### 8.4 RLS Audit
+- `payment_holds`, `platform_invoices`, `refunds`, `financial_transaction_logs`
+- المستخدم يرى ما يخصه فقط (payer_id أو receiver_id = auth.uid())
+- admin/super_admin يرون الكل
+- جميع RPCs الجديدة `SECURITY DEFINER` + `search_path=public`
+
+### 8.5 PDF فواتير ZATCA + QR Code
+
+---
+
+## ✅ البدء الآن: المرحلة 1 فقط
+
+سأبدأ فور موافقتك بتنفيذ **المرحلة 1 كاملة** (التنظيف + القيود + بذر `system_settings` + الملف الحسابي المشترك `_shared/financial.ts` ومزامنة `src/utils/financialCalculations.ts`).
+
+هل أبدأ؟
