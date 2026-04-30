@@ -25,54 +25,54 @@ export const DEFAULT_COMMISSION_RATES = {
 export type ServiceType = 'events' | 'services' | 'training';
 
 export interface FinancialBreakdown {
-  /** The total amount paid by the user (VAT-inclusive) */
+  /** المبلغ الكلي المدفوع (شامل الضريبة) */
   totalAmount: number;
-  /** Commission rate applied (percentage) */
+  /** نسبة العمولة المطبقة (%) */
   commissionRate: number;
-  /** Platform commission amount (VAT-inclusive) */
+  /** الصافي بعد استخراج ضريبة القيمة المضافة من المبلغ الكلي */
+  netAmount: number;
+  /** الضريبة المستخرجة من المبلغ الكلي (15/115) */
+  vat: number;
+  /** عمولة المنصة (محسوبة من الصافي) */
   platformCommission: number;
-  /** VAT extracted from the commission (not added) */
+  /** الضريبة المضافة على العمولة (15% من العمولة) */
   vatOnCommission: number;
-  /** Net commission after VAT extraction */
+  /** صافي العمولة بعد الضريبة (للتوافق العكسي) */
   netCommission: number;
-  /** Amount the provider receives */
+  /** ما يستحقه المزود */
   providerEarnings: number;
-  /** Whether this is a discounted service (0% commission) */
+  /** خصم/إعفاء من العمولة */
   isDiscounted: boolean;
 }
 
 /**
- * Calculate the complete financial breakdown for a transaction
- * 
- * @param totalAmount - The final price paid by the user (VAT-inclusive)
- * @param commissionRate - The commission percentage (e.g., 15 for 15%)
- * @param isDiscounted - Whether this is a discounted service (exempt from commission)
- * @returns Complete financial breakdown
+ * المحرك الحسابي الرسمي. يجب أن يطابق `_shared/financial.ts` في الـ edge functions.
  */
 export function calculateFinancialBreakdown(
   totalAmount: number,
   commissionRate: number,
   isDiscounted: boolean = false
 ): FinancialBreakdown {
-  // Discounted services are ALWAYS exempt from commission
-  const effectiveCommissionRate = isDiscounted ? 0 : commissionRate;
-  
-  // Calculate platform commission
-  const platformCommission = (totalAmount * effectiveCommissionRate) / 100;
-  
-  // Extract VAT from the commission (VAT is included in the commission, not added)
-  // Formula: VAT = commission - (commission / 1.15)
-  const vatOnCommission = platformCommission - (platformCommission / (1 + VAT_RATE));
-  
-  // Net commission is commission minus the VAT portion
-  const netCommission = platformCommission - vatOnCommission;
-  
-  // Provider receives total minus platform commission
-  const providerEarnings = totalAmount - platformCommission;
-  
+  const effectiveRate = isDiscounted ? 0 : commissionRate;
+
+  // 1) استخرج الضريبة من المبلغ الكلي
+  const vat = totalAmount * VAT_RATE / (1 + VAT_RATE);
+  // 2) الصافي بدون ضريبة
+  const netAmount = totalAmount - vat;
+  // 3) عمولة المنصة من الصافي
+  const platformCommission = netAmount * effectiveRate / 100;
+  // 4) ضريبة على العمولة (تُضاف للحكومة)
+  const vatOnCommission = platformCommission * VAT_RATE;
+  // 5) صافي العمولة (= العمولة نفسها قبل ضريبتها — للتوافق)
+  const netCommission = platformCommission;
+  // 6) ما يحصل عليه المزود
+  const providerEarnings = netAmount - platformCommission;
+
   return {
     totalAmount: roundToTwoDecimals(totalAmount),
-    commissionRate: effectiveCommissionRate,
+    commissionRate: effectiveRate,
+    netAmount: roundToTwoDecimals(netAmount),
+    vat: roundToTwoDecimals(vat),
     platformCommission: roundToTwoDecimals(platformCommission),
     vatOnCommission: roundToTwoDecimals(vatOnCommission),
     netCommission: roundToTwoDecimals(netCommission),
