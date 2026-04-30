@@ -1,18 +1,17 @@
 /**
  * Centralized Financial Calculations Module
- * 
- * IMPORTANT: This module implements the VAT-Inclusive Pricing Model
- * - All prices shown to users are FINAL (what they pay)
- * - VAT (15%) is included in the price, not added on top
- * - Commission is calculated from the total amount
- * - VAT on commission is extracted (not added) from the commission amount
- * 
- * Formula breakdown for a 100 SAR service with 15% commission:
- * - User pays: 100 SAR (final price)
- * - Platform commission: 15 SAR (15% of 100)
- * - VAT on commission: 1.96 SAR (15 / 1.15 * 0.15 = extracted from commission)
- * - Net commission to platform: 13.04 SAR (15 - 1.96)
- * - Provider receives: 85 SAR (100 - 15)
+ *
+ * VAT-Inclusive Pricing Model (يجب أن يطابق supabase/functions/_shared/financial.ts)
+ *   vat                = total * 15 / 115        (مستخرج من السعر)
+ *   netAmount          = total - vat              (الصافي بعد الضريبة)
+ *   platformCommission = netAmount * rate / 100   (العمولة من الصافي)
+ *   commissionVat      = platformCommission * 15% (ضريبة على العمولة)
+ *   providerEarnings   = netAmount - platformCommission
+ *
+ * مثال: 115 SAR, rate = 10%
+ *   vat = 15.00, net = 100.00
+ *   platformCommission = 10.00, commissionVat = 1.50
+ *   providerEarnings = 90.00
  */
 
 // Constants
