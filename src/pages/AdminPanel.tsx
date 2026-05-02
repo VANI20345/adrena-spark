@@ -26,6 +26,7 @@ import { EventCategoriesTab } from '@/components/Admin/EventCategoriesTab';
 import { GroupManagementTab } from '@/components/Admin/GroupManagementTab';
 import { UnifiedTicketsTab } from '@/components/Admin/UnifiedTicketsTab';
 import { EntityReportsTab } from '@/components/Admin/EntityReportsTab';
+import { RefundManagementTab } from '@/components/Admin/RefundManagementTab';
 import { AdminEventsTab } from '@/components/Admin/AdminEventsTab';
 import { AdminServicesTab } from '@/components/Admin/AdminServicesTab';
 import { AdminUsersTab } from '@/components/Admin/AdminUsersTab';
