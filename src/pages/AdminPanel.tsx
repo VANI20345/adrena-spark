@@ -26,6 +26,7 @@ import { EventCategoriesTab } from '@/components/Admin/EventCategoriesTab';
 import { GroupManagementTab } from '@/components/Admin/GroupManagementTab';
 import { UnifiedTicketsTab } from '@/components/Admin/UnifiedTicketsTab';
 import { EntityReportsTab } from '@/components/Admin/EntityReportsTab';
+import { RefundManagementTab } from '@/components/Admin/RefundManagementTab';
 import { AdminEventsTab } from '@/components/Admin/AdminEventsTab';
 import { AdminServicesTab } from '@/components/Admin/AdminServicesTab';
 import { AdminUsersTab } from '@/components/Admin/AdminUsersTab';
@@ -430,6 +431,7 @@ const AdminPanel = () => {
               <TabsTrigger value="groups-management" className="whitespace-nowrap">{isRTL ? 'إدارة المجموعات' : 'Group Management'}</TabsTrigger>
               <TabsTrigger value="tickets" className="whitespace-nowrap">{isRTL ? 'التذاكر' : 'Tickets'}</TabsTrigger>
               <TabsTrigger value="payment-holds" className="whitespace-nowrap">{isRTL ? 'الأموال المحتجزة' : 'Payment Holds'}</TabsTrigger>
+              <TabsTrigger value="refunds" className="whitespace-nowrap">{isRTL ? 'الاستردادات' : 'Refunds'}</TabsTrigger>
               <TabsTrigger value="entity-reports" className="whitespace-nowrap">{isRTL ? 'بلاغات المحتوى' : 'Content Reports'}</TabsTrigger>
               <TabsTrigger value="activity" className="whitespace-nowrap">{isRTL ? 'سجل النشاطات' : 'Activity Logs'}</TabsTrigger>
             </TabsList>
@@ -533,6 +535,11 @@ const AdminPanel = () => {
           {/* Payment Holds Tab */}
           <TabsContent value="payment-holds">
             <PaymentHoldsSection />
+          </TabsContent>
+
+          {/* Refunds Tab */}
+          <TabsContent value="refunds">
+            <RefundManagementTab />
           </TabsContent>
 
           {/* Entity Reports Tab */}
