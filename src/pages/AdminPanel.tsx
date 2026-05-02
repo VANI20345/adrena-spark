@@ -537,6 +537,11 @@ const AdminPanel = () => {
             <PaymentHoldsSection />
           </TabsContent>
 
+          {/* Refunds Tab */}
+          <TabsContent value="refunds">
+            <RefundManagementTab />
+          </TabsContent>
+
           {/* Entity Reports Tab */}
           <TabsContent value="entity-reports">
             <EntityReportsTab />
