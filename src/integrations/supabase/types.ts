@@ -2617,36 +2617,63 @@ export type Database = {
       }
       refunds: {
         Row: {
+          admin_notes: string | null
           amount: number
+          auto_processed: boolean
           booking_id: string
+          booking_type: string
           created_at: string
+          eligible_amount: number
+          eligible_pct: number
+          failure_reason: string | null
           id: string
+          payment_hold_id: string | null
           processed_at: string | null
           processed_by: string | null
           reason: string
+          refund_type: string
           status: string
+          updated_at: string
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           amount: number
+          auto_processed?: boolean
           booking_id: string
+          booking_type?: string
           created_at?: string
+          eligible_amount?: number
+          eligible_pct?: number
+          failure_reason?: string | null
           id?: string
+          payment_hold_id?: string | null
           processed_at?: string | null
           processed_by?: string | null
           reason: string
+          refund_type?: string
           status?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           amount?: number
+          auto_processed?: boolean
           booking_id?: string
+          booking_type?: string
           created_at?: string
+          eligible_amount?: number
+          eligible_pct?: number
+          failure_reason?: string | null
           id?: string
+          payment_hold_id?: string | null
           processed_at?: string | null
           processed_by?: string | null
           reason?: string
+          refund_type?: string
           status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -2662,6 +2689,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_payment_hold_id_fkey"
+            columns: ["payment_hold_id"]
+            isOneToOne: false
+            referencedRelation: "payment_holds"
             referencedColumns: ["id"]
           },
         ]
@@ -4573,6 +4607,10 @@ export type Database = {
     }
     Functions: {
       assign_admin_to_group: { Args: never; Returns: string }
+      calculate_refund_eligibility: {
+        Args: { p_booking_id: string; p_booking_type?: string }
+        Returns: Json
+      }
       can_view_full_profile: {
         Args: { _target_user_id: string }
         Returns: boolean
@@ -4707,6 +4745,10 @@ export type Database = {
         Returns: string
       }
       mark_holds_ready_for_review: { Args: never; Returns: Json }
+      process_refund: {
+        Args: { p_admin_override_amount?: number; p_refund_id: string }
+        Returns: Json
+      }
       redeem_referral_code: { Args: { p_code: string }; Returns: Json }
       release_payment_hold: {
         Args: { p_hold_id: string; p_notes?: string }
@@ -4719,6 +4761,10 @@ export type Database = {
           p_group_id: string
           p_message?: string
         }
+        Returns: Json
+      }
+      request_refund: {
+        Args: { p_booking_id: string; p_booking_type: string; p_reason: string }
         Returns: Json
       }
       sync_hold_dispute_state: {
