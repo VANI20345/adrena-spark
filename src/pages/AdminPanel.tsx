@@ -433,6 +433,7 @@ const AdminPanel = () => {
               <TabsTrigger value="tickets" className="whitespace-nowrap">{isRTL ? 'التذاكر' : 'Tickets'}</TabsTrigger>
               <TabsTrigger value="payment-holds" className="whitespace-nowrap">{isRTL ? 'الأموال المحتجزة' : 'Payment Holds'}</TabsTrigger>
               <TabsTrigger value="refunds" className="whitespace-nowrap">{isRTL ? 'الاستردادات' : 'Refunds'}</TabsTrigger>
+              <TabsTrigger value="withdrawals" className="whitespace-nowrap">{isRTL ? 'طلبات السحب' : 'Withdrawals'}</TabsTrigger>
               <TabsTrigger value="entity-reports" className="whitespace-nowrap">{isRTL ? 'بلاغات المحتوى' : 'Content Reports'}</TabsTrigger>
               <TabsTrigger value="activity" className="whitespace-nowrap">{isRTL ? 'سجل النشاطات' : 'Activity Logs'}</TabsTrigger>
             </TabsList>
