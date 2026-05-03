@@ -544,6 +544,11 @@ const AdminPanel = () => {
             <RefundManagementTab />
           </TabsContent>
 
+          {/* Withdrawals Tab */}
+          <TabsContent value="withdrawals">
+            <WithdrawalManagementTab />
+          </TabsContent>
+
           {/* Entity Reports Tab */}
           <TabsContent value="entity-reports">
             <EntityReportsTab />
