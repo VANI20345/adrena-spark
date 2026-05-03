@@ -3942,6 +3942,72 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_requests: {
+        Row: {
+          account_holder_name: string
+          account_number: string
+          admin_notes: string | null
+          amount: number
+          bank_name: string
+          completed_at: string | null
+          created_at: string
+          currency: string
+          external_transfer_ref: string | null
+          iban: string | null
+          id: string
+          processed_at: string | null
+          processed_by: string | null
+          reference_number: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at: string
+          user_id: string
+          wallet_transaction_id: string | null
+        }
+        Insert: {
+          account_holder_name: string
+          account_number: string
+          admin_notes?: string | null
+          amount: number
+          bank_name: string
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          external_transfer_ref?: string | null
+          iban?: string | null
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reference_number: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at?: string
+          user_id: string
+          wallet_transaction_id?: string | null
+        }
+        Update: {
+          account_holder_name?: string
+          account_number?: string
+          admin_notes?: string | null
+          amount?: number
+          bank_name?: string
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          external_transfer_ref?: string | null
+          iban?: string | null
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reference_number?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at?: string
+          user_id?: string
+          wallet_transaction_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       admin_activity_logs_view: {
@@ -4606,6 +4672,15 @@ export type Database = {
       }
     }
     Functions: {
+      admin_process_withdrawal: {
+        Args: {
+          p_action: string
+          p_notes?: string
+          p_request_id: string
+          p_transfer_ref?: string
+        }
+        Returns: Json
+      }
       assign_admin_to_group: { Args: never; Returns: string }
       calculate_refund_eligibility: {
         Args: { p_booking_id: string; p_booking_type?: string }
@@ -4616,6 +4691,10 @@ export type Database = {
         Returns: boolean
       }
       can_view_profile: { Args: { target_user_id: string }; Returns: boolean }
+      cancel_withdrawal_request: {
+        Args: { p_request_id: string }
+        Returns: Json
+      }
       check_in_attendee: {
         Args: { location?: string; organizer_id: string; ticket_id: string }
         Returns: Json
@@ -4699,6 +4778,7 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: string
       }
+      get_withdrawal_requests_summary: { Args: never; Returns: Json }
       has_any_role: {
         Args: {
           _roles: Database["public"]["Enums"]["app_role"][]
@@ -4767,6 +4847,16 @@ export type Database = {
         Args: { p_booking_id: string; p_booking_type: string; p_reason: string }
         Returns: Json
       }
+      request_withdrawal: {
+        Args: {
+          p_account_holder_name: string
+          p_account_number: string
+          p_amount: number
+          p_bank_name: string
+          p_iban?: string
+        }
+        Returns: Json
+      }
       sync_hold_dispute_state: {
         Args: { p_booking_id: string }
         Returns: undefined
@@ -4791,6 +4881,13 @@ export type Database = {
         | "ready_for_release"
         | "dispute_hold"
       profile_visibility: "public" | "friends_only" | "private"
+      withdrawal_status:
+        | "pending"
+        | "approved"
+        | "processing"
+        | "completed"
+        | "rejected"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4938,6 +5035,14 @@ export const Constants = {
         "dispute_hold",
       ],
       profile_visibility: ["public", "friends_only", "private"],
+      withdrawal_status: [
+        "pending",
+        "approved",
+        "processing",
+        "completed",
+        "rejected",
+        "cancelled",
+      ],
     },
   },
 } as const

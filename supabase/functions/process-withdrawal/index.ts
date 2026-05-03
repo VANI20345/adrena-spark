@@ -20,208 +20,87 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    // Verify user authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-    
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const userId = user.id;
-    const { amount, bank_name, account_number, account_holder_name, iban }: WithdrawalRequest = await req.json();
-
-    // Validate input
-    if (!amount || amount < 100) {
-      return new Response(JSON.stringify({ error: 'الحد الأدنى للسحب هو 100 ريال' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (!bank_name || !account_number || !account_holder_name) {
-      return new Response(JSON.stringify({ error: 'يرجى ملء جميع بيانات الحساب البنكي' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Get available balance via RPC (excludes held funds)
-    const { data: balanceData, error: balanceError } = await supabaseClient.rpc(
-      'get_provider_available_balance',
-      { p_user_id: userId }
+    // Auth-scoped client so RPC sees auth.uid()
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
     );
 
-    if (balanceError || !balanceData) {
-      return new Response(JSON.stringify({ error: 'فشل في التحقق من الرصيد' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const availableForWithdrawal = Number(balanceData.available_for_withdrawal || 0);
-    const heldBalance = Number(balanceData.held_balance || 0);
-    const currentBalance = Number(balanceData.balance || 0);
+    const body: WithdrawalRequest = await req.json();
+    const { amount, bank_name, account_number, account_holder_name, iban } = body;
 
-    // Reserve 50 SAR minimum
-    const withdrawableMax = Math.max(0, availableForWithdrawal - 50);
-
-    if (amount > withdrawableMax) {
-      return new Response(JSON.stringify({
-        error: `المبلغ المتاح للسحب هو ${withdrawableMax} ريال فقط (المحجوز: ${heldBalance} ريال لا يمكن سحبه)`
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    if (!amount || typeof amount !== 'number' || amount < 100) {
+      return new Response(JSON.stringify({ error: 'الحد الأدنى للسحب هو 100 ريال' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (!bank_name || !account_number || !account_holder_name) {
+      return new Response(JSON.stringify({ error: 'يرجى ملء جميع بيانات الحساب البنكي' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Re-fetch wallet for the update step
-    const { data: wallet } = await supabaseClient
-      .from('user_wallets').select('*').eq('user_id', userId).single();
-    if (!wallet) {
-      return new Response(JSON.stringify({ error: 'لم يتم العثور على المحفظة' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Single atomic RPC call: validates balance, locks funds, creates request + tx + log + notification
+    const { data, error } = await supabase.rpc('request_withdrawal', {
+      p_amount: amount,
+      p_bank_name: bank_name,
+      p_account_holder_name: account_holder_name,
+      p_account_number: account_number,
+      p_iban: iban ?? null,
+    });
 
-    // Create withdrawal request
-    const withdrawalRef = `WD-${Date.now()}-${userId.substring(0, 8)}`;
-
-    // For now, we'll create a pending withdrawal request
-    // In production, this would integrate with Moyasar's Transfer API
-    // or a bank transfer service
-
-    // Create wallet transaction for withdrawal (pending)
-    const { data: transaction, error: txError } = await supabaseClient
-      .from('wallet_transactions')
-      .insert({
-        user_id: userId,
-        type: 'withdraw',
-        amount: -amount, // Negative for withdrawal
-        description: `طلب سحب إلى ${bank_name} - ${account_number}`,
-        status: 'pending',
-        reference_id: withdrawalRef,
-        reference_type: 'withdrawal'
-      })
-      .select()
-      .single();
-
-    if (txError) {
-      console.error('Failed to create withdrawal transaction:', txError);
+    if (error) {
+      console.error('[process-withdrawal] RPC error:', error);
       return new Response(JSON.stringify({ error: 'فشل في إنشاء طلب السحب' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Update wallet balance (reserve the amount)
-    const { error: updateError } = await supabaseClient
-      .from('user_wallets')
-      .update({
-        balance: wallet.balance - amount,
-        pending_earnings: (wallet.pending_earnings || 0) + amount,
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', userId);
-
-    if (updateError) {
-      // Rollback transaction
-      await supabaseClient.from('wallet_transactions').delete().eq('id', transaction.id);
-      return new Response(JSON.stringify({ error: 'فشل في تحديث المحفظة' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    if (!data?.ok) {
+      const messages: Record<string, string> = {
+        not_authenticated: 'يجب تسجيل الدخول',
+        amount_below_minimum: `الحد الأدنى للسحب هو ${data?.minimum ?? 100} ريال`,
+        missing_bank_details: 'يرجى ملء جميع بيانات الحساب البنكي',
+        wallet_not_found: 'لم يتم العثور على المحفظة',
+        insufficient_balance: `المبلغ المتاح للسحب: ${data?.available ?? 0} ريال (محتجز: ${data?.reserve ?? 50} ريال)`,
+      };
+      return new Response(JSON.stringify({
+        error: messages[data?.error] ?? 'فشل في إنشاء طلب السحب',
+        details: data,
+      }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    // Log financial transaction
-    await supabaseClient.from('financial_transaction_logs').insert({
-      transaction_type: 'withdrawal',
-      amount: amount,
-      reference_type: 'withdrawal',
-      reference_id: transaction.id,
-      payer_id: null, // Platform pays
-      receiver_id: userId,
-      status: 'pending',
-      metadata: {
-        bank_name,
-        account_number: account_number.slice(-4), // Only store last 4 digits for security
-        account_holder_name,
-        iban: iban ? iban.slice(-4) : null,
-        withdrawal_ref: withdrawalRef
-      }
-    });
-
-    // Send notification
-    await supabaseClient.from('notifications').insert({
-      user_id: userId,
-      type: 'withdrawal_requested',
-      title: 'تم استلام طلب السحب',
-      message: `تم استلام طلب سحب ${amount} ريال وسيتم معالجته خلال 2-5 أيام عمل`,
-      data: {
-        amount,
-        bank_name,
-        withdrawal_ref: withdrawalRef,
-        transaction_id: transaction.id
-      }
-    });
-
-    // In production, you would integrate with Moyasar Transfer API here
-    // const moyasarSecretKey = Deno.env.get('MOYASAR_SECRET_KEY');
-    // const transferResponse = await fetch('https://api.moyasar.com/v1/transfers', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Basic ${btoa(moyasarSecretKey + ':')}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     amount: amount * 100, // Convert to halalas
-    //     iban: iban,
-    //     name: account_holder_name,
-    //     description: `Withdrawal ${withdrawalRef}`
-    //   })
-    // });
-
-    console.log('[process-withdrawal] Withdrawal request created:', {
-      userId,
-      amount,
-      bank_name,
-      withdrawalRef
-    });
 
     return new Response(JSON.stringify({
       success: true,
       message: 'تم استلام طلب السحب بنجاح',
-      withdrawal_ref: withdrawalRef,
-      transaction_id: transaction.id,
-      estimated_days: '2-5'
+      withdrawal_ref: data.reference,
+      request_id: data.request_id,
+      amount: data.amount,
+      estimated_days: '2-5',
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('[process-withdrawal] Error:', error);
-    return new Response(JSON.stringify({ 
-      error: 'حدث خطأ أثناء معالجة طلب السحب'
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ error: 'حدث خطأ أثناء معالجة طلب السحب' }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

@@ -27,6 +27,7 @@ import { GroupManagementTab } from '@/components/Admin/GroupManagementTab';
 import { UnifiedTicketsTab } from '@/components/Admin/UnifiedTicketsTab';
 import { EntityReportsTab } from '@/components/Admin/EntityReportsTab';
 import { RefundManagementTab } from '@/components/Admin/RefundManagementTab';
+import { WithdrawalManagementTab } from '@/components/Admin/WithdrawalManagementTab';
 import { AdminEventsTab } from '@/components/Admin/AdminEventsTab';
 import { AdminServicesTab } from '@/components/Admin/AdminServicesTab';
 import { AdminUsersTab } from '@/components/Admin/AdminUsersTab';
@@ -432,6 +433,7 @@ const AdminPanel = () => {
               <TabsTrigger value="tickets" className="whitespace-nowrap">{isRTL ? 'التذاكر' : 'Tickets'}</TabsTrigger>
               <TabsTrigger value="payment-holds" className="whitespace-nowrap">{isRTL ? 'الأموال المحتجزة' : 'Payment Holds'}</TabsTrigger>
               <TabsTrigger value="refunds" className="whitespace-nowrap">{isRTL ? 'الاستردادات' : 'Refunds'}</TabsTrigger>
+              <TabsTrigger value="withdrawals" className="whitespace-nowrap">{isRTL ? 'طلبات السحب' : 'Withdrawals'}</TabsTrigger>
               <TabsTrigger value="entity-reports" className="whitespace-nowrap">{isRTL ? 'بلاغات المحتوى' : 'Content Reports'}</TabsTrigger>
               <TabsTrigger value="activity" className="whitespace-nowrap">{isRTL ? 'سجل النشاطات' : 'Activity Logs'}</TabsTrigger>
             </TabsList>
@@ -540,6 +542,11 @@ const AdminPanel = () => {
           {/* Refunds Tab */}
           <TabsContent value="refunds">
             <RefundManagementTab />
+          </TabsContent>
+
+          {/* Withdrawals Tab */}
+          <TabsContent value="withdrawals">
+            <WithdrawalManagementTab />
           </TabsContent>
 
           {/* Entity Reports Tab */}
