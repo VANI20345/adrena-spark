@@ -223,35 +223,56 @@ const SignupPage1 = ({ data, updateData, onNext }: SignupPage1Props) => {
         </div>
       </div>
 
-      <div className="space-y-3 text-right">
-        <Label className="text-right block">نوع الحساب</Label>
-        <div className="grid grid-cols-2 gap-3">
-          <Button
+      <div className="space-y-2 text-right">
+        <Label htmlFor="passwordConfirmation" className="text-right block">تأكيد كلمة المرور</Label>
+        <div className="relative">
+          <Input
+            id="passwordConfirmation"
+            type={showPasswordConfirm ? 'text' : 'password'}
+            placeholder="أعد إدخال كلمة المرور"
+            value={(data as any).passwordConfirmation || ''}
+            onChange={(e) => updateData({ passwordConfirmation: e.target.value } as any)}
+            required
+            dir="ltr"
+            className="pl-10 text-right"
+          />
+          <button
             type="button"
-            variant={data.role === 'attendee' ? 'default' : 'outline'}
-            className="w-full"
-            onClick={() => updateData({ role: 'attendee' })}
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-1 hover:bg-accent rounded"
+            onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
           >
-            مشارك
-          </Button>
-          <div className="relative group">
+            {showPasswordConfirm ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+          </button>
+        </div>
+      </div>
+
+      {providerSignupEnabled ? (
+        <div className="space-y-3 text-right">
+          <Label className="text-right block">نوع الحساب</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              type="button"
+              variant={data.role === 'attendee' ? 'default' : 'outline'}
+              className="w-full"
+              onClick={() => updateData({ role: 'attendee' })}
+            >
+              مشارك
+            </Button>
             <Button
               type="button"
               variant={data.role === 'provider' ? 'default' : 'outline'}
               className="w-full"
-              onClick={() => !(toggles?.services === false && toggles?.trainings === false && toggles?.discounts === false) && updateData({ role: 'provider' })}
-              disabled={toggles?.services === false && toggles?.trainings === false && toggles?.discounts === false}
+              onClick={() => updateData({ role: 'provider' })}
             >
               مقدم خدمة
             </Button>
-            {toggles?.services === false && toggles?.trainings === false && toggles?.discounts === false && (
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black/80 text-white text-xs p-2 rounded whitespace-nowrap z-10 pointer-events-none">
-                التسجيل كمقدم خدمة غير متاح حالياً
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      ) : (
+        // Provider signup disabled by Super Admin — hide option entirely and force attendee
+        <input type="hidden" value="attendee" onChange={() => {}} />
+      )}
+
 
       {error && (
         <Alert variant="destructive">
