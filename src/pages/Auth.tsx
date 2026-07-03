@@ -13,7 +13,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Eye, EyeOff, Mail, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import SignupFlow from '@/components/Auth/SignupFlow';
+import SocialAuthPlaceholders from '@/components/Auth/SocialAuthPlaceholders';
 import { toast } from 'sonner';
+
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
