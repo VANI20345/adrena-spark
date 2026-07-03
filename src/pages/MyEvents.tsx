@@ -23,9 +23,11 @@ const MyEventsPage = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const [ongoingEvents, setOngoingEvents] = useState<any[]>([]);
   const [pendingPaymentEvents, setPendingPaymentEvents] = useState<any[]>([]);
   const [completedEvents, setCompletedEvents] = useState<any[]>([]);
   const [cancelledEvents, setCancelledEvents] = useState<any[]>([]);
+
   const [groupEvents, setGroupEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [verifyingPayment, setVerifyingPayment] = useState<string | null>(null);
