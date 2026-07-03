@@ -20,8 +20,11 @@ const SignupPage1 = ({ data, updateData, onNext }: SignupPage1Props) => {
   const navigate = useNavigate();
   const { toggles } = useFeatureToggles();
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [error, setError] = useState('');
   const [isChecking, setIsChecking] = useState(false);
+  const providerSignupEnabled = toggles?.provider_signup !== false;
+
 
   const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
