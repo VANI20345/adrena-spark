@@ -776,6 +776,26 @@ const MyEventsPage = () => {
               )}
             </TabsContent>
 
+            <TabsContent value="ongoing" className="space-y-6 mt-6">
+              {ongoingEvents.length > 0 ? (
+                <div className="space-y-4">
+                  {ongoingEvents.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Timer className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">{isRTL ? 'لا توجد فعاليات جارية' : 'No ongoing events'}</h3>
+                    <p className="text-muted-foreground text-center">
+                      {isRTL ? 'لا توجد لديك فعاليات مقامة حالياً' : "You don't have any events currently in progress"}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+
             <TabsContent value="group_events" className="space-y-6 mt-6">
               {groupEvents.length > 0 ? (
                 <div className="space-y-4">
