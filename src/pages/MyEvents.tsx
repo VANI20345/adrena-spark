@@ -794,6 +794,9 @@ const MyEventsPage = () => {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+
 
 
             <TabsContent value="group_events" className="space-y-6 mt-6">
