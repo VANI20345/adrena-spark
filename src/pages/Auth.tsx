@@ -251,8 +251,10 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
+              {!isInSignupFlow && <SocialAuthPlaceholders />}
               <SignupFlow onFlowStart={() => setIsInSignupFlow(true)} />
             </TabsContent>
+
           </Tabs>
         </CardContent>
       </Card>
