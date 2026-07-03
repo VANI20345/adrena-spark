@@ -4,7 +4,7 @@ import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
 
 interface FeatureDisabledProps {
-  featureKey: 'groups' | 'services' | 'trainings' | 'discounts';
+  featureKey: 'groups' | 'services' | 'trainings' | 'discounts' | 'provider_signup';
 }
 
 const FEATURE_LABELS: Record<string, { ar: string; en: string }> = {
@@ -12,7 +12,9 @@ const FEATURE_LABELS: Record<string, { ar: string; en: string }> = {
   services: { ar: 'الخدمات', en: 'Services' },
   trainings: { ar: 'التدريبات', en: 'Trainings' },
   discounts: { ar: 'التخفيضات', en: 'Discounts' },
+  provider_signup: { ar: 'تسجيل مقدمي الخدمات', en: 'Provider signup' },
 };
+
 
 const FeatureDisabled = ({ featureKey }: FeatureDisabledProps) => {
   const { isRTL } = useLanguageContext();
