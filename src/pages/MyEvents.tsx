@@ -708,7 +708,7 @@ const MyEventsPage = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full ${pendingPaymentEvents.length > 0 ? 'grid-cols-3 md:grid-cols-5' : 'grid-cols-2 md:grid-cols-4'} gap-2 bg-transparent p-0 h-auto`}>
+            <TabsList className={`grid w-full ${pendingPaymentEvents.length > 0 ? 'grid-cols-3 md:grid-cols-6' : 'grid-cols-2 md:grid-cols-5'} gap-2 bg-transparent p-0 h-auto`}>
               {pendingPaymentEvents.length > 0 && (
                 <TabsTrigger value="pending_payment" className="text-amber-600 bg-muted data-[state=active]:bg-amber-600 data-[state=active]:text-white rounded-xl py-3 font-semibold shadow-sm">
                   {isRTL ? 'في انتظار الدفع' : 'Pending Payment'} ({pendingPaymentEvents.length})
@@ -716,6 +716,9 @@ const MyEventsPage = () => {
               )}
               <TabsTrigger value="upcoming" className="bg-muted data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl py-3 font-semibold shadow-sm">
                 {isRTL ? 'القادمة' : 'Upcoming'} ({upcomingEvents.length})
+              </TabsTrigger>
+              <TabsTrigger value="ongoing" className="bg-muted data-[state=active]:bg-success data-[state=active]:text-white rounded-xl py-3 font-semibold shadow-sm">
+                {isRTL ? 'الجارية' : 'Ongoing'} ({ongoingEvents.length})
               </TabsTrigger>
               <TabsTrigger value="group_events" className="bg-muted data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl py-3 font-semibold shadow-sm">
                 {isRTL ? 'فعاليات مجموعاتي' : 'Group Events'} ({groupEvents.length})
@@ -727,6 +730,7 @@ const MyEventsPage = () => {
                 {isRTL ? 'الملغية' : 'Cancelled'} ({cancelledEvents.length})
               </TabsTrigger>
             </TabsList>
+
 
             {/* Pending Payment Tab */}
             {pendingPaymentEvents.length > 0 && (
