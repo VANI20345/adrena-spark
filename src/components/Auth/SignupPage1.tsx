@@ -113,12 +113,26 @@ const SignupPage1 = ({ data, updateData, onNext }: SignupPage1Props) => {
         return;
       }
 
-      // Validate account type is selected
-      if (!data.role || (data.role !== 'attendee' && data.role !== 'provider')) {
-        setError('يجب اختيار نوع الحساب (مشارك أو مقدم خدمة)');
+      // Confirm password match
+      if (data.password !== (data as any).passwordConfirmation) {
+        setError('كلمتا المرور غير متطابقتين');
         setIsChecking(false);
         return;
       }
+
+      // If provider signup is disabled, force role to attendee
+      const effectiveRole = providerSignupEnabled ? data.role : 'attendee';
+      if (!providerSignupEnabled && data.role !== 'attendee') {
+        updateData({ role: 'attendee' });
+      }
+
+      // Validate account type is selected
+      if (!effectiveRole || (effectiveRole !== 'attendee' && effectiveRole !== 'provider')) {
+        setError('يجب اختيار نوع الحساب');
+        setIsChecking(false);
+        return;
+      }
+
 
       onNext();
     } catch (err: any) {
