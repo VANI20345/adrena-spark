@@ -1,0 +1,2 @@
+REVOKE ALL ON FUNCTION public.raise_financial_alert(text,text,jsonb,text,text,uuid,numeric,uuid,uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.raise_financial_alert(text,text,jsonb,text,text,uuid,numeric,uuid,uuid) TO authenticated, service_role;
