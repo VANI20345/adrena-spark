@@ -15,6 +15,7 @@ export interface SignupData {
   emailVerification: string;
   phone: string;
   password: string;
+  passwordConfirmation: string;
   role: 'attendee' | 'provider';
   city: string;
   birthDate: string;
@@ -27,6 +28,7 @@ export interface SignupData {
   commercialReg?: File;
   license?: File;
 }
+
 
 interface SignupFlowProps {
   onFlowStart?: () => void;
