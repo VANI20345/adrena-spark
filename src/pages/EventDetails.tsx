@@ -552,7 +552,8 @@ const EventDetails = () => {
                   className="w-full" 
                   size="lg"
                   onClick={() => {
-                    if (event.status === 'pending' || event.status === 'cancelled' || new Date(event.end_date) < new Date() || event.current_attendees >= event.max_attendees) {
+                    const started = new Date(event.start_date) <= new Date();
+                    if (event.status === 'pending' || event.status === 'cancelled' || started || new Date(event.end_date) < new Date() || event.current_attendees >= event.max_attendees) {
                       return;
                     }
                     navigate('/checkout', {
@@ -567,6 +568,7 @@ const EventDetails = () => {
                   disabled={
                     event.status === 'pending' || 
                     event.status === 'cancelled' || 
+                    new Date(event.start_date) <= new Date() ||
                     new Date(event.end_date) < new Date() || 
                     event.current_attendees >= event.max_attendees
                   }
@@ -575,8 +577,10 @@ const EventDetails = () => {
                   {event.status === 'pending' ? 'قيد المراجعة' : 
                    event.status === 'cancelled' ? 'ملغية' :
                    new Date(event.end_date) < new Date() ? 'انتهت' :
+                   new Date(event.start_date) <= new Date() ? 'انتهى التسجيل' :
                    event.current_attendees >= event.max_attendees ? 'مكتملة' : 'احجز الآن'}
                 </Button>
+
 
                 <Button 
                   variant="outline" 

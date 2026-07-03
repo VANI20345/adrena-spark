@@ -13,7 +13,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Eye, EyeOff, Mail, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import SignupFlow from '@/components/Auth/SignupFlow';
+import SocialAuthPlaceholders from '@/components/Auth/SocialAuthPlaceholders';
 import { toast } from 'sonner';
+
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -170,24 +172,9 @@ const Auth = () => {
             
             <TabsContent value="login" className="space-y-4">
               <div className="space-y-4">
-                <Button
-                  onClick={handleGoogleSignIn}
-                  variant="outline"
-                  className="w-full"
-                  type="button"
-                >
-                  <Mail className={language === 'ar' ? 'mr-2 h-4 w-4' : 'ml-2 h-4 w-4'} />
-                  {t('auth.googleSignIn')}
-                </Button>
-                
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">{t('auth.or')}</span>
-                  </div>
-                </div>
+                <SocialAuthPlaceholders />
+
+
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className={`space-y-2 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
@@ -264,8 +251,10 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
+              {!isInSignupFlow && <SocialAuthPlaceholders />}
               <SignupFlow onFlowStart={() => setIsInSignupFlow(true)} />
             </TabsContent>
+
           </Tabs>
         </CardContent>
       </Card>

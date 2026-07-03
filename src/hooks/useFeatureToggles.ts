@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export type FeatureKey = 'groups' | 'services' | 'trainings' | 'discounts';
+export type FeatureKey = 'groups' | 'services' | 'trainings' | 'discounts' | 'provider_signup';
 
 export type FeatureToggles = Record<FeatureKey, boolean>;
 
@@ -11,7 +11,9 @@ const DEFAULTS: FeatureToggles = {
   services: true,
   trainings: true,
   discounts: true,
+  provider_signup: true,
 };
+
 
 export const useFeatureToggles = () => {
   const query = useQuery({

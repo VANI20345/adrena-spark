@@ -23,9 +23,11 @@ const MyEventsPage = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const [ongoingEvents, setOngoingEvents] = useState<any[]>([]);
   const [pendingPaymentEvents, setPendingPaymentEvents] = useState<any[]>([]);
   const [completedEvents, setCompletedEvents] = useState<any[]>([]);
   const [cancelledEvents, setCancelledEvents] = useState<any[]>([]);
+
   const [groupEvents, setGroupEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [verifyingPayment, setVerifyingPayment] = useState<string | null>(null);
@@ -144,10 +146,18 @@ const MyEventsPage = () => {
           b.status === 'pending_payment'
         ).map(b => mapBooking(b, 'pending_payment'));
         
-        // Include confirmed/paid bookings as "upcoming" if event hasn't ended
-        const upcoming = (bookings || []).filter(b => 
-          b.events && 
-          new Date(b.events.end_date || b.events.start_date) > now && 
+        // Upcoming = event hasn't started yet
+        const upcoming = (bookings || []).filter(b =>
+          b.events &&
+          new Date(b.events.start_date) > now &&
+          ['confirmed', 'paid', 'pending'].includes(b.status)
+        ).map(b => mapBooking(b, b.status));
+
+        // Ongoing = event has started but not ended
+        const ongoing = (bookings || []).filter(b =>
+          b.events &&
+          new Date(b.events.start_date) <= now &&
+          new Date(b.events.end_date || b.events.start_date) > now &&
           ['confirmed', 'paid', 'pending'].includes(b.status)
         ).map(b => mapBooking(b, b.status));
 
@@ -166,8 +176,10 @@ const MyEventsPage = () => {
 
         setPendingPaymentEvents(pendingPayment);
         setUpcomingEvents(upcoming);
+        setOngoingEvents(ongoing);
         setCompletedEvents(completed);
         setCancelledEvents(cancelled);
+
 
         // --- Joined Group Events Fetching ---
         const { data: memberships, error: membershipError } = await supabase
@@ -696,7 +708,7 @@ const MyEventsPage = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full ${pendingPaymentEvents.length > 0 ? 'grid-cols-3 md:grid-cols-5' : 'grid-cols-2 md:grid-cols-4'} gap-2 bg-transparent p-0 h-auto`}>
+            <TabsList className={`grid w-full ${pendingPaymentEvents.length > 0 ? 'grid-cols-3 md:grid-cols-6' : 'grid-cols-2 md:grid-cols-5'} gap-2 bg-transparent p-0 h-auto`}>
               {pendingPaymentEvents.length > 0 && (
                 <TabsTrigger value="pending_payment" className="text-amber-600 bg-muted data-[state=active]:bg-amber-600 data-[state=active]:text-white rounded-xl py-3 font-semibold shadow-sm">
                   {isRTL ? 'في انتظار الدفع' : 'Pending Payment'} ({pendingPaymentEvents.length})
@@ -704,6 +716,9 @@ const MyEventsPage = () => {
               )}
               <TabsTrigger value="upcoming" className="bg-muted data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl py-3 font-semibold shadow-sm">
                 {isRTL ? 'القادمة' : 'Upcoming'} ({upcomingEvents.length})
+              </TabsTrigger>
+              <TabsTrigger value="ongoing" className="bg-muted data-[state=active]:bg-success data-[state=active]:text-white rounded-xl py-3 font-semibold shadow-sm">
+                {isRTL ? 'الجارية' : 'Ongoing'} ({ongoingEvents.length})
               </TabsTrigger>
               <TabsTrigger value="group_events" className="bg-muted data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl py-3 font-semibold shadow-sm">
                 {isRTL ? 'فعاليات مجموعاتي' : 'Group Events'} ({groupEvents.length})
@@ -715,6 +730,7 @@ const MyEventsPage = () => {
                 {isRTL ? 'الملغية' : 'Cancelled'} ({cancelledEvents.length})
               </TabsTrigger>
             </TabsList>
+
 
             {/* Pending Payment Tab */}
             {pendingPaymentEvents.length > 0 && (
@@ -759,6 +775,29 @@ const MyEventsPage = () => {
                 </Card>
               )}
             </TabsContent>
+
+            <TabsContent value="ongoing" className="space-y-6 mt-6">
+              {ongoingEvents.length > 0 ? (
+                <div className="space-y-4">
+                  {ongoingEvents.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Timer className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">{isRTL ? 'لا توجد فعاليات جارية' : 'No ongoing events'}</h3>
+                    <p className="text-muted-foreground text-center">
+                      {isRTL ? 'لا توجد لديك فعاليات مقامة حالياً' : "You don't have any events currently in progress"}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+
+
 
             <TabsContent value="group_events" className="space-y-6 mt-6">
               {groupEvents.length > 0 ? (

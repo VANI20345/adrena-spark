@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ToggleLeft, Users, Briefcase, GraduationCap, Percent, Info } from 'lucide-react';
+import { ToggleLeft, Users, Briefcase, GraduationCap, Percent, Info, UserPlus } from 'lucide-react';
 import { useLanguageContext } from '@/contexts/LanguageContext';
 import { useFeatureToggles, FeatureKey, FeatureToggles } from '@/hooks/useFeatureToggles';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,7 +40,14 @@ const FEATURES: Array<{
     ar: { title: 'التخفيضات', desc: 'التحكم في ظهور صفحات التخفيضات وإخفائها' },
     en: { title: 'Discounts', desc: 'Show or hide the Discounts pages site-wide' },
   },
+  {
+    key: 'provider_signup',
+    icon: UserPlus,
+    ar: { title: 'تسجيل مقدمي الخدمات', desc: 'السماح بإنشاء حسابات مقدمي الخدمات من صفحة التسجيل' },
+    en: { title: 'Provider Signup', desc: 'Allow creating Service Provider accounts from the signup page' },
+  },
 ];
+
 
 export const FeatureTogglesTab = () => {
   const { isRTL } = useLanguageContext();
