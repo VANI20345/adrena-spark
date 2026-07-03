@@ -146,10 +146,18 @@ const MyEventsPage = () => {
           b.status === 'pending_payment'
         ).map(b => mapBooking(b, 'pending_payment'));
         
-        // Include confirmed/paid bookings as "upcoming" if event hasn't ended
-        const upcoming = (bookings || []).filter(b => 
-          b.events && 
-          new Date(b.events.end_date || b.events.start_date) > now && 
+        // Upcoming = event hasn't started yet
+        const upcoming = (bookings || []).filter(b =>
+          b.events &&
+          new Date(b.events.start_date) > now &&
+          ['confirmed', 'paid', 'pending'].includes(b.status)
+        ).map(b => mapBooking(b, b.status));
+
+        // Ongoing = event has started but not ended
+        const ongoing = (bookings || []).filter(b =>
+          b.events &&
+          new Date(b.events.start_date) <= now &&
+          new Date(b.events.end_date || b.events.start_date) > now &&
           ['confirmed', 'paid', 'pending'].includes(b.status)
         ).map(b => mapBooking(b, b.status));
 
@@ -168,8 +176,10 @@ const MyEventsPage = () => {
 
         setPendingPaymentEvents(pendingPayment);
         setUpcomingEvents(upcoming);
+        setOngoingEvents(ongoing);
         setCompletedEvents(completed);
         setCancelledEvents(cancelled);
+
 
         // --- Joined Group Events Fetching ---
         const { data: memberships, error: membershipError } = await supabase
