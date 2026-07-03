@@ -45,6 +45,8 @@ const SignupFlow = ({ onFlowStart }: SignupFlowProps) => {
     emailVerification: '',
     phone: '',
     password: '',
+    passwordConfirmation: '',
+
     role: '' as any, // No default selection
     city: '',
     birthDate: '',
