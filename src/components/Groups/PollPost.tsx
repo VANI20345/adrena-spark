@@ -53,7 +53,7 @@ export const PollPost: React.FC<PollPostProps> = ({ postId }) => {
 
   const setupRealtimeSubscription = () => {
     const channel = supabase
-      .channel(`poll-votes-${postId}`)
+      .channel(`poll-votes-${postId}-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
@@ -63,12 +63,10 @@ export const PollPost: React.FC<PollPostProps> = ({ postId }) => {
           filter: `post_id=eq.${postId}`
         },
         (payload) => {
-          // Only reload for other users' votes to update counts
           if (payload.new && (payload.new as any).user_id !== user?.id) {
-            // Increment the specific option's count without full reload
             const newVote = payload.new as { option_id: string; user_id: string };
-            setOptions(prev => prev.map(opt => 
-              opt.id === newVote.option_id 
+            setOptions(prev => prev.map(opt =>
+              opt.id === newVote.option_id
                 ? { ...opt, votes_count: opt.votes_count + 1 }
                 : opt
             ));
