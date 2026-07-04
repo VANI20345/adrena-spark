@@ -368,14 +368,14 @@ const WalletPage = () => {
           </motion.div>
 
           {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             {/* Total Earnings */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-success/10 to-background">
+              <Card className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-success/10 to-background h-full">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-success/10 rounded-full blur-2xl" />
                 <CardContent className="p-6">
                   <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -400,7 +400,7 @@ const WalletPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-brand-orange/10 to-background">
+              <Card className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-brand-orange/10 to-background h-full">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-brand-orange/10 rounded-full blur-2xl" />
                 <CardContent className="p-6">
                   <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -418,8 +418,6 @@ const WalletPage = () => {
                 </CardContent>
               </Card>
             </motion.div>
-
-            {/* Detailed Report card intentionally hidden — page temporarily removed */}
           </div>
 
           {/* Phase 8.1 — Provider Escrow Cards (only for providers) */}
