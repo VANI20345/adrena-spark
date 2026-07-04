@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.raise_financial_alert(text,text,jsonb,text,text,uuid,numeric,uuid,uuid) TO postgres;
